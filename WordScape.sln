@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.29512.182
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordScape", "WordScape\WordScape.csproj", "{EFDA9468-42EB-42A4-90ED-9666F1ED2C64}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordScapeTests", "WordScapeTests\WordScapeTests.csproj", "{F49BD99E-7C4F-49CF-90A0-CEB8635F2432}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{EFDA9468-42EB-42A4-90ED-9666F1ED2C64}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EFDA9468-42EB-42A4-90ED-9666F1ED2C64}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EFDA9468-42EB-42A4-90ED-9666F1ED2C64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F49BD99E-7C4F-49CF-90A0-CEB8635F2432}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F49BD99E-7C4F-49CF-90A0-CEB8635F2432}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F49BD99E-7C4F-49CF-90A0-CEB8635F2432}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F49BD99E-7C4F-49CF-90A0-CEB8635F2432}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
