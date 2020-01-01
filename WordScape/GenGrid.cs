@@ -26,7 +26,8 @@ namespace WordScape
         readonly int _MaxY;
         readonly int _MaxX;
         public char[,] _chars;
-        int nWordsPlaced;
+        public int nWordsPlaced;
+        public int nLtrsPlaced;
         readonly List<LtrPlaced> _ltrsPlaced = new List<LtrPlaced>();
         public GenGrid(int maxX, int maxY, WordContainer wordCont, Random rand)
         {
@@ -49,7 +50,7 @@ namespace WordScape
         {
             foreach (var subword in _wordContainer.subwords)
             {
-                if (nWordsPlaced++ == 0)
+                if (nWordsPlaced == 0)
                 {
                     int x, y, incY = 0, incX = 0;
                     if (_random.NextDouble() < .5) // horiz
@@ -92,7 +93,9 @@ namespace WordScape
                 _chars[x, y] = ltr;
                 x += incX;
                 y += incY;
+                nLtrsPlaced++;
             }
+            nWordsPlaced++;
         }
 
         private bool TryPlaceWord(string subword, LtrPlaced ltrPlaced)

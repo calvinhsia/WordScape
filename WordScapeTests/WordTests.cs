@@ -22,9 +22,10 @@ namespace WordScapeTests
                 {
                     LogMessage($"   {sword}");
                 }
-                var genGrid = new GenGrid(10, 10, wcont, wordGen._rand);
+                var genGrid = new GenGrid(12, 12, wcont, wordGen._rand);
                 var gr = Environment.NewLine + genGrid.ShowGrid();
                 LogMessage($"{gr}");
+                LogMessage($"Grid Ltrs= {genGrid.nLtrsPlaced} Wrds= {genGrid.nWordsPlaced}");
             }
         }
 
