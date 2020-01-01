@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Documents.DocumentStructures;
+using System.Windows.Media;
 
 namespace WordScape
 {
@@ -80,11 +84,49 @@ namespace WordScape
                 }
                 if (nWordsPlaced == 6)
                 {
-//                    return;
+                    //                    return;
                 }
             }
         }
 
+        internal void CreateUserControl(UniformGrid unigrid)
+        {
+            unigrid.Children.Clear();
+            unigrid.Columns = _MaxX;
+            unigrid.Rows = _MaxY;
+            for (int x = 0; x < _MaxX; x++)
+            {
+                for (int y = 0; y < _MaxY; y++)
+                {
+                    //unigrid.Children.Add(new TextBlock() { Text = "AA" });
+                    var ltrTile = new LtrTile(_chars[x, y], x, y);
+                    unigrid.Children.Add(ltrTile);
+                }
+            }
+        }
+        class LtrTile : DockPanel
+        {
+            private readonly char v;
+            private readonly int x;
+            private readonly int y;
+
+            public LtrTile(char v, int x, int y)
+            {
+                this.v = v;
+                this.x = x;
+                this.y = y;
+                var txt = new TextBlock()
+                {
+                    Text = v.ToString(),
+                    FontSize = 24,
+                    //Foreground = Brushes.White,
+                    //Background = Brushes.DarkCyan,
+                    HorizontalAlignment = HorizontalAlignment.Center
+                };
+//                Margin = new Thickness(4, 4, 4, 4);
+                this.Children.Add(txt);
+            }
+        }
         private void PlaceOneWord(string subword, int x, int y, int incX, int incY)
         {
             foreach (var ltr in subword)
@@ -198,7 +240,7 @@ namespace WordScape
                     }
                     if (doesfit)
                     {
-                        if (subword=="band")
+                        if (subword == "band")
                         {
                             "asdf".ToString();
                         }
