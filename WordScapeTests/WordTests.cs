@@ -18,6 +18,10 @@ namespace WordScapeTests
             {
                 var wcont = wordGen.GenerateWord(Targetlen: 7, numMaxSubWords: 1500);
                 LogMessage($"NumLookups = {wcont.cntLookups} #SubWords = {wcont.subwords.Count} {wcont.InitialWord}");
+                foreach (var sword in wcont.subwords)
+                {
+                    LogMessage($"   {sword}");
+                }
                 var genGrid = new GenGrid(10, 10, wcont, wordGen._rand);
                 var gr = Environment.NewLine + genGrid.ShowGrid();
                 LogMessage($"{gr}");

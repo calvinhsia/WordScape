@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Documents.DocumentStructures;
 
 namespace WordScape
 {
@@ -76,9 +77,9 @@ namespace WordScape
                         }
                     }
                 }
-                if (nWordsPlaced == 2)
+                if (nWordsPlaced == 6)
                 {
-                    return;
+//                    return;
                 }
             }
         }
@@ -87,8 +88,10 @@ namespace WordScape
         {
             foreach (var ltr in subword)
             {
-                _chars[x += incX, y += incY] = ltr;
                 _ltrsPlaced.Add(new LtrPlaced() { nX = x, nY = y, ltr = ltr, IsHoriz = incX > 0 });
+                _chars[x, y] = ltr;
+                x += incX;
+                y += incY;
             }
         }
 
@@ -108,14 +111,21 @@ namespace WordScape
                 }
                 int x0 = -1, y0 = -1, incx = 0, incy = 0;
                 if (DoHoriz)
-                {
+                { // if it fits on grid
                     if (ltrPlaced.nX - at >= 0)
                     {
                         if (ltrPlaced.nX - at + subword.Length < _MaxX)
                         {
-                            x0 = ltrPlaced.nX - at;
-                            y0 = ltrPlaced.nY;
-                            incx = 1;
+                            // if the prior and post squares are empty if they exist
+                            if (ltrPlaced.nX - at == 0 || _chars[ltrPlaced.nX - at - 1, ltrPlaced.nY] == Blank)
+                            {
+                                if (ltrPlaced.nX - at + subword.Length + 1 == _MaxX || _chars[ltrPlaced.nX - at + subword.Length, ltrPlaced.nY] == Blank)
+                                {
+                                    x0 = ltrPlaced.nX - at;
+                                    y0 = ltrPlaced.nY;
+                                    incx = 1;
+                                }
+                            }
                         }
                     }
                 }
@@ -125,9 +135,16 @@ namespace WordScape
                     {
                         if (ltrPlaced.nY - at + subword.Length < _MaxY)
                         {
-                            x0 = ltrPlaced.nX;
-                            y0 = ltrPlaced.nY - at;
-                            incy = 1;
+                            // if the prior and post squares are empty if they exist
+                            if (ltrPlaced.nY - at == 0 || _chars[ltrPlaced.nX, ltrPlaced.nY - at - 1] == Blank)
+                            {
+                                if (ltrPlaced.nY - at + subword.Length + 1 == _MaxY || _chars[ltrPlaced.nX, ltrPlaced.nY - at + subword.Length] == Blank)
+                                {
+                                    x0 = ltrPlaced.nX;
+                                    y0 = ltrPlaced.nY - at;
+                                    incy = 1;
+                                }
+                            }
                         }
                     }
                 }
@@ -143,23 +160,56 @@ namespace WordScape
                             doesfit = false;
                             break;
                         }
+                        // if blank and the adjacent ones are not empty, we need to reject (brit xword)
+                        if (val == Blank)
+                        {
+                            if (DoHoriz) // incx>0
+                            {
+                                if (y0 - 1 >= 0 && _chars[x0 + incx * ndxc, y0 - 1] != Blank)
+                                {
+                                    doesfit = false;
+                                    break;
+                                }
+                                if (y0 + 1 < _MaxY && _chars[x0 + incx * ndxc, y0 + 1] != Blank)
+                                {
+                                    doesfit = false;
+                                    break;
+                                }
+                            }
+                            else
+                            { // incy>0
+                                if (x0 - 1 >= 0 && _chars[x0 - 1, y0 + incy * ndxc] != Blank)
+                                {
+                                    doesfit = false;
+                                    break;
+                                }
+                                if (x0 + 1 < _MaxX && _chars[x0 + 1, y0 + incy * ndxc] != Blank)
+                                {
+                                    doesfit = false;
+                                    break;
+                                }
+
+                            }
+                        }
                         ndxc++;
                     }
                     if (doesfit)
                     {
-//                        PlaceOneWord(subword, x0, y0, incx, incy);
-                        ndxc = 0;
-                        foreach (var chr in subword)
+                        if (subword=="band")
                         {
-                            _chars[x0 + incx * ndxc, y0 + incy * ndxc] = chr;
-                            ndxc++;
+                            "asdf".ToString();
                         }
+                        PlaceOneWord(subword, x0, y0, incx, incy);
+                        //ndxc = 0;
+                        //foreach (var chr in subword)
+                        //{
+                        //    _chars[x0 + incx * ndxc, y0 + incy * ndxc] = chr;
+                        //    ndxc++;
+                        //}
                         didPlaceWord = true;
 
                     }
                 }
-
-
                 ndxAt = at + 1;
             }
 
