@@ -34,6 +34,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>WordScape.App</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="DictionaryLib, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\DictionaryLib_Calvin_Hsia.1.0.1\lib\net46\DictionaryLib.dll</HintPath>
@@ -60,7 +63,7 @@
     </ApplicationDefinition>
     <Compile Include="GenGrid.cs" />
     <Compile Include="WordGenerator.cs" />
-    <Page Include="MainWindow.xaml">
+    <Page Include="WordScape.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -69,8 +72,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ILogger.cs" />
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
+    <Compile Include="WordScape.xaml.cs">
+      <DependentUpon>WordScape.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

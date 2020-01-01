@@ -7,6 +7,17 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="300"/>
+            <RowDefinition Height="80"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" Orientation="Horizontal">
+            <Button x:Name="BtnPlayAgain" Content="_Play Again" Margin="0,0,10,0" Click="BtnPlayAgain_Click"/>
+
+        </StackPanel>
+        <UniformGrid Grid.Row="1" Name="unigrid"/>
+
+
     </Grid>
 </Window>
