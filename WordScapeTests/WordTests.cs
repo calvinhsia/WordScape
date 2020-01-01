@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using WordScape;
 
 namespace WordScapeTests
 {
@@ -8,98 +11,111 @@ namespace WordScapeTests
     public class WordTests : BaseTestClass
     {
         [TestMethod]
+        public void TestGenGrid()
+        {
+            var wordGen = new WordGenerator(new Random(1));
+            for (int i = 0; i < 100; i++)
+            {
+                var wcont = wordGen.GenerateWord(Targetlen: 7, numMaxSubWords: 1500);
+                var genGrid = new GenGrid(10, 10, wcont, wordGen._rand);
+                var gr = Environment.NewLine + genGrid.ShowGrid();
+                LogMessage($"{gr}");
+            }
+        }
+
+        [TestMethod]
         public void TestGetWord()
         {
             LogMessage("Starting");
-            var wc = new WordGenerator(new Random(1));
+            var wordGen = new WordGenerator(new Random(1));
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 1000; i++)
             {
-                var wcont = wc.GenerateWord(Targetlen: 7, numMaxSubWords: 15);
-                LogMessage($"{wcont.InitialWord}");
+                var wcont = wordGen.GenerateWord(Targetlen: 7, numMaxSubWords: 1500);
+                LogMessage($"NumLookups = {wcont.cntLookups} #SubWords = {wcont.subwords.Count} {wcont.InitialWord}");
                 foreach (var subword in wcont.subwords)
                 {
                     LogMessage($"   {subword}");
                 }
             }
         }
-    }
-
-
-    public class WordContainer
-    {
-        public string InitialWord;
-        public List<string> subwords = new List<string>();
-
-    }
-    public class WordGenerator
-    {
-        readonly Random _rand;
-        readonly DictionaryLib.DictionaryLib _dictionaryLib;
-        const int MinSubWordLen = 3;
-        public WordGenerator(Random rand = null)
+        [TestMethod]
+        public void TestPermute()
         {
-            if (rand == null)
-            {
-                _rand = new Random();
-            }
-            else
-            {
-                _rand = rand;
-            }
-            _dictionaryLib = new DictionaryLib.DictionaryLib(DictionaryLib.DictionaryType.Small, _rand);
-        }
-
-        public WordContainer GenerateWord(int Targetlen, int numMaxSubWords)
-        {
-            var word = string.Empty;
-            while (word.Length != Targetlen)
-            {
-                word = _dictionaryLib.RandomWord();
-            }
-            var wc = new WordContainer()
-            {
-                InitialWord = word
-            };
+            LogMessage("Starting");
+            var word = "per";
             DictionaryLib.DictionaryLib.PermuteString(word, LeftToRight: true, (str) =>
-               {
-                   //if (!wc.subwords.Contains(str))
-                   //{
-                   //    wc.subwords.Add(str);
-                   //}
-                   //return true;
-                   for (int i = MinSubWordLen; i < str.Length; i++)
-                   {
-                       var testWord = str.Substring(0, i);
-                       var partial = _dictionaryLib.SeekWord(testWord, out var compResult);
-                       if (!string.IsNullOrEmpty(partial) && compResult == 0)
-                       {
-                           if (!wc.subwords.Contains(testWord))
-                           {
-                               wc.subwords.Add(testWord);
-                               return (wc.subwords.Count != numMaxSubWords);
-                           }
-                       }
-                       else
-                       {
-                           if (!partial.StartsWith(testWord))
-                           {
-                               //break;
+             {
+                 LogMessage($"{str}");
+                 return true;
+             });
 
-                           }
-                       }
-                   }
-                   //if (_dictionaryLib.IsWord(str))
-                   //{
-                   //    if (!wc.subwords.Contains(str))
-                   //    {
-                   //        wc.subwords.Add(str);
-                   //        return (wc.subwords.Count != numMaxSubWords);
-                   //    }
-                   //}
-                   return true; // continue
-               });
-            return wc;
         }
+
+        public class GenGrid
+        {
+            readonly WordContainer _wordContainer;
+            readonly public Random _random;
+            int nWordsPlaced;
+            int _nRows;
+            int _nCols;
+            public char[,] _chars;
+            public GenGrid(int rows, int cols, WordContainer wordCont, Random rand)
+            {
+                this._random = rand;
+                this._wordContainer = wordCont;
+                this._nRows = rows;
+                this._nCols = cols;
+                _chars = new char[rows, cols];
+                for (int i = 0; i < _nRows; i++)
+                {
+                    for (int j = 0; j < _nCols; j++)
+                    {
+                        _chars[i, j] = '_';
+                    }
+                }
+                foreach (var subword in wordCont.subwords)
+                {
+                    if (nWordsPlaced++ == 0)
+                    {
+                        if (_random.NextDouble() < .5) // leftToRight
+                        {
+                            var row = _random.Next(_nRows);
+                            var col = _random.Next(_nCols - subword.Length);
+                            foreach (var ltr in subword)
+                            {
+                                _chars[row, col++] = ltr;
+                            }
+                        }
+                        else
+                        { // up/down
+                            var col = _random.Next(_nCols);
+                            var row = _random.Next(_nRows - subword.Length);
+                            foreach (var ltr in subword)
+                            {
+                                _chars[row++, col] = ltr;
+                            }
+
+                        }
+                    }
+                }
+            }
+            public string ShowGrid()
+            {
+                var grid = string.Empty;
+                for (int i = 0; i < _nRows; i++)
+                {
+                    for (int j = 0; j < _nCols; j++)
+                    {
+                        grid += _chars[i, j].ToString();
+                    }
+                    grid += Environment.NewLine;
+                }
+                return grid;
+            }
+        }
+
     }
+
+
 }
