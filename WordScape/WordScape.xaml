@@ -10,6 +10,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
             <RowDefinition Height="300"/>
+            <RowDefinition Height="30"/>
             <RowDefinition Height="180"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" Orientation="Horizontal">
@@ -18,8 +19,8 @@
 
         </StackPanel>
         <UniformGrid Grid.Row="1" Name="unigrid"/>
-        <Canvas x:Name="ltrCircleControl" Grid.Row="2" >
-            
+        <TextBlock x:Name="TxtLtrsSoFar" HorizontalAlignment="Center" FontSize="24" Margin="0,0,0,0" Grid.Row="2" >asdf</TextBlock>
+        <Canvas x:Name="canvasCircleControl" Grid.Row="3" >
         </Canvas>
 
 
