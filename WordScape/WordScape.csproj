@@ -63,6 +63,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="GenGrid.cs" />
+    <Compile Include="LetterWheel.cs" />
     <Compile Include="WordGenerator.cs" />
     <Page Include="WordScape.xaml">
       <Generator>MSBuild:Compile</Generator>

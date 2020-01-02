@@ -11,6 +11,10 @@ namespace WordScape
         public string InitialWord;
         public List<string> subwords = new List<string>();
         public int cntLookups;
+        public override string ToString()
+        {
+            return $"{InitialWord} #Subw={subwords.Count}";
+        }
     }
     public class WordGenerator
     {
@@ -45,7 +49,6 @@ namespace WordScape
 
         private WordContainer GenSubWords(string word)
         {
-            //            word = "imagery";
             var wc = new WordContainer()
             {
                 InitialWord = word

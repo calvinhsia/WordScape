@@ -58,21 +58,10 @@ namespace WordScape
         private void BtnPlayAgain_Click(object sender, RoutedEventArgs e)
         {
             var WordCont = this.wordGen.GenerateWord(Targetlen: 7);
-            var gridgen = new GenGrid(maxX: 10, maxY: 10, WordCont, this.wordGen._rand);
+            var gridgen = new GenGrid(maxX: 12, maxY: 12, WordCont, this.wordGen._rand);
             gridgen.FillGrid(this.unigrid);
-            this.ltrCircleControl.Children.Clear();
-            this.ltrCircleControl.Background = Brushes.AliceBlue;
-            var circ = new Ellipse()
-            {
-                Width = 300,
-                Height = 300,
-                Fill = Brushes.White,
-                StrokeThickness = 3,
-                Stroke = Brushes.Black
-            };
-            Canvas.SetLeft(circ, 50);
-            Canvas.SetTop(circ, 100);
-            this.ltrCircleControl.Children.Add(circ);
+
+            var ltrWheel = new LetterWheel(this, this.canvasCircleControl, WordCont, gridgen);
         }
         private void BtnShowLtrs_Click(object sender, RoutedEventArgs e)
         {
