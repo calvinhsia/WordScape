@@ -20,9 +20,7 @@
         </StackPanel>
         <UniformGrid Grid.Row="1" Name="unigrid"/>
         <TextBlock x:Name="TxtLtrsSoFar" HorizontalAlignment="Center" FontSize="24" Margin="0,0,0,0" Grid.Row="2" >asdf</TextBlock>
-        <Canvas x:Name="canvasCircleControl" Grid.Row="3" >
-        </Canvas>
-
+        <local:LetterWheel x:Name="ltrWheel" Grid.Row="3" />
 
     </Grid>
 </Window>

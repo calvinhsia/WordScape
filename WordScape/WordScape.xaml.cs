@@ -60,8 +60,7 @@ namespace WordScape
             var WordCont = this.wordGen.GenerateWord(Targetlen: 7);
             var gridgen = new GenGrid(maxX: 12, maxY: 12, WordCont, this.wordGen._rand);
             gridgen.FillGrid(this.unigrid);
-
-            var ltrWheel = new LetterWheel(this, this.canvasCircleControl, WordCont, gridgen);
+            this.ltrWheel.LetterWheelInit(this, WordCont, gridgen);
         }
         private void BtnShowLtrs_Click(object sender, RoutedEventArgs e)
         {
