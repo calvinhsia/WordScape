@@ -5,17 +5,18 @@ using System.Windows.Shapes;
 
 namespace WordScape
 {
-    internal class LetterWheel
+    public class LetterWheel: Canvas
     {
         private MainWindow mainWindow;
-        private Canvas canvasCircleControl;
         private WordContainer wordCont;
         private GenGrid gridgen;
+        public LetterWheel()
+        {
 
-        public LetterWheel(MainWindow mainWindow, Canvas canvasCircleControl, WordContainer wordCont, GenGrid gridgen)
+        }
+        public void LetterWheelInit(MainWindow mainWindow, WordContainer wordCont, GenGrid gridgen)
         {
             this.mainWindow = mainWindow;
-            this.canvasCircleControl = canvasCircleControl;
             this.wordCont = wordCont;
             this.gridgen = gridgen;
             this.CreateCircle();
@@ -23,8 +24,8 @@ namespace WordScape
 
         private void CreateCircle()
         {
-            this.canvasCircleControl.Children.Clear();
-            this.canvasCircleControl.Background = Brushes.AliceBlue;
+            this.Children.Clear();
+            this.Background = Brushes.AliceBlue;
             var circ = new Ellipse()
             {
                 Width = 300,
@@ -35,12 +36,12 @@ namespace WordScape
             };
             Canvas.SetLeft(circ, 50);
             Canvas.SetTop(circ, 10);
-            this.canvasCircleControl.Children.Add(circ);
+            this.Children.Add(circ);
 
             var ltr1 = new TextBlock() { Text = "A", FontSize = 40 };
             Canvas.SetLeft(ltr1, 130);
             Canvas.SetTop(ltr1, 60);
-            this.canvasCircleControl.Children.Add(ltr1);
+            this.Children.Add(ltr1);
 
             var numLtrs = wordCont.InitialWord.Length;
 
@@ -54,26 +55,26 @@ namespace WordScape
                 Stroke = Brushes.Red,
                 StrokeThickness = 8
             };
-            this.canvasCircleControl.Children.Add(pl);
+            this.Children.Add(pl);
             pl.Points.Add(new System.Windows.Point(0, 0));
             pl.Points.Add(new System.Windows.Point(77, 44));
             var mouseIsDown = false;
-            this.canvasCircleControl.MouseDown += (o, e) =>
+            this.MouseDown += (o, e) =>
              {
                  pl.Points.Clear();
-                 var ptx = e.GetPosition(this.canvasCircleControl);
+                 var ptx = e.GetPosition(this);
                  pl.Points.Add(ptx);
                  mouseIsDown = true;
              };
-            this.canvasCircleControl.MouseMove += (o, e) =>
+            this.MouseMove += (o, e) =>
               {
                   if (mouseIsDown)
                   {
-                      var ptx = e.GetPosition(this.canvasCircleControl);
+                      var ptx = e.GetPosition(this);
                       pl.Points.Add(ptx);
                   }
               };
-            this.canvasCircleControl.MouseUp += (o, e) =>
+            this.MouseUp += (o, e) =>
              {
 //                 pl.Points.Clear();
                  mouseIsDown = false;
