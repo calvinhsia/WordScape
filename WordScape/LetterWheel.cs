@@ -57,6 +57,27 @@ namespace WordScape
             this.canvasCircleControl.Children.Add(pl);
             pl.Points.Add(new System.Windows.Point(0, 0));
             pl.Points.Add(new System.Windows.Point(77, 44));
+            var mouseIsDown = false;
+            this.canvasCircleControl.MouseDown += (o, e) =>
+             {
+                 pl.Points.Clear();
+                 var ptx = e.GetPosition(this.canvasCircleControl);
+                 pl.Points.Add(ptx);
+                 mouseIsDown = true;
+             };
+            this.canvasCircleControl.MouseMove += (o, e) =>
+              {
+                  if (mouseIsDown)
+                  {
+                      var ptx = e.GetPosition(this.canvasCircleControl);
+                      pl.Points.Add(ptx);
+                  }
+              };
+            this.canvasCircleControl.MouseUp += (o, e) =>
+             {
+//                 pl.Points.Clear();
+                 mouseIsDown = false;
+             };
         }
     }
 }
