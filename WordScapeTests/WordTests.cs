@@ -16,7 +16,7 @@ namespace WordScapeTests
             var wordGen = new WordGenerator(new Random(1));
             for (int i = 0; i < 100; i++)
             {
-                var wcont = wordGen.GenerateWord(Targetlen: 7, numMaxSubWords: 1500);
+                var wcont = wordGen.GenerateWord(Targetlen: 7);
                 LogMessage($"NumLookups = {wcont.cntLookups} #SubWords = {wcont.subwords.Count} {wcont.InitialWord}");
                 foreach (var sword in wcont.subwords)
                 {
@@ -37,7 +37,7 @@ namespace WordScapeTests
 
             for (int i = 0; i < 100; i++)
             {
-                var wcont = wordGen.GenerateWord(Targetlen: 7, numMaxSubWords: 1500);
+                var wcont = wordGen.GenerateWord(Targetlen: 7);
                 LogMessage($"NumLookups = {wcont.cntLookups} #SubWords = {wcont.subwords.Count} {wcont.InitialWord}");
                 foreach (var subword in wcont.subwords)
                 {

@@ -26,6 +26,16 @@ namespace WordScape
         public MainWindow()
         {
             InitializeComponent();
+            this.Width = Properties.Settings.Default.WindowSize.Width;
+            this.Height = Properties.Settings.Default.WindowSize.Height;
+            this.Top = Properties.Settings.Default.WindowPos.Y;
+            this.Left = Properties.Settings.Default.WindowPos.X;
+            this.Closing += (o, ec) =>
+            {
+                Properties.Settings.Default.WindowPos = new System.Drawing.Point((int)this.Left, (int)this.Top);
+                Properties.Settings.Default.WindowSize = new System.Drawing.Size((int)this.Width, (int)this.Height);
+                Properties.Settings.Default.Save();
+            };
             this.Loaded += MainWindow_Loaded;
         }
 
@@ -33,7 +43,9 @@ namespace WordScape
         {
             try
             {
-                this.wordGen = new WordGenerator(new Random(1));
+                this.wordGen = new WordGenerator(new Random(1),
+                    minSubWordLen:3,
+                    numMaxSubWords:1500);
 
                 BtnPlayAgain.RaiseEvent(new RoutedEventArgs() { RoutedEvent = Button.ClickEvent, Source = this });
             }
@@ -45,9 +57,16 @@ namespace WordScape
 
         private void BtnPlayAgain_Click(object sender, RoutedEventArgs e)
         {
-            var WordCont = this.wordGen.GenerateWord(Targetlen: 7, numMaxSubWords: 15);
+            var WordCont = this.wordGen.GenerateWord(Targetlen: 7);
             var gridgen = new GenGrid(maxX: 10, maxY: 10, WordCont, this.wordGen._rand);
-            gridgen.CreateUserControl(this.unigrid);
+            gridgen.FillGrid(this.unigrid);
+        }
+        private void BtnShowLtrs_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (LtrTile tile in this.unigrid.Children)
+            {
+                tile.ShowLetter();
+            }
         }
     }
 }
