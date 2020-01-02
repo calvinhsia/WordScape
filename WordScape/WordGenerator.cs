@@ -16,9 +16,12 @@ namespace WordScape
     {
         public readonly Random _rand;
         readonly DictionaryLib.DictionaryLib _dictionaryLib;
-        const int MinSubWordLen = 4;
-        public WordGenerator(Random rand = null)
+        readonly int _MinSubWordLen = 5;
+        readonly int _numMaxSubWords = 1500;
+        public WordGenerator(Random rand = null, int minSubWordLen = 5, int numMaxSubWords = 1500)
         {
+            this._MinSubWordLen = minSubWordLen;
+            this._numMaxSubWords = numMaxSubWords;
             if (rand == null)
             {
                 _rand = new Random();
@@ -30,13 +33,18 @@ namespace WordScape
             _dictionaryLib = new DictionaryLib.DictionaryLib(DictionaryLib.DictionaryType.Small, _rand);
         }
 
-        public WordContainer GenerateWord(int Targetlen, int numMaxSubWords)
+        public WordContainer GenerateWord(int Targetlen)
         {
             var word = string.Empty;
             while (word.Length != Targetlen)
             {
                 word = _dictionaryLib.RandomWord();
             }
+            return GenSubWords(word);
+        }
+
+        private WordContainer GenSubWords(string word)
+        {
             //            word = "imagery";
             var wc = new WordContainer()
             {
@@ -49,7 +57,7 @@ namespace WordScape
                 //    wc.subwords.Add(str);
                 //}
                 //return true;
-                for (int i = MinSubWordLen; i < str.Length + 1; i++)
+                for (int i = _MinSubWordLen; i < str.Length + 1; i++)
                 {
                     var testWord = str.Substring(0, i);
                     var partial = _dictionaryLib.SeekWord(testWord, out var compResult);
@@ -69,7 +77,7 @@ namespace WordScape
                         }
                     }
                 }
-                return wc.subwords.Count != numMaxSubWords; // continue
+                return wc.subwords.Count != _numMaxSubWords; // continue
             });
             wc.subwords = wc.subwords.OrderByDescending(w => w.Length).ToList();
             return wc;

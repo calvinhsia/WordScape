@@ -24,7 +24,7 @@ namespace WordScape
     }
     public class GenGrid
     {
-        const char Blank = '_';
+        public const char Blank = '_';
         readonly WordContainer _wordContainer;
         readonly public Random _random;
         readonly int _MaxY;
@@ -54,6 +54,10 @@ namespace WordScape
         {
             foreach (var subword in _wordContainer.subwords)
             {
+                if (subword == "hustle")
+                {
+                    "".ToString();
+                }
                 if (nWordsPlaced == 0)
                 {
                     int x, y, incY = 0, incX = 0;
@@ -89,44 +93,6 @@ namespace WordScape
             }
         }
 
-        internal void CreateUserControl(UniformGrid unigrid)
-        {
-            unigrid.Children.Clear();
-            unigrid.Columns = _MaxX;
-            unigrid.Rows = _MaxY;
-            for (int x = 0; x < _MaxX; x++)
-            {
-                for (int y = 0; y < _MaxY; y++)
-                {
-                    //unigrid.Children.Add(new TextBlock() { Text = "AA" });
-                    var ltrTile = new LtrTile(_chars[x, y], x, y);
-                    unigrid.Children.Add(ltrTile);
-                }
-            }
-        }
-        class LtrTile : DockPanel
-        {
-            private readonly char v;
-            private readonly int x;
-            private readonly int y;
-
-            public LtrTile(char v, int x, int y)
-            {
-                this.v = v;
-                this.x = x;
-                this.y = y;
-                var txt = new TextBlock()
-                {
-                    Text = v.ToString(),
-                    FontSize = 24,
-                    //Foreground = Brushes.White,
-                    //Background = Brushes.DarkCyan,
-                    HorizontalAlignment = HorizontalAlignment.Center
-                };
-//                Margin = new Thickness(4, 4, 4, 4);
-                this.Children.Add(txt);
-            }
-        }
         private void PlaceOneWord(string subword, int x, int y, int incX, int incY)
         {
             foreach (var ltr in subword)
@@ -159,12 +125,12 @@ namespace WordScape
                 { // if it fits on grid
                     if (ltrPlaced.nX - at >= 0)
                     {
-                        if (ltrPlaced.nX - at + subword.Length < _MaxX)
+                        if (ltrPlaced.nX - at + subword.Length <= _MaxX)
                         {
                             // if the prior and post squares are empty if they exist
                             if (ltrPlaced.nX - at == 0 || _chars[ltrPlaced.nX - at - 1, ltrPlaced.nY] == Blank)
                             {
-                                if (ltrPlaced.nX - at + subword.Length + 1 == _MaxX || _chars[ltrPlaced.nX - at + subword.Length, ltrPlaced.nY] == Blank)
+                                if (ltrPlaced.nX - at + subword.Length == _MaxX || _chars[ltrPlaced.nX - at + subword.Length, ltrPlaced.nY] == Blank)
                                 {
                                     x0 = ltrPlaced.nX - at;
                                     y0 = ltrPlaced.nY;
@@ -178,12 +144,12 @@ namespace WordScape
                 {
                     if (ltrPlaced.nY - at >= 0)
                     {
-                        if (ltrPlaced.nY - at + subword.Length < _MaxY)
+                        if (ltrPlaced.nY - at + subword.Length <= _MaxY)
                         {
                             // if the prior and post squares are empty if they exist
                             if (ltrPlaced.nY - at == 0 || _chars[ltrPlaced.nX, ltrPlaced.nY - at - 1] == Blank)
                             {
-                                if (ltrPlaced.nY - at + subword.Length + 1 == _MaxY || _chars[ltrPlaced.nX, ltrPlaced.nY - at + subword.Length] == Blank)
+                                if (ltrPlaced.nY - at + subword.Length == _MaxY || _chars[ltrPlaced.nX, ltrPlaced.nY - at + subword.Length] == Blank)
                                 {
                                     x0 = ltrPlaced.nX;
                                     y0 = ltrPlaced.nY - at;
@@ -283,6 +249,61 @@ namespace WordScape
                 grid += Environment.NewLine;
             }
             return grid;
+        }
+        internal void FillGrid(UniformGrid unigrid)
+        {
+            unigrid.Children.Clear();
+            unigrid.Columns = _MaxX;
+            unigrid.Rows = _MaxY;
+            //            unigrid.Background = Brushes.Black;
+            for (int x = 0; x < _MaxX; x++)
+            {
+                for (int y = 0; y < _MaxY; y++)
+                {
+                    //unigrid.Children.Add(new TextBlock() { Text = "AA" });
+                    var ltrTile = new LtrTile(_chars[x, y], x, y);
+                    unigrid.Children.Add(ltrTile);
+                }
+            }
+        }
+    }
+    public class LtrTile : DockPanel
+    {
+        private readonly char v;
+        private readonly int x;
+        private readonly int y;
+
+        public LtrTile(char v, int x, int y)
+        {
+            this.v = v;
+            this.x = x;
+            this.y = y;
+            Margin = new Thickness(2, 2, 2, 2);
+            if (v != GenGrid.Blank)
+            {
+                Background = Brushes.DarkCyan;
+                var txt = new TextBlock()
+                {
+                    //                        Text = v == Blank ? " " : v.ToString().ToUpper(),
+                    FontSize = 20,
+                    Foreground = Brushes.White,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                this.Children.Add(txt);
+            }
+            else
+            {
+                this.Children.Add(new TextBlock());
+            }
+        }
+
+        internal void ShowLetter()
+        {
+            if (this.v != GenGrid.Blank)
+            {
+                (this.Children[0] as TextBlock).Text = v.ToString().ToUpper();
+            }
         }
     }
 }
