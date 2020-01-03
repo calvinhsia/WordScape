@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -19,13 +21,22 @@ namespace WordScape
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class WordScapeWindow : Window, INotifyPropertyChanged
     {
         private WordGenerator wordGen;
 
-        public MainWindow()
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void OnMyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        string _strWordSoFar;
+        public string StrWordSoFar { get { return _strWordSoFar; } set { _strWordSoFar = value; OnMyPropertyChanged(); } }
+
+        public WordScapeWindow()
         {
             InitializeComponent();
+            this.DataContext = this;
             this.Width = Properties.Settings.Default.WindowSize.Width;
             this.Height = Properties.Settings.Default.WindowSize.Height;
             this.Top = Properties.Settings.Default.WindowPos.Y;
