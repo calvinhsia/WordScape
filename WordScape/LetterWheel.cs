@@ -17,6 +17,15 @@ namespace WordScape
         private GenGrid gridgen;
 
         private List<LetterWheelLetter> _lstLetters = new List<LetterWheelLetter>();
+        private Polyline polyLine = new Polyline()
+        {
+            Stroke = Brushes.Red,
+            StrokeThickness = 10
+        };
+        private bool _mouseIsDown = false;
+        private bool _curlinefloating = false;
+        private List<LetterWheelLetter> _lstLtrsSelected = new List<LetterWheelLetter>();
+
         public LetterWheel()
         {
 
@@ -69,104 +78,107 @@ namespace WordScape
                 ndx++;
             }
 
-            var polyLine = new Polyline()
-            {
-                Stroke = Brushes.Red,
-                StrokeThickness = 10
-            };
             this.Children.Add(polyLine);
-            var mouseIsDown = false;
-            var lstLtrsSelected = new List<LetterWheelLetter>();
-            Func<MouseEventArgs, LetterWheelLetter> ltrFromArgs = (args) =>
+        }
+        LetterWheelLetter ltrFromArgs(MouseEventArgs args) 
+        {
+            var pt = args.GetPosition(this);
+            LetterWheelLetter ltrUnderMouse = null;
+            var x = this.InputHitTest(pt);
+            if (x != null)
             {
-                var pt = args.GetPosition(this);
-                LetterWheelLetter ltrUnderMouse = null;
-                var x = this.InputHitTest(pt);
-                if (x != null)
+                if (x is TextBlock)
                 {
-                    if (x is TextBlock)
+                    ltrUnderMouse = VisualTreeHelper.GetParent(x as TextBlock) as LetterWheelLetter;
+                }
+                else if (x is LetterWheelLetter)
+                {
+                    ltrUnderMouse = x as LetterWheelLetter;
+                }
+            }
+            return ltrUnderMouse;
+        }
+        protected override void OnMouseDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseDown(e);
+            polyLine.Points.Clear();
+            _lstLtrsSelected.Clear();
+            var ltrUnderMouse = ltrFromArgs(e);
+            if (ltrUnderMouse != null)
+            {
+                ltrUnderMouse.Select();
+                _lstLtrsSelected.Add(ltrUnderMouse);
+                this.mainWindow.StrWordSoFar = ltrUnderMouse.ltr.ToString();
+                _mouseIsDown = true;
+                var pt = ltrUnderMouse.TranslatePoint(new Point(0, 0), this);
+                pt.X += ltrUnderMouse.Width / 2;
+                pt.Y += ltrUnderMouse.Height / 2;
+                polyLine.Points.Add(pt);
+            }
+        }
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+            if (_curlinefloating)
+            {
+                if (polyLine.Points.Count > 0)
+                {
+                    polyLine.Points.RemoveAt(polyLine.Points.Count - 1);
+                }
+                _curlinefloating = false;
+            }
+            if (_mouseIsDown)
+            {
+                var ltrUnderMouse = ltrFromArgs(e);
+                if (ltrUnderMouse != null)
+                {
+                    if (_lstLtrsSelected.Contains(ltrUnderMouse))
                     {
-                        ltrUnderMouse = VisualTreeHelper.GetParent(x as TextBlock) as LetterWheelLetter;
+                        var at = _lstLtrsSelected.IndexOf(ltrUnderMouse);
+                        if (at == _lstLtrsSelected.Count - 1)
+                        {
+                            "".ToString();
+                        }
                     }
-                    else if (x is LetterWheelLetter)
+                    else
                     {
-                        ltrUnderMouse = x as LetterWheelLetter;
+                        ltrUnderMouse.Select();
+                        _lstLtrsSelected.Add(ltrUnderMouse);
+                        this.mainWindow.StrWordSoFar += ltrUnderMouse.ltr.ToString();
+                        var pt = ltrUnderMouse.TranslatePoint(new Point(0, 0), this);
+                        pt.X += ltrUnderMouse.Width / 2;
+                        pt.Y += ltrUnderMouse.Height / 2;
+                        polyLine.Points.Add(pt);
+                        _curlinefloating = false;
                     }
                 }
-                return ltrUnderMouse;
-            };
-            var curlinefloating = false;
-            this.MouseDown += (o, e) =>
-             {
-                 polyLine.Points.Clear();
-                 lstLtrsSelected.Clear();
-                 var ltrUnderMouse = ltrFromArgs(e);
-                 if (ltrUnderMouse != null)
-                 {
-                     ltrUnderMouse.Select();
-                     lstLtrsSelected.Add(ltrUnderMouse);
-                     this.mainWindow.StrWordSoFar = ltrUnderMouse.ltr.ToString();
-                     mouseIsDown = true;
-                     var pt = ltrUnderMouse.TranslatePoint(new Point(0, 0), this);
-                     pt.X += ltrUnderMouse.Width / 2;
-                     pt.Y += ltrUnderMouse.Height / 2;
-                     polyLine.Points.Add(pt);
-                 }
-             };
-            this.MouseMove += (o, e) =>
-              {
-                  if (curlinefloating)
-                  {
-                      if (polyLine.Points.Count > 0)
-                      {
-                          polyLine.Points.RemoveAt(polyLine.Points.Count - 1);
-                      }
-                      curlinefloating = false;
-                  }
-                  if (mouseIsDown)
-                  {
-                      var ltrUnderMouse = ltrFromArgs(e);
-                      if (ltrUnderMouse != null)
-                      {
-                          if (lstLtrsSelected.Contains(ltrUnderMouse))
-                          {
-                              var at = lstLtrsSelected.IndexOf(ltrUnderMouse);
-                              if (at == lstLtrsSelected.Count - 1)
-                              {
-                                  "".ToString();
-                              }
-                          }
-                          else
-                          {
-                              ltrUnderMouse.Select();
-                              lstLtrsSelected.Add(ltrUnderMouse);
-                              this.mainWindow.StrWordSoFar += ltrUnderMouse.ltr.ToString();
-                              var pt = ltrUnderMouse.TranslatePoint(new Point(0, 0), this);
-                              pt.X += ltrUnderMouse.Width / 2;
-                              pt.Y += ltrUnderMouse.Height / 2;
-                              polyLine.Points.Add(pt);
-                              curlinefloating = false;
-                          }
-                      }
-                      else
-                      {
-                          polyLine.Points.Add(e.GetPosition(this));
-                          curlinefloating = true;
-                      }
-                  }
-              };
-            this.MouseUp += (o, e) =>
-             {
-                 mouseIsDown = false;
-                 polyLine.Points.Clear();
-                 curlinefloating = false;
-                 foreach (var ltr in _lstLetters)
-                 {
-                     ltr.UnSelect();
-                 }
-                 lstLtrsSelected.Clear();
-                 this.mainWindow.StrWordSoFar = string.Empty;
-             };
+                else
+                {
+                    polyLine.Points.Add(e.GetPosition(this));
+                    _curlinefloating = true;
+                }
+            }
+        }
+        protected override void OnMouseUp(MouseButtonEventArgs e)
+        {
+            base.OnMouseUp(e);
+            var wrdSoFar = this.mainWindow.StrWordSoFar;
+            if (wrdSoFar.Length >= this.mainWindow._wordGen._MinSubWordLen)
+            {
+                if (this.gridgen.ShowWord(wrdSoFar))
+                {
+
+                }
+            }
+            _mouseIsDown = false;
+            polyLine.Points.Clear();
+            _curlinefloating = false;
+            foreach (var ltr in _lstLetters)
+            {
+                ltr.UnSelect();
+            }
+            _lstLtrsSelected.Clear();
+            this.mainWindow.StrWordSoFar = string.Empty;
         }
     }
     public class LetterWheelLetter : Border

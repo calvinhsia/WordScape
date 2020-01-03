@@ -20,8 +20,8 @@ namespace WordScape
     {
         public readonly Random _rand;
         readonly DictionaryLib.DictionaryLib _dictionaryLib;
-        readonly int _MinSubWordLen = 5;
-        readonly int _numMaxSubWords = 1500;
+        public readonly int _MinSubWordLen = 5;
+        public readonly int _numMaxSubWords = 1500;
         public WordGenerator(Random rand = null, int minSubWordLen = 5, int numMaxSubWords = 1500)
         {
             this._MinSubWordLen = minSubWordLen;
@@ -83,6 +83,8 @@ namespace WordScape
                 return wc.subwords.Count != _numMaxSubWords; // continue
             });
             wc.subwords = wc.subwords.OrderByDescending(w => w.Length).ToList();
+            wc.subwords = wc.subwords.Select(p => p.ToUpper()).ToList();
+            wc.InitialWord = wc.InitialWord.ToUpper();
             return wc;
         }
     }
