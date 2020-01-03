@@ -55,7 +55,7 @@ namespace WordScape
             try
             {
                 this._wordGen = new WordGenerator(new Random(1),
-                    minSubWordLen: 3,
+                    minSubWordLen: 5,
                     numMaxSubWords: 1500);
 
                 BtnPlayAgain.RaiseEvent(new RoutedEventArgs() { RoutedEvent = Button.ClickEvent, Source = this });
