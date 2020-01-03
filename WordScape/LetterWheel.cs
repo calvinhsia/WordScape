@@ -76,6 +76,7 @@ namespace WordScape
             };
             this.Children.Add(polyLine);
             var mouseIsDown = false;
+            var lstLtrsSelected = new List<LetterWheelLetter>();
             Func<MouseEventArgs, LetterWheelLetter> ltrFromArgs = (args) =>
             {
                 var pt = args.GetPosition(this);
@@ -94,13 +95,16 @@ namespace WordScape
                 }
                 return ltrUnderMouse;
             };
+            var curlinefloating = false;
             this.MouseDown += (o, e) =>
              {
                  polyLine.Points.Clear();
+                 lstLtrsSelected.Clear();
                  var ltrUnderMouse = ltrFromArgs(e);
                  if (ltrUnderMouse != null)
                  {
                      ltrUnderMouse.Select();
+                     lstLtrsSelected.Add(ltrUnderMouse);
                      //var tb = (ltrUnderMouse.Child as TextBlock);
                      //var pp = tb.TranslatePoint(new System.Windows.Point(0, 0), this);
                      //Debug.WriteLine($"ltrw = {ltrUnderMouse.ltr} {pp} ");
@@ -113,24 +117,42 @@ namespace WordScape
              };
             this.MouseMove += (o, e) =>
               {
-                  var ltrUnderMouse = ltrFromArgs(e);
+                  if (curlinefloating)
+                  {
+                      if (polyLine.Points.Count > 0)
+                      {
+                          polyLine.Points.RemoveAt(polyLine.Points.Count - 1);
+                      }
+                      curlinefloating = false;
+                  }
                   if (mouseIsDown)
                   {
+                      var ltrUnderMouse = ltrFromArgs(e);
                       if (ltrUnderMouse != null)
                       {
-                          ltrUnderMouse.Select();
-                          var pt = ltrUnderMouse.TranslatePoint(new Point(0, 0), this);
-                          pt.X += ltrUnderMouse.Width / 2;
-                          pt.Y += ltrUnderMouse.Height / 2;
-                          polyLine.Points.Add(pt);
+                          if (lstLtrsSelected.Contains(ltrUnderMouse))
+                          {
+                              var at = lstLtrsSelected.IndexOf(ltrUnderMouse);
+                              if (at == lstLtrsSelected.Count - 1)
+                              {
+
+                              }
+                          }
+                          else
+                          {
+                              ltrUnderMouse.Select();
+                              lstLtrsSelected.Add(ltrUnderMouse);
+                              var pt = ltrUnderMouse.TranslatePoint(new Point(0, 0), this);
+                              pt.X += ltrUnderMouse.Width / 2;
+                              pt.Y += ltrUnderMouse.Height / 2;
+                              polyLine.Points.Add(pt);
+                              curlinefloating = false;
+                          }
                       }
                       else
                       {
-                          if (polyLine.Points.Count > 1)
-                          {
-                              polyLine.Points.RemoveAt(polyLine.Points.Count - 1);
-                          }
                           polyLine.Points.Add(e.GetPosition(this));
+                          curlinefloating = true;
                       }
                   }
               };
@@ -138,10 +160,12 @@ namespace WordScape
              {
                  mouseIsDown = false;
                  polyLine.Points.Clear();
+                 curlinefloating = false;
                  foreach (var ltr in _lstLetters)
                  {
                      ltr.UnSelect();
                  }
+                 lstLtrsSelected.Clear();
              };
         }
     }
@@ -172,6 +196,7 @@ namespace WordScape
             {
                 Text = ltr.ToString(),
                 FontSize = 50,
+                IsHitTestVisible = false,
                 FontWeight = FontWeights.Bold,
                 Foreground = Brushes.Black,
                 HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
