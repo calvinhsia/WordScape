@@ -15,6 +15,7 @@ namespace WordScape
         private WordScapeWindow mainWindow;
         private WordContainer wordCont;
         private GenGrid gridgen;
+        int _WordsFound;
 
         private List<LetterWheelLetter> _lstLetters = new List<LetterWheelLetter>();
         private Polyline polyLine = new Polyline()
@@ -36,6 +37,7 @@ namespace WordScape
             this.wordCont = wordCont;
             this.gridgen = gridgen;
             this.CreateCircle();
+            _WordsFound = 0;
         }
 
         private void CreateCircle()
@@ -167,7 +169,11 @@ namespace WordScape
             {
                 if (this.gridgen.ShowWord(wrdSoFar))
                 {
-
+                    _WordsFound++;
+                    if (_WordsFound == this.gridgen._dictPlacedWords.Count)
+                    {
+                        this.mainWindow.StrWordSoFar = "YAYYY!";
+                    }
                 }
             }
             _mouseIsDown = false;

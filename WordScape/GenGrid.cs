@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Documents.DocumentStructures;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace WordScape
@@ -329,6 +330,19 @@ namespace WordScape
             }
         }
 
+        protected override void OnMouseDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseDown(e);
+            if (IsShowing)
+            {
+                IsShowing = false;
+                (this.Children[0] as TextBlock).Text = " ";
+            }
+            else
+            {
+                this.ShowLetter();
+            }
+        }
         internal void ShowLetter()
         {
             if (this.v != GenGrid.Blank)
