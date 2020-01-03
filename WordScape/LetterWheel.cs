@@ -12,7 +12,7 @@ namespace WordScape
 {
     public class LetterWheel : Canvas
     {
-        private MainWindow mainWindow;
+        private WordScapeWindow mainWindow;
         private WordContainer wordCont;
         private GenGrid gridgen;
 
@@ -21,7 +21,7 @@ namespace WordScape
         {
 
         }
-        public void LetterWheelInit(MainWindow mainWindow, WordContainer wordCont, GenGrid gridgen)
+        public void LetterWheelInit(WordScapeWindow mainWindow, WordContainer wordCont, GenGrid gridgen)
         {
             this.mainWindow = mainWindow;
             this.wordCont = wordCont;
@@ -105,9 +105,7 @@ namespace WordScape
                  {
                      ltrUnderMouse.Select();
                      lstLtrsSelected.Add(ltrUnderMouse);
-                     //var tb = (ltrUnderMouse.Child as TextBlock);
-                     //var pp = tb.TranslatePoint(new System.Windows.Point(0, 0), this);
-                     //Debug.WriteLine($"ltrw = {ltrUnderMouse.ltr} {pp} ");
+                     this.mainWindow.StrWordSoFar = ltrUnderMouse.ltr.ToString();
                      mouseIsDown = true;
                      var pt = ltrUnderMouse.TranslatePoint(new Point(0, 0), this);
                      pt.X += ltrUnderMouse.Width / 2;
@@ -135,13 +133,14 @@ namespace WordScape
                               var at = lstLtrsSelected.IndexOf(ltrUnderMouse);
                               if (at == lstLtrsSelected.Count - 1)
                               {
-
+                                  "".ToString();
                               }
                           }
                           else
                           {
                               ltrUnderMouse.Select();
                               lstLtrsSelected.Add(ltrUnderMouse);
+                              this.mainWindow.StrWordSoFar += ltrUnderMouse.ltr.ToString();
                               var pt = ltrUnderMouse.TranslatePoint(new Point(0, 0), this);
                               pt.X += ltrUnderMouse.Width / 2;
                               pt.Y += ltrUnderMouse.Height / 2;
@@ -166,6 +165,7 @@ namespace WordScape
                      ltr.UnSelect();
                  }
                  lstLtrsSelected.Clear();
+                 this.mainWindow.StrWordSoFar = string.Empty;
              };
         }
     }
