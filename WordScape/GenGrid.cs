@@ -11,7 +11,7 @@ using System.Windows.Media;
 
 namespace WordScape
 {
-    class LtrPlaced
+    public class LtrPlaced
     {
         public int nX;
         public int nY;
@@ -25,12 +25,15 @@ namespace WordScape
     public class GenGrid
     {
         public const char Blank = '_';
+        public UniformGrid _unigrid;
         readonly WordContainer _wordContainer;
         readonly public Random _random;
         readonly int _MaxY;
         readonly int _MaxX;
         public char[,] _chars;
-        public int nWordsPlaced;
+        public int nWordsPlaced => _dictPlacedWords.Count;
+        //        public List<string> _lstWordsPlaced = new List<string>();
+        public Dictionary<string, LtrPlaced> _dictPlacedWords = new Dictionary<string, LtrPlaced>(); // subword to 1st letter
         public int nLtrsPlaced;
         readonly List<LtrPlaced> _ltrsPlaced = new List<LtrPlaced>();
         public GenGrid(int maxX, int maxY, WordContainer wordCont, Random rand)
@@ -54,10 +57,6 @@ namespace WordScape
         {
             foreach (var subword in _wordContainer.subwords)
             {
-                if (subword == "hustle")
-                {
-                    "".ToString();
-                }
                 if (nWordsPlaced == 0)
                 {
                     int x, y, incY = 0, incX = 0;
@@ -95,15 +94,21 @@ namespace WordScape
 
         private void PlaceOneWord(string subword, int x, int y, int incX, int incY)
         {
+            var isFirstLetter = true;
             foreach (var ltr in subword)
             {
-                _ltrsPlaced.Add(new LtrPlaced() { nX = x, nY = y, ltr = ltr, IsHoriz = incX > 0 });
+                var ltrPlaced = new LtrPlaced() { nX = x, nY = y, ltr = ltr, IsHoriz = incX > 0 };
+                if (isFirstLetter)
+                {
+                    _dictPlacedWords[subword] = ltrPlaced;
+                    isFirstLetter = false;
+                }
+                _ltrsPlaced.Add(ltrPlaced);
                 _chars[x, y] = ltr;
                 x += incX;
                 y += incY;
                 nLtrsPlaced++;
             }
-            nWordsPlaced++;
         }
 
         private bool TryPlaceWord(string subword, LtrPlaced ltrPlaced)
@@ -206,10 +211,6 @@ namespace WordScape
                     }
                     if (doesfit)
                     {
-                        if (subword == "band")
-                        {
-                            "asdf".ToString();
-                        }
                         PlaceOneWord(subword, x0, y0, incx, incy);
                         //ndxc = 0;
                         //foreach (var chr in subword)
@@ -226,6 +227,35 @@ namespace WordScape
 
             return didPlaceWord;
         }
+
+        internal bool ShowWord(string wrdSoFar)
+        {
+            var DidShow = false;
+            if (_dictPlacedWords.TryGetValue(wrdSoFar, out var ltrPlaced))
+            {
+                int incx = 0, incy = 0, x = ltrPlaced.nX, y = ltrPlaced.nY;
+                if (ltrPlaced.IsHoriz)
+                {
+                    incx = 1;
+                }
+                else
+                {
+                    incy = 1;
+                }
+                for (int i = 0; i < wrdSoFar.Length; i++)
+                {
+                    var ltrTile = this._unigrid.Children[y * _MaxX + x] as LtrTile;
+                    if (!ltrTile.IsShowing)
+                    {
+                        DidShow = true;
+                        ltrTile.ShowLetter();
+                    }
+                    x += incx; y += incy;
+                }
+            }
+            return DidShow;
+        }
+
         private void ShuffleLettersPlaced()
         {
             for (int i = 0; i < _ltrsPlaced.Count; i++)
@@ -252,13 +282,14 @@ namespace WordScape
         }
         internal void FillGrid(UniformGrid unigrid)
         {
+            this._unigrid = unigrid;
             unigrid.Children.Clear();
             unigrid.Columns = _MaxX;
             unigrid.Rows = _MaxY;
             //            unigrid.Background = Brushes.Black;
-            for (int x = 0; x < _MaxX; x++)
+            for (int y = 0; y < _MaxY; y++)
             {
-                for (int y = 0; y < _MaxY; y++)
+                for (int x = 0; x < _MaxX; x++)
                 {
                     //unigrid.Children.Add(new TextBlock() { Text = "AA" });
                     var ltrTile = new LtrTile(_chars[x, y], x, y);
@@ -272,7 +303,7 @@ namespace WordScape
         private readonly char v;
         private readonly int x;
         private readonly int y;
-
+        public bool IsShowing;
         public LtrTile(char v, int x, int y)
         {
             this.v = v;
@@ -303,6 +334,7 @@ namespace WordScape
             if (this.v != GenGrid.Blank)
             {
                 (this.Children[0] as TextBlock).Text = v.ToString().ToUpper();
+                IsShowing = true;
             }
         }
     }

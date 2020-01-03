@@ -23,7 +23,7 @@ namespace WordScape
     /// </summary>
     public partial class WordScapeWindow : Window, INotifyPropertyChanged
     {
-        private WordGenerator wordGen;
+        internal WordGenerator _wordGen;
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnMyPropertyChanged([CallerMemberName] string propertyName = "")
@@ -54,7 +54,7 @@ namespace WordScape
         {
             try
             {
-                this.wordGen = new WordGenerator(new Random(1),
+                this._wordGen = new WordGenerator(new Random(1),
                     minSubWordLen: 3,
                     numMaxSubWords: 1500);
 
@@ -68,9 +68,11 @@ namespace WordScape
 
         private void BtnPlayAgain_Click(object sender, RoutedEventArgs e)
         {
-            var WordCont = this.wordGen.GenerateWord(Targetlen: 7);
-            var gridgen = new GenGrid(maxX: 12, maxY: 12, WordCont, this.wordGen._rand);
+            var WordCont = this._wordGen.GenerateWord(Targetlen: 7);
+            var gridgen = new GenGrid(maxX: 12, maxY: 12, WordCont, this._wordGen._rand);
             gridgen.FillGrid(this.unigrid);
+            //this.ltrWheel = new LetterWheel();
+            //Grid.SetRow(this.ltrWheel, 3);
             this.ltrWheel.LetterWheelInit(this, WordCont, gridgen);
         }
         private void BtnShowLtrs_Click(object sender, RoutedEventArgs e)
