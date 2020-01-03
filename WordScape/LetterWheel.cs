@@ -1,15 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
 namespace WordScape
 {
-    public class LetterWheel: Canvas
+    public class LetterWheel : Canvas
     {
         private MainWindow mainWindow;
         private WordContainer wordCont;
         private GenGrid gridgen;
+
+        private List<LetterWheelLetter> _lstLetters = new List<LetterWheelLetter>();
         public LetterWheel()
         {
 
@@ -26,59 +32,162 @@ namespace WordScape
         {
             this.Children.Clear();
             this.Background = Brushes.AliceBlue;
+            var circRadius = 150;
             var circ = new Ellipse()
             {
-                Width = 300,
-                Height = 300,
+                Width = 2 * circRadius,
+                Height = 2 * circRadius,
                 Fill = Brushes.White,
                 StrokeThickness = 3,
                 Stroke = Brushes.Black
             };
-            Canvas.SetLeft(circ, 50);
-            Canvas.SetTop(circ, 10);
+            var ptcircpos = new Point(50, 10);
+            Canvas.SetLeft(circ, ptcircpos.X);
+            Canvas.SetTop(circ, ptcircpos.Y);
+            var ptCircCtr = new Point(ptcircpos.X + circ.Width / 2, ptcircpos.Y + circ.Height / 2);
             this.Children.Add(circ);
 
-            var ltr1 = new TextBlock() { Text = "A", FontSize = 40 };
-            Canvas.SetLeft(ltr1, 130);
-            Canvas.SetTop(ltr1, 60);
-            this.Children.Add(ltr1);
+            //var ltr1 = new TextBlock() { Text = "A", FontSize = 40 };
+            //Canvas.SetLeft(ltr1, 130);
+            //Canvas.SetTop(ltr1, 60);
+            //this.Children.Add(ltr1);
 
             var numLtrs = wordCont.InitialWord.Length;
-
-            foreach (var ltr in wordCont.InitialWord)
+            int ndx = 0;
+            var radsPerLetter = (2 * Math.PI / numLtrs);
+            foreach (var ltr in wordCont.InitialWord.ToUpper())
             {
-                var lett = new TextBlock() { Text = ltr.ToString().ToUpper() };
+                var lett = new LetterWheelLetter(ltr);
+                _lstLetters.Add(lett);
+
+                var x = ptCircCtr.X + .7 * circRadius * Math.Cos(radsPerLetter * ndx);
+                var y = ptCircCtr.Y - .7 * circRadius * Math.Sin(radsPerLetter * ndx);
+                x -= lett.Width / 2;
+                y -= lett.Height / 2;
+                var letpt = new Point(x, y);
+                Canvas.SetLeft(lett, letpt.X);
+                Canvas.SetTop(lett, letpt.Y);
+                this.Children.Add(lett);
+                if (ndx % 2 == 0)
+                {
+                    //                    lett.Select();
+                }
+                ndx++;
             }
 
-            var pl = new Polyline()
+            var polyLine = new Polyline()
             {
                 Stroke = Brushes.Red,
                 StrokeThickness = 8
             };
-            this.Children.Add(pl);
-            pl.Points.Add(new System.Windows.Point(0, 0));
-            pl.Points.Add(new System.Windows.Point(77, 44));
+            this.Children.Add(polyLine);
             var mouseIsDown = false;
             this.MouseDown += (o, e) =>
              {
-                 pl.Points.Clear();
-                 var ptx = e.GetPosition(this);
-                 pl.Points.Add(ptx);
-                 mouseIsDown = true;
+                 polyLine.Points.Clear();
+                 polyLine.Points.Add(ptCircCtr);
+                 var pt = e.GetPosition(this);
+                 LetterWheelLetter ltrUnderMouse = null;
+                 var x = this.InputHitTest(pt);
+                 if (x != null)
+                 {
+                     if (x is TextBlock)
+                     {
+                         ltrUnderMouse = VisualTreeHelper.GetParent(x as TextBlock) as LetterWheelLetter;
+                     }
+                     else if (x is LetterWheelLetter)
+                     {
+                         ltrUnderMouse = x as LetterWheelLetter;
+                     }
+                     if (ltrUnderMouse != null && !ltrUnderMouse.IsSelected)
+                     {
+                         ltrUnderMouse.Select();
+                         var tb = (ltrUnderMouse.Child as TextBlock);
+                         var pp = tb.TranslatePoint(new System.Windows.Point(0, 0), this);
+                         Debug.WriteLine($"ltrw = {ltrUnderMouse.ltr} {pp} ");
+                         mouseIsDown = true;
+                         //                         Debug.WriteLine($"ltrw = {ltrUnderMouse.ltr} ");
+                     }
+                 }
+                 polyLine.Points.Add(pt);
              };
             this.MouseMove += (o, e) =>
               {
+                  var pt = e.GetPosition(this);
                   if (mouseIsDown)
                   {
-                      var ptx = e.GetPosition(this);
-                      pl.Points.Add(ptx);
+                      if (polyLine.Points.Count > 1)
+                      {
+                          polyLine.Points.RemoveAt(polyLine.Points.Count - 1);
+                      }
+                      polyLine.Points.Add(pt);
                   }
               };
             this.MouseUp += (o, e) =>
              {
-//                 pl.Points.Clear();
                  mouseIsDown = false;
+                 polyLine.Points.Clear();
+                 foreach (var ltr in _lstLetters)
+                 {
+                     ltr.UnSelect();
+                 }
              };
+        }
+    }
+    public class LetterWheelLetter : Border
+    {
+        internal char ltr;
+        public bool IsSelected;
+
+        /*
+<Border Grid.Row="1" CornerRadius="45" Height="50" Width="50">
+<TextBlock Text="D" FontSize="40" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+</Border>
+
+<Border Grid.Row="1" BorderThickness="1" BorderBrush="Black" Background="Green" CornerRadius="45" Height="50" Width="50">
+<TextBlock Text="D" FontSize="40" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+</Border>
+*/
+        public LetterWheelLetter(char ltr)
+        {
+            this.ltr = ltr;
+            //            this.BorderThickness = new System.Windows.Thickness(0);
+            //            this.BorderBrush = Brushes.Black;
+            this.CornerRadius = new System.Windows.CornerRadius(45);
+            this.Height = 60;
+            this.Width = 60;
+            this.Background = Brushes.White;
+            this.Child = new TextBlock()
+            {
+                Text = ltr.ToString(),
+                FontSize = 50,
+                FontWeight = FontWeights.Bold,
+                Foreground = Brushes.Black,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center
+            };
+        }
+
+        public void Select()
+        {
+            if (!IsSelected)
+            {
+                var txtb = this.Child as TextBlock;
+                txtb.Foreground = Brushes.White;
+                this.Background = Brushes.Green;
+                IsSelected = true;
+            }
+        }
+        public void UnSelect()
+        {
+            if (IsSelected)
+            {
+                var txtb = this.Child as TextBlock;
+                txtb.Foreground = Brushes.Black;
+                this.Background = Brushes.Green;
+                this.Background = Brushes.White;
+                IsSelected = false;
+            }
         }
     }
 }

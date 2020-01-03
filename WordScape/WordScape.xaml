@@ -16,7 +16,6 @@
         <StackPanel Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" Orientation="Horizontal">
             <Button x:Name="BtnPlayAgain" Content="_Play Again" Margin="0,0,10,0" Click="BtnPlayAgain_Click"/>
             <Button x:Name="BtnShowLtrs" Content="_ShowLetters" Margin="0,0,10,0" Click="BtnShowLtrs_Click"/>
-
         </StackPanel>
         <UniformGrid Grid.Row="1" Name="unigrid"/>
         <TextBlock x:Name="TxtLtrsSoFar" HorizontalAlignment="Center" FontSize="24" Margin="0,0,0,0" Grid.Row="2" >asdf</TextBlock>
