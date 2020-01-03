@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -47,11 +48,6 @@ namespace WordScape
             var ptCircCtr = new Point(ptcircpos.X + circ.Width / 2, ptcircpos.Y + circ.Height / 2);
             this.Children.Add(circ);
 
-            //var ltr1 = new TextBlock() { Text = "A", FontSize = 40 };
-            //Canvas.SetLeft(ltr1, 130);
-            //Canvas.SetTop(ltr1, 60);
-            //this.Children.Add(ltr1);
-
             var numLtrs = wordCont.InitialWord.Length;
             int ndx = 0;
             var radsPerLetter = (2 * Math.PI / numLtrs);
@@ -60,10 +56,8 @@ namespace WordScape
                 var lett = new LetterWheelLetter(ltr);
                 _lstLetters.Add(lett);
 
-                var x = ptCircCtr.X + .7 * circRadius * Math.Cos(radsPerLetter * ndx);
-                var y = ptCircCtr.Y - .7 * circRadius * Math.Sin(radsPerLetter * ndx);
-                x -= lett.Width / 2;
-                y -= lett.Height / 2;
+                var x = ptCircCtr.X + .7 * circRadius * Math.Cos(radsPerLetter * ndx) - lett.Width / 2;
+                var y = ptCircCtr.Y - .7 * circRadius * Math.Sin(radsPerLetter * ndx) - lett.Height / 2;
                 var letpt = new Point(x, y);
                 Canvas.SetLeft(lett, letpt.X);
                 Canvas.SetTop(lett, letpt.Y);
@@ -78,49 +72,66 @@ namespace WordScape
             var polyLine = new Polyline()
             {
                 Stroke = Brushes.Red,
-                StrokeThickness = 8
+                StrokeThickness = 10
             };
             this.Children.Add(polyLine);
             var mouseIsDown = false;
+            Func<MouseEventArgs, LetterWheelLetter> ltrFromArgs = (args) =>
+            {
+                var pt = args.GetPosition(this);
+                LetterWheelLetter ltrUnderMouse = null;
+                var x = this.InputHitTest(pt);
+                if (x != null)
+                {
+                    if (x is TextBlock)
+                    {
+                        ltrUnderMouse = VisualTreeHelper.GetParent(x as TextBlock) as LetterWheelLetter;
+                    }
+                    else if (x is LetterWheelLetter)
+                    {
+                        ltrUnderMouse = x as LetterWheelLetter;
+                    }
+                }
+                return ltrUnderMouse;
+            };
             this.MouseDown += (o, e) =>
              {
                  polyLine.Points.Clear();
-                 polyLine.Points.Add(ptCircCtr);
-                 var pt = e.GetPosition(this);
-                 LetterWheelLetter ltrUnderMouse = null;
-                 var x = this.InputHitTest(pt);
-                 if (x != null)
+                 var ltrUnderMouse = ltrFromArgs(e);
+                 if (ltrUnderMouse != null)
                  {
-                     if (x is TextBlock)
-                     {
-                         ltrUnderMouse = VisualTreeHelper.GetParent(x as TextBlock) as LetterWheelLetter;
-                     }
-                     else if (x is LetterWheelLetter)
-                     {
-                         ltrUnderMouse = x as LetterWheelLetter;
-                     }
-                     if (ltrUnderMouse != null && !ltrUnderMouse.IsSelected)
-                     {
-                         ltrUnderMouse.Select();
-                         var tb = (ltrUnderMouse.Child as TextBlock);
-                         var pp = tb.TranslatePoint(new System.Windows.Point(0, 0), this);
-                         Debug.WriteLine($"ltrw = {ltrUnderMouse.ltr} {pp} ");
-                         mouseIsDown = true;
-                         //                         Debug.WriteLine($"ltrw = {ltrUnderMouse.ltr} ");
-                     }
+                     ltrUnderMouse.Select();
+                     //var tb = (ltrUnderMouse.Child as TextBlock);
+                     //var pp = tb.TranslatePoint(new System.Windows.Point(0, 0), this);
+                     //Debug.WriteLine($"ltrw = {ltrUnderMouse.ltr} {pp} ");
+                     mouseIsDown = true;
+                     var pt = ltrUnderMouse.TranslatePoint(new Point(0, 0), this);
+                     pt.X += ltrUnderMouse.Width / 2;
+                     pt.Y += ltrUnderMouse.Height / 2;
+                     polyLine.Points.Add(pt);
                  }
-                 polyLine.Points.Add(pt);
              };
             this.MouseMove += (o, e) =>
               {
-                  var pt = e.GetPosition(this);
+                  var ltrUnderMouse = ltrFromArgs(e);
                   if (mouseIsDown)
                   {
-                      if (polyLine.Points.Count > 1)
+                      if (ltrUnderMouse != null)
                       {
-                          polyLine.Points.RemoveAt(polyLine.Points.Count - 1);
+                          ltrUnderMouse.Select();
+                          var pt = ltrUnderMouse.TranslatePoint(new Point(0, 0), this);
+                          pt.X += ltrUnderMouse.Width / 2;
+                          pt.Y += ltrUnderMouse.Height / 2;
+                          polyLine.Points.Add(pt);
                       }
-                      polyLine.Points.Add(pt);
+                      else
+                      {
+                          if (polyLine.Points.Count > 1)
+                          {
+                              polyLine.Points.RemoveAt(polyLine.Points.Count - 1);
+                          }
+                          polyLine.Points.Add(e.GetPosition(this));
+                      }
                   }
               };
             this.MouseUp += (o, e) =>
