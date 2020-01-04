@@ -236,11 +236,18 @@ namespace WordScape
             return didPlaceWord;
         }
 
-        internal bool ShowWord(string wrdSoFar)
+        public enum WordStatus
         {
-            var DidShow = false;
+            IsAlreadyInGrid,
+            IsShownInGridForFirstTime,
+            IsNotInGrid
+        }
+        internal WordStatus ShowWord(string wrdSoFar)
+        {
+            var DidShow = WordStatus.IsNotInGrid;
             if (_dictPlacedWords.TryGetValue(wrdSoFar, out var ltrPlaced))
             {
+                DidShow = WordStatus.IsAlreadyInGrid;
                 int incx = 0, incy = 0, x = ltrPlaced.nX, y = ltrPlaced.nY;
                 if (ltrPlaced.IsHoriz)
                 {
@@ -255,7 +262,7 @@ namespace WordScape
                     var ltrTile = this._unigrid.Children[y * _MaxX + x] as LtrTile;
                     if (!ltrTile.IsShowing)
                     {
-                        DidShow = true;
+                        DidShow =  WordStatus.IsShownInGridForFirstTime;
                         ltrTile.ShowLetter();
                     }
                     x += incx; y += incy;

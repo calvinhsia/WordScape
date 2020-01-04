@@ -12,6 +12,16 @@ namespace WordScape
 {
     public class LetterWheel : Canvas
     {
+        enum FoundWordType
+        {
+            FoundWordTypeSubWordInGrid,
+            FoundWordTypeSubWordNotInGrid
+        };
+        class FoundWord
+        {
+            public FoundWordType foundStringType;
+            public string word;
+        }
         private WordScapeWindow mainWindow;
         private WordContainer wordCont;
         private GenGrid gridgen;
@@ -26,7 +36,7 @@ namespace WordScape
         private bool _mouseIsDown = false;
         private bool _curlinefloating = false;
         private List<LetterWheelLetter> _lstLtrsSelected = new List<LetterWheelLetter>();
-
+        private List<FoundWord> _lstFoundWordsSoFar = new List<FoundWord>();
         public LetterWheel()
         {
 
@@ -38,13 +48,14 @@ namespace WordScape
             this.gridgen = gridgen;
             this.CreateCircle();
             _WordsFound = 0;
+            _lstFoundWordsSoFar.Clear();
         }
 
         private void CreateCircle()
         {
             this.Children.Clear();
             this.Background = Brushes.AliceBlue;
-            var circRadius = 150;
+            var circRadius = 110;
             var circ = new Ellipse()
             {
                 Width = 2 * circRadius,
@@ -53,7 +64,7 @@ namespace WordScape
                 StrokeThickness = 3,
                 Stroke = Brushes.Black
             };
-            var ptcircpos = new Point(50, 10);
+            var ptcircpos = new Point(60, 10);
             Canvas.SetLeft(circ, ptcircpos.X);
             Canvas.SetTop(circ, ptcircpos.Y);
             var ptCircCtr = new Point(ptcircpos.X + circ.Width / 2, ptcircpos.Y + circ.Height / 2);
@@ -63,9 +74,9 @@ namespace WordScape
             int ndx = 0;
             var radsPerLetter = (2 * Math.PI / numLtrs);
             foreach (var ltr in wordCont.InitialWord.ToUpper().OrderBy(p => gridgen._random.NextDouble()))
-//                foreach (var ltr in wordCont.InitialWord.ToUpper().OrderBy(p => Guid.NewGuid()))
-                {
-                    var lett = new LetterWheelLetter(ltr);
+            //                foreach (var ltr in wordCont.InitialWord.ToUpper().OrderBy(p => Guid.NewGuid()))
+            {
+                var lett = new LetterWheelLetter(ltr);
                 _lstLetters.Add(lett);
 
                 var x = ptCircCtr.X + .7 * circRadius * Math.Cos(radsPerLetter * ndx) - lett.Width / 2;
@@ -168,9 +179,35 @@ namespace WordScape
             var wrdSoFar = this.mainWindow.StrWordSoFar;
             if (wrdSoFar.Length >= this.mainWindow._wordGen._MinSubWordLen)
             {
-                if (this.gridgen.ShowWord(wrdSoFar))
+                if (this.wordCont.subwords.Contains(wrdSoFar)) // if it's one of the subwords
                 {
-                    _WordsFound++;
+                    var doRefreshList = false;
+                    if (_lstFoundWordsSoFar.Where(p => p.word == wrdSoFar).Any()) // user already found this word
+                    {
+
+                    }
+                    else
+                    {
+                        var stat = this.gridgen.ShowWord(wrdSoFar);
+                        switch (stat)
+                        {
+                            case GenGrid.WordStatus.IsNotInGrid:
+                                _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = FoundWordType.FoundWordTypeSubWordNotInGrid, word = wrdSoFar });
+                                doRefreshList = true;
+                                break;
+                            case GenGrid.WordStatus.IsAlreadyInGrid:
+                                break;
+                            case GenGrid.WordStatus.IsShownInGridForFirstTime:
+                                _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = FoundWordType.FoundWordTypeSubWordInGrid, word = wrdSoFar });
+                                _WordsFound++;
+                                doRefreshList = true;
+                                break;
+                        }
+                    }
+                    if (doRefreshList)
+                    {
+                        this.RefreshWordList();
+                    }
                 }
             }
             _mouseIsDown = false;
@@ -188,6 +225,23 @@ namespace WordScape
             else
             {
                 this.mainWindow.StrWordSoFar = string.Empty;
+            }
+        }
+        void RefreshWordList()
+        {
+            this.mainWindow.LstWrdsSoFar.Clear();
+            foreach (var wrd in this._lstFoundWordsSoFar.OrderBy(p => p.word))
+            {
+                var tb = new TextBlock() { Text = wrd.word, FontSize = 12 };
+                switch (wrd.foundStringType)
+                {
+                    case FoundWordType.FoundWordTypeSubWordInGrid:
+                        break;
+                    case FoundWordType.FoundWordTypeSubWordNotInGrid:
+                        tb.Background = Brushes.LightBlue;
+                        break;
+                }
+                this.mainWindow.LstWrdsSoFar.Add(tb);
             }
         }
     }

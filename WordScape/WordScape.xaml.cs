@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -33,6 +34,8 @@ namespace WordScape
         string _strWordSoFar;
         public string StrWordSoFar { get { return _strWordSoFar; } set { _strWordSoFar = value; OnMyPropertyChanged(); } }
 
+        private ObservableCollection<UIElement> _LstWrdsSoFar = new ObservableCollection<UIElement>();
+        public ObservableCollection<UIElement> LstWrdsSoFar { get { return _LstWrdsSoFar; } set { _LstWrdsSoFar = value; OnMyPropertyChanged(); } }
         public WordScapeWindow()
         {
             InitializeComponent();
@@ -72,6 +75,7 @@ namespace WordScape
             var gridgen = new GenGrid(maxX: 12, maxY: 12, WordCont, this._wordGen._rand);
             gridgen.FillGrid(this.unigrid);
             StrWordSoFar = string.Empty;
+            LstWrdsSoFar.Clear();
             //this.ltrWheel = new LetterWheel();
             //Grid.SetRow(this.ltrWheel, 3);
             this.ltrWheel.LetterWheelInit(this, WordCont, gridgen);
