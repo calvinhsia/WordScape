@@ -62,9 +62,10 @@ namespace WordScape
             var numLtrs = wordCont.InitialWord.Length;
             int ndx = 0;
             var radsPerLetter = (2 * Math.PI / numLtrs);
-            foreach (var ltr in wordCont.InitialWord.ToUpper())
-            {
-                var lett = new LetterWheelLetter(ltr);
+            foreach (var ltr in wordCont.InitialWord.ToUpper().OrderBy(p => gridgen._random.NextDouble()))
+//                foreach (var ltr in wordCont.InitialWord.ToUpper().OrderBy(p => Guid.NewGuid()))
+                {
+                    var lett = new LetterWheelLetter(ltr);
                 _lstLetters.Add(lett);
 
                 var x = ptCircCtr.X + .7 * circRadius * Math.Cos(radsPerLetter * ndx) - lett.Width / 2;
@@ -82,7 +83,7 @@ namespace WordScape
 
             this.Children.Add(polyLine);
         }
-        LetterWheelLetter ltrFromArgs(MouseEventArgs args) 
+        LetterWheelLetter ltrFromArgs(MouseEventArgs args)
         {
             var pt = args.GetPosition(this);
             LetterWheelLetter ltrUnderMouse = null;
