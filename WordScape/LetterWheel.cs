@@ -170,10 +170,6 @@ namespace WordScape
                 if (this.gridgen.ShowWord(wrdSoFar))
                 {
                     _WordsFound++;
-                    if (_WordsFound == this.gridgen._dictPlacedWords.Count)
-                    {
-                        this.mainWindow.StrWordSoFar = "YAYYY!";
-                    }
                 }
             }
             _mouseIsDown = false;
@@ -184,7 +180,14 @@ namespace WordScape
                 ltr.UnSelect();
             }
             _lstLtrsSelected.Clear();
-            this.mainWindow.StrWordSoFar = string.Empty;
+            if (_WordsFound == this.gridgen._dictPlacedWords.Count)
+            {
+                this.mainWindow.StrWordSoFar = "YAYYY!";
+            }
+            else
+            {
+                this.mainWindow.StrWordSoFar = string.Empty;
+            }
         }
     }
     public class LetterWheelLetter : Border

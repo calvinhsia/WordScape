@@ -71,6 +71,7 @@ namespace WordScape
             var WordCont = this._wordGen.GenerateWord(Targetlen: 7);
             var gridgen = new GenGrid(maxX: 12, maxY: 12, WordCont, this._wordGen._rand);
             gridgen.FillGrid(this.unigrid);
+            StrWordSoFar = string.Empty;
             //this.ltrWheel = new LetterWheel();
             //Grid.SetRow(this.ltrWheel, 3);
             this.ltrWheel.LetterWheelInit(this, WordCont, gridgen);
