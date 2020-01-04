@@ -77,6 +77,13 @@ namespace WordScape
                 }
                 else
                 {// not 1st word: find random common letter and see if it can be placed
+                    if (!subword.EndsWith("S"))
+                    {
+                        if (_dictPlacedWords.ContainsKey(subword + "S"))
+                        {
+                            continue;
+                        }
+                    }
                     ShuffleLettersPlaced();
                     foreach (var ltrPlaced in _ltrsPlaced)
                     {
