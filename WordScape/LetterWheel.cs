@@ -148,10 +148,17 @@ namespace WordScape
                 {
                     if (_lstLtrsSelected.Contains(ltrUnderMouse))
                     {
-                        var at = _lstLtrsSelected.IndexOf(ltrUnderMouse);
-                        if (at == _lstLtrsSelected.Count - 1)
+                        if (_lstLtrsSelected.Count > 1)
                         {
-                            "".ToString();
+                            var at = _lstLtrsSelected.IndexOf(ltrUnderMouse);
+                            if (at == _lstLtrsSelected.Count - 2)
+                            {
+                                _lstLtrsSelected[_lstLtrsSelected.Count - 1].UnSelect();
+                                _lstLtrsSelected.RemoveAt(_lstLtrsSelected.Count - 1);
+                                polyLine.Points.RemoveAt(polyLine.Points.Count - 1);
+                                polyLine.Points.Add(e.GetPosition(this));
+                                _curlinefloating = true;
+                            }
                         }
                     }
                     else
@@ -300,6 +307,10 @@ namespace WordScape
                 this.Background = Brushes.White;
                 IsSelected = false;
             }
+        }
+        public override string ToString()
+        {
+            return $"{ltr}";
         }
     }
 }
