@@ -158,6 +158,7 @@ namespace WordScape
                                 polyLine.Points.RemoveAt(polyLine.Points.Count - 1);
                                 polyLine.Points.Add(e.GetPosition(this));
                                 _curlinefloating = true;
+                                this.mainWindow.StrWordSoFar = this.mainWindow.StrWordSoFar.Substring(0, _lstLtrsSelected.Count);
                             }
                         }
                     }
@@ -272,13 +273,13 @@ namespace WordScape
             //            this.BorderThickness = new System.Windows.Thickness(0);
             //            this.BorderBrush = Brushes.Black;
             this.CornerRadius = new System.Windows.CornerRadius(45);
-            this.Height = 60;
-            this.Width = 60;
+            this.Height = 40;
+            this.Width = 40;
             this.Background = Brushes.White;
             this.Child = new TextBlock()
             {
                 Text = ltr.ToString(),
-                FontSize = 50,
+                FontSize = 40,
                 IsHitTestVisible = false,
                 FontWeight = FontWeights.Bold,
                 Foreground = Brushes.Black,
