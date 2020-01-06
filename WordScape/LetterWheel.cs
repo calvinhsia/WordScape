@@ -27,16 +27,16 @@ namespace WordScape
         private GenGrid gridgen;
         int _WordsFound;
 
-        private List<LetterWheelLetter> _lstLetters = new List<LetterWheelLetter>();
-        private Polyline polyLine = new Polyline()
+        private readonly List<LetterWheelLetter> _lstLetters = new List<LetterWheelLetter>();
+        private readonly Polyline polyLine = new Polyline()
         {
             Stroke = Brushes.Red,
             StrokeThickness = 10
         };
         private bool _mouseIsDown = false;
         private bool _curlinefloating = false;
-        private List<LetterWheelLetter> _lstLtrsSelected = new List<LetterWheelLetter>();
-        private List<FoundWord> _lstFoundWordsSoFar = new List<FoundWord>();
+        private readonly List<LetterWheelLetter> _lstLtrsSelected = new List<LetterWheelLetter>();
+        private readonly List<FoundWord> _lstFoundWordsSoFar = new List<FoundWord>();
         public LetterWheel()
         {
 
@@ -94,7 +94,7 @@ namespace WordScape
 
             this.Children.Add(polyLine);
         }
-        LetterWheelLetter ltrFromArgs(MouseEventArgs args)
+        LetterWheelLetter LtrFromArgs(MouseEventArgs args)
         {
             var pt = args.GetPosition(this);
             LetterWheelLetter ltrUnderMouse = null;
@@ -117,7 +117,7 @@ namespace WordScape
             base.OnMouseDown(e);
             polyLine.Points.Clear();
             _lstLtrsSelected.Clear();
-            var ltrUnderMouse = ltrFromArgs(e);
+            var ltrUnderMouse = LtrFromArgs(e);
             if (ltrUnderMouse != null)
             {
                 ltrUnderMouse.Select();
@@ -143,7 +143,7 @@ namespace WordScape
             }
             if (_mouseIsDown)
             {
-                var ltrUnderMouse = ltrFromArgs(e);
+                var ltrUnderMouse = LtrFromArgs(e);
                 if (ltrUnderMouse != null)
                 {
                     if (_lstLtrsSelected.Contains(ltrUnderMouse))
@@ -188,16 +188,16 @@ namespace WordScape
                     }
                     else
                     {
-                        var stat = this.gridgen.ShowWord(wrdSoFar);
+                        var stat = this.ShowWord(wrdSoFar);
                         switch (stat)
                         {
-                            case GenGrid.WordStatus.IsNotInGrid:
+                            case WordStatus.IsNotInGrid:
                                 _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = FoundWordType.FoundWordTypeSubWordNotInGrid, word = wrdSoFar });
                                 doRefreshList = true;
                                 break;
-                            case GenGrid.WordStatus.IsAlreadyInGrid:
+                            case WordStatus.IsAlreadyInGrid:
                                 break;
-                            case GenGrid.WordStatus.IsShownInGridForFirstTime:
+                            case WordStatus.IsShownInGridForFirstTime:
                                 _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = FoundWordType.FoundWordTypeSubWordInGrid, word = wrdSoFar });
                                 _WordsFound++;
                                 doRefreshList = true;
@@ -227,6 +227,42 @@ namespace WordScape
                 this.mainWindow.StrWordSoFar = string.Empty;
             }
         }
+        public enum WordStatus
+        {
+            IsAlreadyInGrid,
+            IsShownInGridForFirstTime,
+            IsNotInGrid
+        }
+
+        internal WordStatus ShowWord(string wrdSoFar)
+        {
+            var DidShow = WordStatus.IsNotInGrid;
+            if (gridgen._dictPlacedWords.TryGetValue(wrdSoFar, out var ltrPlaced))
+            {
+                DidShow = WordStatus.IsAlreadyInGrid;
+                int incx = 0, incy = 0, x = ltrPlaced.nX, y = ltrPlaced.nY;
+                if (ltrPlaced.IsHoriz)
+                {
+                    incx = 1;
+                }
+                else
+                {
+                    incy = 1;
+                }
+                for (int i = 0; i < wrdSoFar.Length; i++)
+                {
+                    var ltrTile = this.mainWindow.unigrid.Children[y * gridgen._MaxX + x] as LtrTile;
+                    if (!ltrTile.IsShowing)
+                    {
+                        DidShow = WordStatus.IsShownInGridForFirstTime;
+                        ltrTile.ShowLetter();
+                    }
+                    x += incx; y += incy;
+                }
+            }
+            return DidShow;
+        }
+
         void RefreshWordList()
         {
             this.mainWindow.LstWrdsSoFar.Clear();
