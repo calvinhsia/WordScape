@@ -13,6 +13,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -97,7 +98,7 @@ namespace WordScape
                 for (int x = 0; x < gridgen._MaxX; x++)
                 {
                     //unigrid.Children.Add(new TextBlock() { Text = "AA" });
-                    var ltrTile = new LtrTile(gridgen._chars[x, y], x, y);
+                    var ltrTile = new LtrTile(this, gridgen._chars[x, y], x, y);
                     unigrid.Children.Add(ltrTile);
                 }
             }
@@ -118,8 +119,11 @@ namespace WordScape
         private readonly int x;
         private readonly int y;
         public bool IsShowing;
-        public LtrTile(char v, int x, int y)
+        private readonly WordScapeWindow wordScapeWindow;
+        private readonly TextBlock txtBlock;
+        public LtrTile(WordScapeWindow wordScapeWindow, char v, int x, int y)
         {
+            this.wordScapeWindow = wordScapeWindow;
             this.v = v;
             this.x = x;
             this.y = y;
@@ -127,15 +131,17 @@ namespace WordScape
             if (v != GenGrid.Blank)
             {
                 Background = Brushes.DarkCyan;
-                var txt = new TextBlock()
+                txtBlock = new TextBlock()
                 {
                     //                        Text = v == Blank ? " " : v.ToString().ToUpper(),
                     FontSize = 20,
                     Foreground = Brushes.White,
+                    Background = Brushes.Black,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
+                    , Text="A"
                 };
-                this.Children.Add(txt);
+                this.Children.Add(txtBlock);
             }
             else
             {
@@ -153,7 +159,26 @@ namespace WordScape
             }
             else
             {
-                this.ShowLetter();
+                var storyBoard = this.wordScapeWindow.TryFindResource("blinkAnimation") as Storyboard;
+                var name = $"LtrTile{x}{y}";
+                this.RegisterName(name, this.wordScapeWindow);
+                var xx1 = storyBoard.Children[0] as ColorAnimationUsingKeyFrames;
+                xx1.FillBehavior = FillBehavior.Stop;
+                xx1.RepeatBehavior= new RepeatBehavior(40);
+                xx1.Duration = new Duration(TimeSpan.FromMilliseconds(1000));
+                Storyboard.SetTarget(xx1, this.txtBlock);
+                Storyboard.SetTargetName(xx1, name);
+
+                var xx2 = storyBoard.Children[1] as ColorAnimationUsingKeyFrames;
+                Storyboard.SetTarget(xx2, this.txtBlock);
+                Storyboard.SetTargetName(xx2, name);
+                xx2.FillBehavior = FillBehavior.Stop;
+                xx2.RepeatBehavior = new RepeatBehavior(40);
+                xx2.Duration = new Duration(TimeSpan.FromMilliseconds(1000));
+
+                storyBoard?.Begin();
+                //https://stackoverflow.com/questions/4177574/how-to-make-a-textblock-blink-in-wpf
+
             }
         }
         internal void ShowLetter()
