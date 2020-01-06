@@ -25,7 +25,7 @@ namespace WordScapeTests
                 var genGrid = new GenGrid(12, 12, wcont, wordGen._rand);
                 var gr = Environment.NewLine + genGrid.ShowGrid();
                 LogMessage($"{gr}");
-                LogMessage($"Grid Ltrs= {genGrid.nLtrsPlaced} Wrds= {genGrid.nWordsPlaced}");
+                LogMessage($"Grid Ltrs= {genGrid.nLtrsPlaced} Wrds= {genGrid.NumWordsPlaced}");
             }
         }
 
