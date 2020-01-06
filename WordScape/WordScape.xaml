@@ -6,7 +6,32 @@
         xmlns:local="clr-namespace:WordScape"
         mc:Ignorable="d"
         Title="WordScapes" Height="450" Width="800">
-    <Grid>
+    <Window.Resources>
+        <Storyboard x:Key="blinkAnimation" Duration="0:0:5" >
+            <!--<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(TextBlock.Background).(SolidColorBrush.Color)" Storyboard.TargetName="TitleTextBlock" AutoReverse="True">-->
+            <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(TextBlock.Background).(SolidColorBrush.Color)" AutoReverse="True">
+                <ColorAnimationUsingKeyFrames.KeyFrames>
+                    <DiscreteColorKeyFrame KeyTime="0:0:0" Value="White"/>
+                    <DiscreteColorKeyFrame KeyTime="0:0:0.2" Value="Black"/>
+                    <DiscreteColorKeyFrame KeyTime="0:0:0.4" Value="White"/>
+                    <DiscreteColorKeyFrame KeyTime="0:0:0.6" Value="Black"/>
+                    <DiscreteColorKeyFrame KeyTime="0:0:0.8" Value="White"/>
+                </ColorAnimationUsingKeyFrames.KeyFrames>
+            </ColorAnimationUsingKeyFrames>
+
+            <!--<ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)" Storyboard.TargetName="TitleTextBlock" AutoReverse="True">-->
+            <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)" AutoReverse="True">
+                <ColorAnimationUsingKeyFrames.KeyFrames>
+                    <DiscreteColorKeyFrame KeyTime="0:0:0.0" Value="Black"/>
+                    <DiscreteColorKeyFrame KeyTime="0:0:0.2" Value="White"/>
+                    <DiscreteColorKeyFrame KeyTime="0:0:0.4" Value="Black"/>
+                    <DiscreteColorKeyFrame KeyTime="0:0:0.6" Value="White"/>
+                    <DiscreteColorKeyFrame KeyTime="0:0:0.8" Value="Black"/>
+                </ColorAnimationUsingKeyFrames.KeyFrames>
+            </ColorAnimationUsingKeyFrames>
+        </Storyboard>
+    </Window.Resources>
+    <Grid Margin="0,-28,2,29">
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
             <RowDefinition Height="300"/>
@@ -17,13 +42,13 @@
             <Button x:Name="BtnPlayAgain" Content="_Play Again" Margin="0,0,10,0" Click="BtnPlayAgain_Click"/>
             <Button x:Name="BtnShowLtrs" Content="_ShowLetters" Margin="0,0,10,0" Click="BtnShowLtrs_Click"/>
         </StackPanel>
-        <UniformGrid Grid.Row="1" Name="unigrid"/>
+        <UniformGrid Grid.Row="1" Name="unigrid" Margin="0,0,-2,0"/>
         <TextBlock x:Name="TxtLtrsSoFar" 
                    HorizontalAlignment="Center" 
                    Text="{Binding StrWordSoFar}"
                    FontSize="24" 
-                   Margin="0,0,0,0" Grid.Row="2" />
-        <Grid Grid.Row="3">
+                   Margin="396,0,394,0" Grid.Row="2" />
+        <Grid Grid.Row="3" Margin="0,0,-2,-1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition  Width="80"/>
                 <ColumnDefinition Width="*" />
