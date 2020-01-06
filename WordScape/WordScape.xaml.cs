@@ -78,13 +78,31 @@ namespace WordScape
         {
             var WordCont = this._wordGen.GenerateWord(Targetlen: 7);
             var gridgen = new GenGrid(maxX: 12, maxY: 12, WordCont, this._wordGen._rand);
-            gridgen.FillGrid(this.unigrid);
+            FillGrid(gridgen);
             StrWordSoFar = string.Empty;
             LstWrdsSoFar.Clear();
             //this.ltrWheel = new LetterWheel();
             //Grid.SetRow(this.ltrWheel, 3);
             this.ltrWheel.LetterWheelInit(this, WordCont, gridgen);
         }
+
+        private void FillGrid(GenGrid gridgen)
+        {
+            unigrid.Children.Clear();
+            unigrid.Columns = gridgen._MaxX;
+            unigrid.Rows = gridgen._MaxY;
+            //            unigrid.Background = Brushes.Black;
+            for (int y = 0; y < gridgen._MaxY; y++)
+            {
+                for (int x = 0; x < gridgen._MaxX; x++)
+                {
+                    //unigrid.Children.Add(new TextBlock() { Text = "AA" });
+                    var ltrTile = new LtrTile(gridgen._chars[x, y], x, y);
+                    unigrid.Children.Add(ltrTile);
+                }
+            }
+        }
+
         private void BtnShowLtrs_Click(object sender, RoutedEventArgs e)
         {
             foreach (LtrTile tile in this.unigrid.Children)
@@ -93,4 +111,59 @@ namespace WordScape
             }
         }
     }
+
+    public class LtrTile : DockPanel
+    {
+        private readonly char v;
+        private readonly int x;
+        private readonly int y;
+        public bool IsShowing;
+        public LtrTile(char v, int x, int y)
+        {
+            this.v = v;
+            this.x = x;
+            this.y = y;
+            Margin = new Thickness(2, 2, 2, 2);
+            if (v != GenGrid.Blank)
+            {
+                Background = Brushes.DarkCyan;
+                var txt = new TextBlock()
+                {
+                    //                        Text = v == Blank ? " " : v.ToString().ToUpper(),
+                    FontSize = 20,
+                    Foreground = Brushes.White,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                this.Children.Add(txt);
+            }
+            else
+            {
+                this.Children.Add(new TextBlock());
+            }
+        }
+
+        protected override void OnMouseDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseDown(e);
+            if (IsShowing)
+            {
+                IsShowing = false;
+                (this.Children[0] as TextBlock).Text = " ";
+            }
+            else
+            {
+                this.ShowLetter();
+            }
+        }
+        internal void ShowLetter()
+        {
+            if (this.v != GenGrid.Blank)
+            {
+                (this.Children[0] as TextBlock).Text = v.ToString().ToUpper();
+                IsShowing = true;
+            }
+        }
+    }
+
 }

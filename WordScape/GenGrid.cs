@@ -3,12 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Documents.DocumentStructures;
-using System.Windows.Input;
-using System.Windows.Media;
 
 namespace WordScape
 {
@@ -26,13 +20,12 @@ namespace WordScape
     public class GenGrid
     {
         public const char Blank = '_';
-        public UniformGrid _unigrid;
         readonly WordContainer _wordContainer;
         readonly public Random _random;
-        readonly int _MaxY;
-        readonly int _MaxX;
+        public readonly int _MaxY;
+        public readonly int _MaxX;
         public char[,] _chars;
-        public int nWordsPlaced => _dictPlacedWords.Count;
+        public int NumWordsPlaced => _dictPlacedWords.Count;
         //        public List<string> _lstWordsPlaced = new List<string>();
         public Dictionary<string, LtrPlaced> _dictPlacedWords = new Dictionary<string, LtrPlaced>(); // subword to 1st letter
         public int nLtrsPlaced;
@@ -58,7 +51,7 @@ namespace WordScape
         {
             foreach (var subword in _wordContainer.subwords)
             {
-                if (nWordsPlaced == 0)
+                if (NumWordsPlaced == 0)
                 {
                     int x, y, incY = 0, incX = 0;
                     if (_random.NextDouble() < .5) // horiz
@@ -93,7 +86,7 @@ namespace WordScape
                         }
                     }
                 }
-                if (nWordsPlaced == 6)
+                if (NumWordsPlaced == 6)
                 {
                     //                    return;
                 }
@@ -236,40 +229,6 @@ namespace WordScape
             return didPlaceWord;
         }
 
-        public enum WordStatus
-        {
-            IsAlreadyInGrid,
-            IsShownInGridForFirstTime,
-            IsNotInGrid
-        }
-        internal WordStatus ShowWord(string wrdSoFar)
-        {
-            var DidShow = WordStatus.IsNotInGrid;
-            if (_dictPlacedWords.TryGetValue(wrdSoFar, out var ltrPlaced))
-            {
-                DidShow = WordStatus.IsAlreadyInGrid;
-                int incx = 0, incy = 0, x = ltrPlaced.nX, y = ltrPlaced.nY;
-                if (ltrPlaced.IsHoriz)
-                {
-                    incx = 1;
-                }
-                else
-                {
-                    incy = 1;
-                }
-                for (int i = 0; i < wrdSoFar.Length; i++)
-                {
-                    var ltrTile = this._unigrid.Children[y * _MaxX + x] as LtrTile;
-                    if (!ltrTile.IsShowing)
-                    {
-                        DidShow =  WordStatus.IsShownInGridForFirstTime;
-                        ltrTile.ShowLetter();
-                    }
-                    x += incx; y += incy;
-                }
-            }
-            return DidShow;
-        }
 
         private void ShuffleLettersPlaced()
         {
@@ -294,76 +253,6 @@ namespace WordScape
                 grid += Environment.NewLine;
             }
             return grid;
-        }
-        internal void FillGrid(UniformGrid unigrid)
-        {
-            this._unigrid = unigrid;
-            unigrid.Children.Clear();
-            unigrid.Columns = _MaxX;
-            unigrid.Rows = _MaxY;
-            //            unigrid.Background = Brushes.Black;
-            for (int y = 0; y < _MaxY; y++)
-            {
-                for (int x = 0; x < _MaxX; x++)
-                {
-                    //unigrid.Children.Add(new TextBlock() { Text = "AA" });
-                    var ltrTile = new LtrTile(_chars[x, y], x, y);
-                    unigrid.Children.Add(ltrTile);
-                }
-            }
-        }
-    }
-    public class LtrTile : DockPanel
-    {
-        private readonly char v;
-        private readonly int x;
-        private readonly int y;
-        public bool IsShowing;
-        public LtrTile(char v, int x, int y)
-        {
-            this.v = v;
-            this.x = x;
-            this.y = y;
-            Margin = new Thickness(2, 2, 2, 2);
-            if (v != GenGrid.Blank)
-            {
-                Background = Brushes.DarkCyan;
-                var txt = new TextBlock()
-                {
-                    //                        Text = v == Blank ? " " : v.ToString().ToUpper(),
-                    FontSize = 20,
-                    Foreground = Brushes.White,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center
-                };
-                this.Children.Add(txt);
-            }
-            else
-            {
-                this.Children.Add(new TextBlock());
-            }
-        }
-
-        protected override void OnMouseDown(MouseButtonEventArgs e)
-        {
-            base.OnMouseDown(e);
-            if (IsShowing)
-            {
-                IsShowing = false;
-                (this.Children[0] as TextBlock).Text = " ";
-            }
-            else
-            {
-                this.ShowLetter();
-            }
-        }
-        internal void ShowLetter()
-        {
-            if (this.v != GenGrid.Blank)
-            {
-                (this.Children[0] as TextBlock).Text = v.ToString().ToUpper();
-                IsShowing = true;
-            }
         }
     }
 }

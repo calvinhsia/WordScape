@@ -82,8 +82,7 @@ namespace WordScape
                 }
                 return wc.subwords.Count != _numMaxSubWords; // continue
             });
-            wc.subwords = wc.subwords.OrderByDescending(w => w.Length).ToList();
-            wc.subwords = wc.subwords.Select(p => p.ToUpper()).ToList();
+            wc.subwords = wc.subwords.OrderByDescending(w => w.Length).Select(p=>p.ToUpper()).ToList();
             wc.InitialWord = wc.InitialWord.ToUpper();
             return wc;
         }
