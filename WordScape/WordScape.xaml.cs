@@ -57,7 +57,12 @@ namespace WordScape
         {
             try
             {
-                this._wordGen = new WordGenerator(new Random(1),
+                var rand = new Random(
+#if DEBUG
+                        1
+#endif
+                    );
+                this._wordGen = new WordGenerator(rand,
                     minSubWordLen: 5,
                     numMaxSubWords: 1500);
 
