@@ -35,6 +35,10 @@ namespace WordScape
         string _strWordSoFar;
         public string StrWordSoFar { get { return _strWordSoFar; } set { _strWordSoFar = value; OnMyPropertyChanged(); } }
 
+        public int LenTargetWord { get; set; } = 7;
+        public int MinSubWordLength { get; set; } = 5;
+        private readonly Random _random;
+
         private ObservableCollection<UIElement> _LstWrdsSoFar = new ObservableCollection<UIElement>();
         public ObservableCollection<UIElement> LstWrdsSoFar { get { return _LstWrdsSoFar; } set { _LstWrdsSoFar = value; OnMyPropertyChanged(); } }
         public WordScapeWindow()
@@ -45,6 +49,11 @@ namespace WordScape
             this.Height = Properties.Settings.Default.WindowSize.Height;
             this.Top = Properties.Settings.Default.WindowPos.Y;
             this.Left = Properties.Settings.Default.WindowPos.X;
+            _random = new Random(
+#if DEBUG
+                        1
+#endif
+                    );
             this.Closing += (o, ec) =>
             {
                 Properties.Settings.Default.WindowPos = new System.Drawing.Point((int)this.Left, (int)this.Top);
@@ -56,35 +65,43 @@ namespace WordScape
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            BtnPlayAgain.RaiseEvent(new RoutedEventArgs() { RoutedEvent = Button.ClickEvent, Source = this });
+        }
+
+        private void BtnPlayAgain_Click(object sender, RoutedEventArgs e)
+        {
             try
             {
-                var rand = new Random(
-#if DEBUG
-                        1
-#endif
-                    );
-                this._wordGen = new WordGenerator(rand,
-                    minSubWordLen: 5,
+                if (this.LenTargetWord >= 12)
+                {
+                    var ow = new Window()
+                    {
+                        Left = this.Left,
+                        Top = this.Top,
+                        Height = 300,
+                        Width = 800,
+                    };
+                    ow.Content = "Really ??";
+                    ow.ShowDialog();
+                    return;
+                }
+                this._wordGen = new WordGenerator(_random,
+                    minSubWordLen: MinSubWordLength,
                     numMaxSubWords: 1500);
 
-                BtnPlayAgain.RaiseEvent(new RoutedEventArgs() { RoutedEvent = Button.ClickEvent, Source = this });
+                var WordCont = this._wordGen.GenerateWord(LenTargetWord);
+                var gridgen = new GenGrid(maxX: 12, maxY: 12, WordCont, this._wordGen._rand);
+                FillGrid(gridgen);
+                StrWordSoFar = string.Empty;
+                LstWrdsSoFar.Clear();
+                //this.ltrWheel = new LetterWheel();
+                //Grid.SetRow(this.ltrWheel, 3);
+                this.ltrWheel.LetterWheelInit(this, WordCont, gridgen);
             }
             catch (Exception ex)
             {
                 this.Content = ex.ToString();
             }
-        }
-
-        private void BtnPlayAgain_Click(object sender, RoutedEventArgs e)
-        {
-            var WordCont = this._wordGen.GenerateWord(Targetlen: 7);
-            var gridgen = new GenGrid(maxX: 12, maxY: 12, WordCont, this._wordGen._rand);
-            FillGrid(gridgen);
-            StrWordSoFar = string.Empty;
-            LstWrdsSoFar.Clear();
-            //this.ltrWheel = new LetterWheel();
-            //Grid.SetRow(this.ltrWheel, 3);
-            this.ltrWheel.LetterWheelInit(this, WordCont, gridgen);
         }
 
         private void FillGrid(GenGrid gridgen)
@@ -136,10 +153,10 @@ namespace WordScape
                     Text = v == GenGrid.Blank ? " " : v.ToString().ToUpper(),
                     FontSize = 20,
                     Foreground = Brushes.White,
-//                    Background = Brushes.Black,
+                    //                    Background = Brushes.Black,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
-                    Visibility= Visibility.Hidden
+                    Visibility = Visibility.Hidden
                 };
                 this.Children.Add(txtBlock);
             }
@@ -155,7 +172,7 @@ namespace WordScape
             if (IsShowing)
             {
                 this.txtBlock.Visibility = Visibility.Hidden;
-//                (this.Children[0] as TextBlock).Text = " ";
+                //                (this.Children[0] as TextBlock).Text = " ";
             }
             else
             {
@@ -165,7 +182,7 @@ namespace WordScape
                 var anim = new ObjectAnimationUsingKeyFrames
                 {
                     Duration = TimeSpan.FromMilliseconds(500), // Dura of entire timeline
-//                    RepeatBehavior = new RepeatBehavior(10) // # times to repeat duration. Total dura = RepeatCount * Dura
+                                                               //                    RepeatBehavior = new RepeatBehavior(10) // # times to repeat duration. Total dura = RepeatCount * Dura
                 };
                 var frm1 = new DiscreteObjectKeyFrame(Visibility.Visible, TimeSpan.FromMilliseconds(10));
                 anim.KeyFrames.Add(frm1);
