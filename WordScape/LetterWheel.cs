@@ -14,8 +14,10 @@ namespace WordScape
     {
         enum FoundWordType
         {
-            FoundWordTypeSubWordInGrid,
-            FoundWordTypeSubWordNotInGrid
+            SubWordNotAWord,
+            SubWordInGrid,
+            SubWordNotInGrid,
+            SubWordInLargeDictionary
         };
         class FoundWord
         {
@@ -187,35 +189,46 @@ namespace WordScape
             var wrdSoFar = this.mainWindow.StrWordSoFar;
             if (wrdSoFar.Length >= this.mainWindow._wordGen._MinSubWordLen)
             {
-                if (this.wordCont.subwords.Contains(wrdSoFar)) // if it's one of the subwords
+                var doRefreshList = false;
+                var foundWordType = FoundWordType.SubWordNotAWord;
+                if (_lstFoundWordsSoFar.Where(p => p.word == wrdSoFar).Any()) // user already found this word
                 {
-                    var doRefreshList = false;
-                    if (_lstFoundWordsSoFar.Where(p => p.word == wrdSoFar).Any()) // user already found this word
-                    {
 
-                    }
-                    else
+                }
+                else
+                {
+                    var stat = this.ShowWord(wrdSoFar);
+                    switch (stat)
                     {
-                        var stat = this.ShowWord(wrdSoFar);
-                        switch (stat)
-                        {
-                            case WordStatus.IsNotInGrid:
-                                _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = FoundWordType.FoundWordTypeSubWordNotInGrid, word = wrdSoFar });
-                                doRefreshList = true;
-                                break;
-                            case WordStatus.IsAlreadyInGrid:
-                                break;
-                            case WordStatus.IsShownInGridForFirstTime:
-                                _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = FoundWordType.FoundWordTypeSubWordInGrid, word = wrdSoFar });
-                                _WordsFound++;
-                                doRefreshList = true;
-                                break;
-                        }
+                        case WordStatus.IsNotInGrid:
+                            foundWordType = FoundWordType.SubWordNotInGrid;
+                            if (!wordCont.subwords.Contains(wrdSoFar))
+                            {
+                                if (this.mainWindow._wordGen._dictionaryLibLarge.IsWord(wrdSoFar.ToLower()))
+                                {
+                                    foundWordType = FoundWordType.SubWordInLargeDictionary;
+                                }
+                                else
+                                {
+                                    foundWordType = FoundWordType.SubWordNotAWord;
+                                }
+                            }
+                            _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = foundWordType, word = wrdSoFar });
+                            doRefreshList = true;
+                            break;
+                        case WordStatus.IsAlreadyInGrid:
+                            break;
+                        case WordStatus.IsShownInGridForFirstTime:
+                            foundWordType = FoundWordType.SubWordInGrid;
+                            _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = foundWordType, word = wrdSoFar });
+                            _WordsFound++;
+                            doRefreshList = true;
+                            break;
                     }
-                    if (doRefreshList)
-                    {
-                        this.RefreshWordList();
-                    }
+                }
+                if (doRefreshList)
+                {
+                    this.RefreshWordList();
                 }
             }
             _mouseIsDown = false;
@@ -244,10 +257,10 @@ namespace WordScape
 
         internal WordStatus ShowWord(string wrdSoFar)
         {
-            var DidShow = WordStatus.IsNotInGrid;
+            var wrdStatus = WordStatus.IsNotInGrid;
             if (gridgen._dictPlacedWords.TryGetValue(wrdSoFar, out var ltrPlaced))
             {
-                DidShow = WordStatus.IsAlreadyInGrid;
+                wrdStatus = WordStatus.IsAlreadyInGrid;
                 int incx = 0, incy = 0, x = ltrPlaced.nX, y = ltrPlaced.nY;
                 if (ltrPlaced.IsHoriz)
                 {
@@ -262,13 +275,13 @@ namespace WordScape
                     var ltrTile = this.mainWindow.unigrid.Children[y * gridgen._MaxX + x] as LtrTile;
                     if (!ltrTile.IsShowing)
                     {
-                        DidShow = WordStatus.IsShownInGridForFirstTime;
+                        wrdStatus = WordStatus.IsShownInGridForFirstTime;
                         ltrTile.ShowLetter();
                     }
                     x += incx; y += incy;
                 }
             }
-            return DidShow;
+            return wrdStatus;
         }
 
         void RefreshWordList()
@@ -279,9 +292,15 @@ namespace WordScape
                 var tb = new TextBlock() { Text = wrd.word, FontSize = 12 };
                 switch (wrd.foundStringType)
                 {
-                    case FoundWordType.FoundWordTypeSubWordInGrid:
+                    case FoundWordType.SubWordNotAWord:
+                        tb.Background = Brushes.LightPink;
                         break;
-                    case FoundWordType.FoundWordTypeSubWordNotInGrid:
+                    case FoundWordType.SubWordInLargeDictionary:
+                        tb.Background = Brushes.LightSeaGreen;
+                        break;
+                    case FoundWordType.SubWordInGrid:
+                        break;
+                    case FoundWordType.SubWordNotInGrid:
                         tb.Background = Brushes.LightBlue;
                         break;
                 }

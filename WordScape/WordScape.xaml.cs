@@ -115,7 +115,7 @@ namespace WordScape
                 for (int x = 0; x < gridgen._MaxX; x++)
                 {
                     //unigrid.Children.Add(new TextBlock() { Text = "AA" });
-                    var ltrTile = new LtrTile(this, gridgen._chars[x, y], x, y);
+                    var ltrTile = new LtrTile(gridgen._chars[x, y]);
                     unigrid.Children.Add(ltrTile);
                 }
             }
@@ -132,25 +132,19 @@ namespace WordScape
 
     public class LtrTile : DockPanel
     {
-        private readonly char v;
-        private readonly int x;
-        private readonly int y;
+        private readonly char _ltr;
         public bool IsShowing;
-        private readonly WordScapeWindow wordScapeWindow;
         private readonly TextBlock txtBlock;
-        public LtrTile(WordScapeWindow wordScapeWindow, char v, int x, int y)
+        public LtrTile(char ltr)
         {
-            this.wordScapeWindow = wordScapeWindow;
-            this.v = v;
-            this.x = x;
-            this.y = y;
+            this._ltr = ltr;
             Margin = new Thickness(2, 2, 2, 2);
-            if (v != GenGrid.Blank)
+            if (ltr != GenGrid.Blank)
             {
                 Background = Brushes.DarkCyan;
                 txtBlock = new TextBlock()
                 {
-                    Text = v == GenGrid.Blank ? " " : v.ToString().ToUpper(),
+                    Text = ltr == GenGrid.Blank ? " " : ltr.ToString().ToUpper(),
                     FontSize = 20,
                     Foreground = Brushes.White,
                     //                    Background = Brushes.Black,
@@ -217,7 +211,7 @@ namespace WordScape
         }
         internal void ShowLetter()
         {
-            if (!IsShowing && this.v != GenGrid.Blank)
+            if (!IsShowing && this._ltr != GenGrid.Blank)
             {
                 this.txtBlock.Visibility = Visibility.Visible;
                 IsShowing = true;
