@@ -24,8 +24,8 @@ namespace WordScape
             public FoundWordType foundStringType;
             public string word;
         }
-        private WordScapeWindow mainWindow;
-        private WordContainer wordCont;
+        private WordScapeWindow wordScapeWindow;
+        private WordContainer _wordCont;
         private GenGrid gridgen;
         int _WordsFound;
 
@@ -40,14 +40,19 @@ namespace WordScape
         private bool _curlinefloating = false;
         private readonly List<LetterWheelLetter> _lstLtrsSelected = new List<LetterWheelLetter>();
         private readonly List<FoundWord> _lstFoundWordsSoFar = new List<FoundWord>();
+        private Point _ptCirclePos = new Point(60, 10);
+        private Point _ptCircleCtr;
+        private readonly double _pctRadiusLettersInCircle = .7; // the letters (are in the within the circle, forming a smaller circle) are at this fraction of the circle radius
+        private int NumLtrs => _wordCont.InitialWord.Length;
+
         public LetterWheel()
         {
 
         }
-        public void LetterWheelInit(WordScapeWindow mainWindow, WordContainer wordCont, GenGrid gridgen)
+        public void LetterWheelInit(WordScapeWindow wordScapeWindow, WordContainer wordCont, GenGrid gridgen)
         {
-            this.mainWindow = mainWindow;
-            this.wordCont = wordCont;
+            this.wordScapeWindow = wordScapeWindow;
+            this._wordCont = wordCont;
             this.gridgen = gridgen;
             this.CreateCircle();
             _WordsFound = 0;
@@ -67,31 +72,26 @@ namespace WordScape
                 StrokeThickness = 3,
                 Stroke = Brushes.Black
             };
-            var ptcircpos = new Point(60, 10);
-            Canvas.SetLeft(circ, ptcircpos.X);
-            Canvas.SetTop(circ, ptcircpos.Y);
-            var ptCircCtr = new Point(ptcircpos.X + circ.Width / 2, ptcircpos.Y + circ.Height / 2);
+            Canvas.SetLeft(circ, _ptCirclePos.X);
+            Canvas.SetTop(circ, _ptCirclePos.Y);
+
+            _ptCircleCtr = new Point(_ptCirclePos.X + circ.Width / 2, _ptCirclePos.Y + circ.Height / 2);
             this.Children.Add(circ);
 
-            var numLtrs = wordCont.InitialWord.Length;
             int ndx = 0;
-            var radsPerLetter = (2 * Math.PI / numLtrs);
-            foreach (var ltr in wordCont.InitialWord.ToUpper().OrderBy(p => gridgen._random.NextDouble()))
+            var radsPerLetter = (2 * Math.PI / NumLtrs);
+            foreach (var ltr in _wordCont.InitialWord.ToUpper().OrderBy(p => gridgen._random.NextDouble()))
             //                foreach (var ltr in wordCont.InitialWord.ToUpper().OrderBy(p => Guid.NewGuid()))
             {
                 var lett = new LetterWheelLetter(ltr);
                 _lstLetters.Add(lett);
 
-                var x = ptCircCtr.X + .7 * circRadius * Math.Cos(radsPerLetter * ndx) - lett.Width / 2;
-                var y = ptCircCtr.Y - .7 * circRadius * Math.Sin(radsPerLetter * ndx) - lett.Height / 2;
+                var x = _ptCircleCtr.X + _pctRadiusLettersInCircle * circRadius * Math.Cos(radsPerLetter * ndx) - lett.Width / 2;
+                var y = _ptCircleCtr.Y - _pctRadiusLettersInCircle * circRadius * Math.Sin(radsPerLetter * ndx) - lett.Height / 2;
                 var letpt = new Point(x, y);
                 Canvas.SetLeft(lett, letpt.X);
                 Canvas.SetTop(lett, letpt.Y);
                 this.Children.Add(lett);
-                if (ndx % 2 == 0)
-                {
-                    //                    lett.Select();
-                }
                 ndx++;
             }
 
@@ -112,6 +112,44 @@ namespace WordScape
                 {
                     ltrUnderMouse = x as LetterWheelLetter;
                 }
+                else if (x is Ellipse)
+                {
+                    if (!_mouseIsDown) // for the 1st mousedown, we'll allow a larger area
+                    {
+                        // calc x,y with circCtr as origin
+                        var ptInCirc = new Point(pt.X - _ptCircleCtr.X, _ptCircleCtr.Y - pt.Y);
+
+                        //var radsPerLetter = (2 * Math.PI / NumLtrs);
+                        //var theta = Math.Atan2(ptInCirc.Y, ptInCirc.X);
+                        //if (theta < 0)
+                        //{
+                        //    theta += 2 * Math.PI;
+                        //}
+                        //var ltrWheelNdx = (theta / (radsPerLetter));
+                        //ltrUnderMouse = Children.OfType<LetterWheelLetter>().Skip((int)(ltrWheelNdx)).First();
+
+                        LetterWheelLetter closestLetterWheelLetter = null;
+                        var minDist = double.MaxValue;
+                        foreach (var ltrWheelLtr in Children.OfType<LetterWheelLetter>())
+                        {
+                            var pttry = new Point(Canvas.GetLeft(ltrWheelLtr) + ltrWheelLtr.Width / 2 - _ptCircleCtr.X, _ptCircleCtr.Y - Canvas.GetTop(ltrWheelLtr) - ltrWheelLtr.Height / 2); // center of letter
+                            var dist = Math.Sqrt(Math.Pow((pttry.X - ptInCirc.X), 2) + Math.Pow((pttry.Y - ptInCirc.Y), 2));
+                            if (dist < minDist)
+                            {
+                                closestLetterWheelLetter = ltrWheelLtr;
+                                minDist = dist;
+                            }
+                        }
+                        if (minDist <= closestLetterWheelLetter.Height)
+                        {
+                            ltrUnderMouse = closestLetterWheelLetter;
+                        }
+
+
+
+
+                    }
+                }
             }
             return ltrUnderMouse;
         }
@@ -125,7 +163,7 @@ namespace WordScape
             {
                 ltrUnderMouse.Select();
                 _lstLtrsSelected.Add(ltrUnderMouse);
-                this.mainWindow.StrWordSoFar = ltrUnderMouse.ltr.ToString();
+                this.wordScapeWindow.StrWordSoFar = ltrUnderMouse.ltr.ToString();
                 _mouseIsDown = true;
                 var pt = ltrUnderMouse.TranslatePoint(new Point(0, 0), this);
                 pt.X += ltrUnderMouse.Width / 2;
@@ -161,7 +199,7 @@ namespace WordScape
                                 polyLine.Points.RemoveAt(polyLine.Points.Count - 1);
                                 polyLine.Points.Add(e.GetPosition(this));
                                 _curlinefloating = true;
-                                this.mainWindow.StrWordSoFar = this.mainWindow.StrWordSoFar.Substring(0, _lstLtrsSelected.Count);
+                                this.wordScapeWindow.StrWordSoFar = this.wordScapeWindow.StrWordSoFar.Substring(0, _lstLtrsSelected.Count);
                             }
                         }
                     }
@@ -169,7 +207,7 @@ namespace WordScape
                     {
                         ltrUnderMouse.Select();
                         _lstLtrsSelected.Add(ltrUnderMouse);
-                        this.mainWindow.StrWordSoFar += ltrUnderMouse.ltr.ToString();
+                        this.wordScapeWindow.StrWordSoFar += ltrUnderMouse.ltr.ToString();
                         var pt = ltrUnderMouse.TranslatePoint(new Point(0, 0), this);
                         pt.X += ltrUnderMouse.Width / 2;
                         pt.Y += ltrUnderMouse.Height / 2;
@@ -187,8 +225,8 @@ namespace WordScape
         protected override void OnMouseUp(MouseButtonEventArgs e)
         {
             base.OnMouseUp(e);
-            var wrdSoFar = this.mainWindow.StrWordSoFar;
-            if (wrdSoFar.Length >= this.mainWindow._wordGen._MinSubWordLen)
+            var wrdSoFar = this.wordScapeWindow.StrWordSoFar;
+            if (wrdSoFar.Length >= this.wordScapeWindow._wordGen._MinSubWordLen)
             {
                 var doRefreshList = false;
                 var foundWordType = FoundWordType.SubWordNotAWord;
@@ -203,9 +241,9 @@ namespace WordScape
                     {
                         case WordStatus.IsNotInGrid:
                             foundWordType = FoundWordType.SubWordNotInGrid;
-                            if (!wordCont.subwords.Contains(wrdSoFar))
+                            if (!_wordCont.subwords.Contains(wrdSoFar))
                             {
-                                if (this.mainWindow._wordGen._dictionaryLibLarge.IsWord(wrdSoFar.ToLower()))
+                                if (this.wordScapeWindow._wordGen._dictionaryLibLarge.IsWord(wrdSoFar.ToLower()))
                                 {
                                     foundWordType = FoundWordType.SubWordInLargeDictionary;
                                 }
@@ -246,11 +284,11 @@ namespace WordScape
             _lstLtrsSelected.Clear();
             if (_WordsFound == this.gridgen._dictPlacedWords.Count)
             {
-                this.mainWindow.StrWordSoFar = "YAYYY!";
+                this.wordScapeWindow.StrWordSoFar = "YAYYY!";
             }
             else
             {
-                this.mainWindow.StrWordSoFar = string.Empty;
+                this.wordScapeWindow.StrWordSoFar = string.Empty;
             }
         }
         public enum WordStatus
@@ -277,7 +315,7 @@ namespace WordScape
                 }
                 for (int i = 0; i < wrdSoFar.Length; i++)
                 {
-                    var ltrTile = this.mainWindow.unigrid.Children[y * gridgen._MaxX + x] as LtrTile;
+                    var ltrTile = this.wordScapeWindow.unigrid.Children[y * gridgen._MaxX + x] as LtrTile;
                     if (!ltrTile.IsShowing)
                     {
                         wrdStatus = WordStatus.IsShownInGridForFirstTime;
@@ -291,7 +329,7 @@ namespace WordScape
 
         void RefreshWordList()
         {
-            this.mainWindow.LstWrdsSoFar.Clear();
+            this.wordScapeWindow.LstWrdsSoFar.Clear();
             foreach (var wrd in this._lstFoundWordsSoFar.OrderBy(p => p.word))
             {
                 var tb = new TextBlock() { Text = wrd.word, FontSize = 12 };
@@ -309,7 +347,7 @@ namespace WordScape
                         tb.Background = Brushes.LightBlue;
                         break;
                 }
-                this.mainWindow.LstWrdsSoFar.Add(tb);
+                this.wordScapeWindow.LstWrdsSoFar.Add(tb);
             }
         }
     }
