@@ -19,7 +19,8 @@ namespace WordScape
     public class WordGenerator
     {
         public readonly Random _rand;
-        readonly DictionaryLib.DictionaryLib _dictionaryLib;
+        public readonly DictionaryLib.DictionaryLib _dictionaryLibSmall;
+        public readonly DictionaryLib.DictionaryLib _dictionaryLibLarge;
         public readonly int _MinSubWordLen = 5;
         public readonly int _numMaxSubWords = 1500;
         public WordGenerator(Random rand = null, int minSubWordLen = 5, int numMaxSubWords = 1500)
@@ -34,7 +35,8 @@ namespace WordScape
             {
                 _rand = rand;
             }
-            _dictionaryLib = new DictionaryLib.DictionaryLib(DictionaryLib.DictionaryType.Small, _rand);
+            _dictionaryLibSmall = new DictionaryLib.DictionaryLib(DictionaryLib.DictionaryType.Small, _rand);
+            _dictionaryLibLarge = new DictionaryLib.DictionaryLib(DictionaryLib.DictionaryType.Large, _rand);
         }
 
         public WordContainer GenerateWord(int Targetlen)
@@ -42,7 +44,7 @@ namespace WordScape
             var word = string.Empty;
             while (word.Length != Targetlen)
             {
-                word = _dictionaryLib.RandomWord();
+                word = _dictionaryLibSmall.RandomWord();
             }
             return GenSubWords(word);
         }
@@ -63,7 +65,7 @@ namespace WordScape
                 for (int i = _MinSubWordLen; i < str.Length + 1; i++)
                 {
                     var testWord = str.Substring(0, i);
-                    var partial = _dictionaryLib.SeekWord(testWord, out var compResult);
+                    var partial = _dictionaryLibSmall.SeekWord(testWord, out var compResult);
                     wc.cntLookups++;
                     if (!string.IsNullOrEmpty(partial) && compResult == 0)
                     {
@@ -82,7 +84,7 @@ namespace WordScape
                 }
                 return wc.subwords.Count != _numMaxSubWords; // continue
             });
-            wc.subwords = wc.subwords.OrderByDescending(w => w.Length).Select(p=>p.ToUpper()).ToList();
+            wc.subwords = wc.subwords.OrderByDescending(w => w.Length).Select(p => p.ToUpper()).ToList();
             wc.InitialWord = wc.InitialWord.ToUpper();
             return wc;
         }
