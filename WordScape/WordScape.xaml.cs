@@ -51,7 +51,7 @@ namespace WordScape
             this.Left = Properties.Settings.Default.WindowPos.X;
             _random = new Random(
 #if DEBUG
-                        1
+//                        1
 #endif
                     );
             this.Closing += (o, ec) =>
@@ -157,21 +157,15 @@ namespace WordScape
             else
             {
                 this.Children.Add(new TextBlock());
+                IsShowing = true;
             }
         }
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
             base.OnMouseDown(e);
-            if (IsShowing)
+            if (!IsShowing)
             {
-                this.txtBlock.Visibility = Visibility.Hidden;
-                //                (this.Children[0] as TextBlock).Text = " ";
-            }
-            else
-            {
-                //                this.txtBlock.Visibility = Visibility.Visible;
-
 
                 var anim = new ObjectAnimationUsingKeyFrames
                 {
@@ -182,8 +176,8 @@ namespace WordScape
                 anim.KeyFrames.Add(frm1);
                 var frm2 = new DiscreteObjectKeyFrame(Visibility.Hidden, TimeSpan.FromMilliseconds(450));
                 anim.KeyFrames.Add(frm2);
-                this.txtBlock.BeginAnimation(TextBlock.VisibilityProperty, anim);
                 anim.FillBehavior = FillBehavior.Stop;
+                this.txtBlock.BeginAnimation(TextBlock.VisibilityProperty, anim);
 
 
                 //var storyBoard = this.wordScapeWindow.TryFindResource("blinkAnimation") as Storyboard;
@@ -207,7 +201,6 @@ namespace WordScape
                 ////https://stackoverflow.com/questions/4177574/how-to-make-a-textblock-blink-in-wpf
 
             }
-            IsShowing = !IsShowing;
         }
         internal void ShowLetter()
         {

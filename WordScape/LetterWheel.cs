@@ -33,7 +33,8 @@ namespace WordScape
         private readonly Polyline polyLine = new Polyline()
         {
             Stroke = Brushes.Red,
-            StrokeThickness = 10
+            StrokeThickness = 10,
+            IsHitTestVisible = false
         };
         private bool _mouseIsDown = false;
         private bool _curlinefloating = false;
