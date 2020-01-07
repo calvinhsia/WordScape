@@ -193,7 +193,7 @@ namespace WordScape
                 var foundWordType = FoundWordType.SubWordNotAWord;
                 if (_lstFoundWordsSoFar.Where(p => p.word == wrdSoFar).Any()) // user already found this word
                 {
-
+                    foundWordType = FoundWordType.SubWordInGrid;
                 }
                 else
                 {
@@ -217,8 +217,11 @@ namespace WordScape
                             doRefreshList = true;
                             break;
                         case WordStatus.IsAlreadyInGrid:
+                            // animate word already found in grid
+                            foundWordType = FoundWordType.SubWordInGrid;
                             break;
                         case WordStatus.IsShownInGridForFirstTime:
+                            // animate word found in grid for first time
                             foundWordType = FoundWordType.SubWordInGrid;
                             _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = foundWordType, word = wrdSoFar });
                             _WordsFound++;
@@ -228,6 +231,7 @@ namespace WordScape
                 }
                 if (doRefreshList)
                 {
+                    // animate new entry in list
                     this.RefreshWordList();
                 }
             }
