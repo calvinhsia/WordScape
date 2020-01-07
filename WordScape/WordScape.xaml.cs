@@ -133,13 +133,13 @@ namespace WordScape
                 Background = Brushes.DarkCyan;
                 txtBlock = new TextBlock()
                 {
-                    //                        Text = v == Blank ? " " : v.ToString().ToUpper(),
+                    Text = v == GenGrid.Blank ? " " : v.ToString().ToUpper(),
                     FontSize = 20,
                     Foreground = Brushes.White,
-                    Background = Brushes.Black,
+//                    Background = Brushes.Black,
                     HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center
-                    , Text="A"
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Visibility= Visibility.Hidden
                 };
                 this.Children.Add(txtBlock);
             }
@@ -154,38 +154,55 @@ namespace WordScape
             base.OnMouseDown(e);
             if (IsShowing)
             {
-                IsShowing = false;
-                (this.Children[0] as TextBlock).Text = " ";
+                this.txtBlock.Visibility = Visibility.Hidden;
+//                (this.Children[0] as TextBlock).Text = " ";
             }
             else
             {
-                var storyBoard = this.wordScapeWindow.TryFindResource("blinkAnimation") as Storyboard;
-                var name = $"LtrTile{x}{y}";
-                this.RegisterName(name, this.wordScapeWindow);
-                var xx1 = storyBoard.Children[0] as ColorAnimationUsingKeyFrames;
-                xx1.FillBehavior = FillBehavior.Stop;
-                xx1.RepeatBehavior= new RepeatBehavior(40);
-                xx1.Duration = new Duration(TimeSpan.FromMilliseconds(1000));
-                Storyboard.SetTarget(xx1, this.txtBlock);
-                Storyboard.SetTargetName(xx1, name);
+                //                this.txtBlock.Visibility = Visibility.Visible;
 
-                var xx2 = storyBoard.Children[1] as ColorAnimationUsingKeyFrames;
-                Storyboard.SetTarget(xx2, this.txtBlock);
-                Storyboard.SetTargetName(xx2, name);
-                xx2.FillBehavior = FillBehavior.Stop;
-                xx2.RepeatBehavior = new RepeatBehavior(40);
-                xx2.Duration = new Duration(TimeSpan.FromMilliseconds(1000));
 
-                storyBoard?.Begin();
-                //https://stackoverflow.com/questions/4177574/how-to-make-a-textblock-blink-in-wpf
+                var anim = new ObjectAnimationUsingKeyFrames
+                {
+                    Duration = TimeSpan.FromMilliseconds(500), // Dura of entire timeline
+//                    RepeatBehavior = new RepeatBehavior(10) // # times to repeat duration. Total dura = RepeatCount * Dura
+                };
+                var frm1 = new DiscreteObjectKeyFrame(Visibility.Visible, TimeSpan.FromMilliseconds(10));
+                anim.KeyFrames.Add(frm1);
+                var frm2 = new DiscreteObjectKeyFrame(Visibility.Hidden, TimeSpan.FromMilliseconds(450));
+                anim.KeyFrames.Add(frm2);
+                this.txtBlock.BeginAnimation(TextBlock.VisibilityProperty, anim);
+                anim.FillBehavior = FillBehavior.Stop;
+
+
+                //var storyBoard = this.wordScapeWindow.TryFindResource("blinkAnimation") as Storyboard;
+                //var name = $"LtrTile{x}{y}";
+                //this.RegisterName(name, this.wordScapeWindow);
+                //var xx1 = storyBoard.Children[0] as ColorAnimationUsingKeyFrames;
+                //xx1.FillBehavior = FillBehavior.Stop;
+                //xx1.RepeatBehavior= new RepeatBehavior(40);
+                //xx1.Duration = new Duration(TimeSpan.FromMilliseconds(1011));
+                //Storyboard.SetTarget(xx1, this.txtBlock);
+                //Storyboard.SetTargetName(xx1, name);
+
+                //var xx2 = storyBoard.Children[1] as ColorAnimationUsingKeyFrames;
+                //Storyboard.SetTarget(xx2, this.txtBlock);
+                //Storyboard.SetTargetName(xx2, name);
+                //xx2.FillBehavior = FillBehavior.Stop;
+                //xx2.RepeatBehavior = new RepeatBehavior(40);
+                //xx2.Duration = new Duration(TimeSpan.FromMilliseconds(1011));
+
+                //storyBoard?.Begin();
+                ////https://stackoverflow.com/questions/4177574/how-to-make-a-textblock-blink-in-wpf
 
             }
+            IsShowing = !IsShowing;
         }
         internal void ShowLetter()
         {
-            if (this.v != GenGrid.Blank)
+            if (!IsShowing && this.v != GenGrid.Blank)
             {
-                (this.Children[0] as TextBlock).Text = v.ToString().ToUpper();
+                this.txtBlock.Visibility = Visibility.Visible;
                 IsShowing = true;
             }
         }
