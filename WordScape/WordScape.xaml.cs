@@ -17,6 +17,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace WordScape
 {
@@ -40,6 +41,40 @@ namespace WordScape
         public int LenTargetWord { get; set; } = 7;
         public int MinSubWordLength { get; set; } = 5;
         private readonly Random _random;
+
+        private int _CountDownTime;
+        public bool TimerIsEnabled = false;
+        public int CountDownTime { get { return _CountDownTime; } set { _CountDownTime = value; OnMyPropertyChanged("CountDownTimeStr"); } }
+        public string CountDownTimeStr
+        {
+            get
+            {
+                return GetTimeAsString(_CountDownTime);
+            }
+        }
+
+        private string GetTimeAsString(int tmpSecs)
+        {
+            var hrs = string.Empty;
+            var mins = string.Empty;
+            if (tmpSecs >= 3600)
+            {
+                hrs = $"{(int)(tmpSecs / 3600):n0}:";
+                tmpSecs -= (int)((tmpSecs / 3600)) * 3600;
+            }
+            string secs;
+            if (!string.IsNullOrEmpty(hrs) || tmpSecs >= 60)
+            {
+                mins = $"{((int)((tmpSecs / 60))).ToString(String.IsNullOrEmpty(hrs) ? "" : "00")}:";
+                tmpSecs -= (int)((tmpSecs / 60)) * 60;
+                secs = tmpSecs.ToString("00");
+            }
+            else
+            {
+                secs = tmpSecs.ToString();
+            }
+            return $"{hrs}{mins}{secs}";
+        }
 
         private ObservableCollection<UIElement> _LstWrdsSoFar = new ObservableCollection<UIElement>();
         public ObservableCollection<UIElement> LstWrdsSoFar { get { return _LstWrdsSoFar; } set { _LstWrdsSoFar = value; OnMyPropertyChanged(); } }
@@ -101,9 +136,23 @@ namespace WordScape
                 FillGrid(_gridgen);
                 StrWordSoFar = string.Empty;
                 LstWrdsSoFar.Clear();
+                CountDownTime = 0;
                 //this.ltrWheel = new LetterWheel();
                 //Grid.SetRow(this.ltrWheel, 3);
                 this.ltrWheel.LetterWheelInit(this, _WordCont, _gridgen);
+                TimerIsEnabled = true;
+                var timer = new DispatcherTimer(
+                    TimeSpan.FromSeconds(1),
+                    DispatcherPriority.Normal,
+                    (o, et) =>
+                    {
+                        if (TimerIsEnabled)
+                        {
+                            CountDownTime += 1;
+                        }
+                    },
+                    this.Dispatcher
+                    ); ;
             }
             catch (Exception ex)
             {
@@ -169,7 +218,7 @@ namespace WordScape
                 var anim = new ObjectAnimationUsingKeyFrames
                 {
                     Duration = TimeSpan.FromMilliseconds(2500), // Dura of entire timeline
-                                                               //                    RepeatBehavior = new RepeatBehavior(10) // # times to repeat duration. Total dura = RepeatCount * Dura
+                                                                //                    RepeatBehavior = new RepeatBehavior(10) // # times to repeat duration. Total dura = RepeatCount * Dura
                 };
                 var frm1 = new DiscreteObjectKeyFrame(Visibility.Visible, TimeSpan.FromMilliseconds(10));
                 anim.KeyFrames.Add(frm1);
