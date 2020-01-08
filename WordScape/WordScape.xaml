@@ -47,6 +47,7 @@
             <TextBox HorizontalAlignment="Left" Height="23"  Text="{Binding LenTargetWord}" VerticalAlignment="Top" Width="20" ToolTip="Length of longest word (max = 11, takes several seconds)"/>
             <Label Content="SubWordLen"/>
             <TextBox HorizontalAlignment="Left" Height="23"  Text="{Binding MinSubWordLength}" VerticalAlignment="Top" Width="20" ToolTip="Minimum Sub Word length"/>
+            <TextBox Width="90" Margin="20,0,0,0" FontSize="20" HorizontalAlignment="Right" IsReadOnly="True" Text="{Binding CountDownTimeStr, Mode=OneWay}"/>
         </StackPanel>
         <UniformGrid Grid.Row="1" Name="unigrid"/>
         <TextBlock x:Name="TxtLtrsSoFar" 

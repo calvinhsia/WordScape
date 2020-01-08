@@ -295,6 +295,7 @@ namespace WordScape
             if (_WordsFound == this.gridgen._dictPlacedWords.Count)
             {
                 this.wordScapeWindow.StrWordSoFar = "YAYYY!";
+                this.wordScapeWindow.TimerIsEnabled = false;
             }
             else
             {
