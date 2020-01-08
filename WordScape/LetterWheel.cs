@@ -42,7 +42,7 @@ namespace WordScape
         private bool _curlinefloating = false;
         private readonly List<LetterWheelLetter> _lstLtrsSelected = new List<LetterWheelLetter>();
         private readonly List<FoundWord> _lstFoundWordsSoFar = new List<FoundWord>();
-        private Point _ptCirclePos = new Point(60, 10);
+        private Point _ptCirclePos;
         private Point _ptCircleCtr;
         private readonly double _pctRadiusLettersInCircle = .7; // the letters (are in the within the circle, forming a smaller circle) are at this fraction of the circle radius
         private int NumLtrs => _wordCont.InitialWord.Length;
@@ -74,6 +74,7 @@ namespace WordScape
                 StrokeThickness = 3,
                 Stroke = Brushes.Black
             };
+            _ptCirclePos = new Point(this.ActualWidth / 2 - circ.Width/2, 0); //new Point(60, 10);
             Canvas.SetLeft(circ, _ptCirclePos.X);
             Canvas.SetTop(circ, _ptCirclePos.Y);
 
