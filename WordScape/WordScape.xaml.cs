@@ -117,30 +117,20 @@ namespace WordScape
                 for (int x = 0; x < gridgen._MaxX; x++)
                 {
                     //unigrid.Children.Add(new TextBlock() { Text = "AA" });
-                    var ltrTile = new LtrTile(this, gridgen._chars[x, y]);
+                    var ltrTile = new LtrTile(gridgen._chars[x, y]);
                     unigrid.Children.Add(ltrTile);
                 }
-            }
-        }
-
-        private void BtnShowLtrs_Click(object sender, RoutedEventArgs e)
-        {
-            foreach (LtrTile tile in this.unigrid.Children)
-            {
-                tile.ShowLetter();
             }
         }
     }
 
     public class LtrTile : DockPanel
     {
-        private readonly WordScapeWindow _wordScapeWindow;
         private readonly char _ltr;
         public bool IsShowing;
         internal readonly TextBlock txtBlock;
-        public LtrTile(WordScapeWindow wordScapeWindow, char ltr)
+        public LtrTile(char ltr)
         {
-            this._wordScapeWindow = wordScapeWindow;
             this._ltr = ltr;
             Margin = new Thickness(2, 2, 2, 2);
             if (ltr != GenGrid.Blank)

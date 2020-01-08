@@ -31,15 +31,19 @@
     </Window.Resources>-->
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"/> <!--controls-->
-            <RowDefinition Height="300"/> <!--grid-->
-            <RowDefinition Height="30"/><!--wordsofar-->
-            <RowDefinition Height="230"/> <!--wheel-->
-            <RowDefinition Height="*"/> <!--wrdlist-->
+            <RowDefinition Height="30"/>
+            <!--controls-->
+            <RowDefinition Height="300"/>
+            <!--grid-->
+            <RowDefinition Height="30"/>
+            <!--wordsofar-->
+            <RowDefinition Height="230"/>
+            <!--wheel-->
+            <RowDefinition Height="*"/>
+            <!--wrdlist-->
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" Orientation="Horizontal">
             <Button x:Name="BtnPlayAgain" Content="_Play Again" Margin="0,0,10,0" Click="BtnPlayAgain_Click"/>
-            <Button x:Name="BtnShowLtrs" Content="_ShowLetters" Margin="0,0,10,0" Click="BtnShowLtrs_Click"/>
             <Label Content="WordLen"/>
             <TextBox HorizontalAlignment="Left" Height="23"  Text="{Binding LenTargetWord}" VerticalAlignment="Top" Width="20" ToolTip="Length of longest word (max = 11, takes several seconds)"/>
             <Label Content="SubWordLen"/>
@@ -65,6 +69,5 @@
                 </ListBox>
             </DockPanel>
         </Grid>
-
     </Grid>
 </Window>
