@@ -376,26 +376,30 @@ namespace WordScape
             foreach (var wrd in this._lstFoundWordsSoFar.OrderBy(p => p.word))
             {
                 var tb = new MyTextBlockWithOnlineLookup() { Text = wrd.word, FontSize = 12 };
+                var colr = Colors.Transparent;
                 switch (wrd.foundStringType)
                 {
                     case FoundWordType.SubWordNotAWord:
-                        tb.Background = Brushes.LightPink;
+                        colr = Colors.LightPink;
                         break;
                     case FoundWordType.SubWordInLargeDictionary:
-                        tb.Background = Brushes.LightSeaGreen;
+                        colr = Colors.LightSeaGreen;
                         break;
                     case FoundWordType.SubWordInGrid:
+                        colr = Colors.DarkCyan;
+                        tb.Foreground = Brushes.White;
                         break;
                     case FoundWordType.SubWordNotInGrid:
-                        tb.Background = Brushes.LightBlue;
+                        colr = Colors.LightBlue;
                         break;
                 }
+                tb.Background = new SolidColorBrush(colr);
                 if (newWord == wrd.word) //it's the new word
                 {
                     var animDura = TimeSpan.FromSeconds(.2);
-                    var anim = new ColorAnimation(fromValue: Colors.Transparent, toValue: Colors.Red, animDura)
+                    var anim = new ColorAnimation(fromValue: Colors.Transparent, toValue: colr, animDura)
                     {
-                        FillBehavior = FillBehavior.Stop,
+                        FillBehavior = FillBehavior.HoldEnd,
                         RepeatBehavior = new RepeatBehavior(10)
                     };
                     tb.Background = new SolidColorBrush(Colors.Transparent);
