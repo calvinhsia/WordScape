@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
 namespace WordScape
@@ -271,7 +272,7 @@ namespace WordScape
                 if (doRefreshList)
                 {
                     // animate new entry in list
-                    this.RefreshWordList();
+                    this.RefreshWordList(wrdSoFar);
                 }
             }
             _mouseIsDown = false;
@@ -313,6 +314,47 @@ namespace WordScape
                 {
                     incy = 1;
                 }
+                //var altrPlaced = this._wordScapeWindow._gridgen._dictPlacedWords[this._wordScapeWindow._WordCont.InitialWord];
+                //var aTile = this._wordScapeWindow.unigrid.Children[altrPlaced.nY * this._wordScapeWindow._gridgen._MaxX + altrPlaced.nX] as LtrTile;
+                //aTile = this;
+                //var anim = new DoubleAnimation()
+                //{
+                //    Duration = TimeSpan.FromMilliseconds(500), // Dura of entire timeline
+                //    From = aTile.ActualHeight,
+                //    To = aTile.ActualHeight + 20,
+                //    //                    RepeatBehavior = new RepeatBehavior(10) // # times to repeat duration. Total dura = RepeatCount * Dura
+                //};
+
+                //anim.EasingFunction = new ElasticEase()
+                //{
+                //    Oscillations = 10,
+                //    Springiness = 2,
+                //    EasingMode = EasingMode.EaseInOut
+                //};
+
+
+                //anim.FillBehavior = FillBehavior.Stop;
+                //this.txtBlock.BeginAnimation(TextBlock.HeightProperty, anim);
+                //this.txtBlock.BeginAnimation(TextBlock.WidthProperty, anim);
+
+                var aTile = this.wordScapeWindow.unigrid.Children[0] as LtrTile;
+
+                var anim = new DoubleAnimation()
+                {
+                    Duration = TimeSpan.FromMilliseconds(500), // Dura of entire timeline
+                    From = aTile.ActualHeight,
+                    To = aTile.ActualHeight + 20,
+                    //                    RepeatBehavior = new RepeatBehavior(10) // # times to repeat duration. Total dura = RepeatCount * Dura
+                };
+
+                anim.EasingFunction = new ElasticEase()
+                {
+                    Oscillations = 10,
+                    Springiness = 2,
+                    EasingMode = EasingMode.EaseInOut
+                };
+                anim.FillBehavior = FillBehavior.Stop;
+
                 for (int i = 0; i < wrdSoFar.Length; i++)
                 {
                     var ltrTile = this.wordScapeWindow.unigrid.Children[y * gridgen._MaxX + x] as LtrTile;
@@ -321,13 +363,15 @@ namespace WordScape
                         wrdStatus = WordStatus.IsShownInGridForFirstTime;
                         ltrTile.ShowLetter();
                     }
+                    ltrTile.txtBlock.BeginAnimation(TextBlock.HeightProperty, anim);
+                    ltrTile.txtBlock.BeginAnimation(TextBlock.WidthProperty, anim);
                     x += incx; y += incy;
                 }
             }
             return wrdStatus;
         }
 
-        void RefreshWordList()
+        void RefreshWordList(string newWord)
         {
             this.wordScapeWindow.LstWrdsSoFar.Clear();
             foreach (var wrd in this._lstFoundWordsSoFar.OrderBy(p => p.word))
@@ -346,6 +390,29 @@ namespace WordScape
                     case FoundWordType.SubWordNotInGrid:
                         tb.Background = Brushes.LightBlue;
                         break;
+                }
+                if (newWord == wrd.word) //it's the new word
+                {
+                    var aTile = this.wordScapeWindow.unigrid.Children[0] as LtrTile;
+
+                    var anim = new DoubleAnimation()
+                    {
+                        Duration = TimeSpan.FromMilliseconds(500), // Dura of entire timeline
+                        From = aTile.ActualHeight,
+                        To = aTile.ActualHeight + 20,
+                        //                    RepeatBehavior = new RepeatBehavior(10) // # times to repeat duration. Total dura = RepeatCount * Dura
+                    };
+
+                    anim.EasingFunction = new ElasticEase()
+                    {
+                        Oscillations = 10,
+                        Springiness = 2,
+                        EasingMode = EasingMode.EaseInOut
+                    };
+                    anim.FillBehavior = FillBehavior.Stop;
+                    tb.BeginAnimation(TextBlock.HeightProperty, anim);
+                    tb.BeginAnimation(TextBlock.WidthProperty, anim);
+
                 }
                 this.wordScapeWindow.LstWrdsSoFar.Add(tb);
             }

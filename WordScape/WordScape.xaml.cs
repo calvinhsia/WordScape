@@ -26,6 +26,8 @@ namespace WordScape
     public partial class WordScapeWindow : Window, INotifyPropertyChanged
     {
         internal WordGenerator _wordGen;
+        internal WordContainer _WordCont;
+        internal GenGrid _gridgen;
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnMyPropertyChanged([CallerMemberName] string propertyName = "")
@@ -51,7 +53,7 @@ namespace WordScape
             this.Left = Properties.Settings.Default.WindowPos.X;
             _random = new Random(
 #if DEBUG
-//                        1
+                    //                        1
 #endif
                     );
             this.Closing += (o, ec) =>
@@ -89,14 +91,14 @@ namespace WordScape
                     minSubWordLen: MinSubWordLength,
                     numMaxSubWords: 1500);
 
-                var WordCont = this._wordGen.GenerateWord(LenTargetWord);
-                var gridgen = new GenGrid(maxX: 12, maxY: 12, WordCont, this._wordGen._rand);
-                FillGrid(gridgen);
+                _WordCont = this._wordGen.GenerateWord(LenTargetWord);
+                _gridgen = new GenGrid(maxX: 12, maxY: 12, _WordCont, this._wordGen._rand);
+                FillGrid(_gridgen);
                 StrWordSoFar = string.Empty;
                 LstWrdsSoFar.Clear();
                 //this.ltrWheel = new LetterWheel();
                 //Grid.SetRow(this.ltrWheel, 3);
-                this.ltrWheel.LetterWheelInit(this, WordCont, gridgen);
+                this.ltrWheel.LetterWheelInit(this, _WordCont, _gridgen);
             }
             catch (Exception ex)
             {
@@ -115,7 +117,7 @@ namespace WordScape
                 for (int x = 0; x < gridgen._MaxX; x++)
                 {
                     //unigrid.Children.Add(new TextBlock() { Text = "AA" });
-                    var ltrTile = new LtrTile(gridgen._chars[x, y]);
+                    var ltrTile = new LtrTile(this, gridgen._chars[x, y]);
                     unigrid.Children.Add(ltrTile);
                 }
             }
@@ -132,11 +134,13 @@ namespace WordScape
 
     public class LtrTile : DockPanel
     {
+        private readonly WordScapeWindow _wordScapeWindow;
         private readonly char _ltr;
         public bool IsShowing;
-        private readonly TextBlock txtBlock;
-        public LtrTile(char ltr)
+        internal readonly TextBlock txtBlock;
+        public LtrTile(WordScapeWindow wordScapeWindow, char ltr)
         {
+            this._wordScapeWindow = wordScapeWindow;
             this._ltr = ltr;
             Margin = new Thickness(2, 2, 2, 2);
             if (ltr != GenGrid.Blank)
@@ -156,7 +160,8 @@ namespace WordScape
             }
             else
             {
-                this.Children.Add(new TextBlock());
+                this.txtBlock = new TextBlock();
+                this.Children.Add(txtBlock);
                 IsShowing = true;
             }
         }
@@ -164,9 +169,8 @@ namespace WordScape
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
             base.OnMouseDown(e);
-            if (!IsShowing)
+            if (true)
             {
-
                 var anim = new ObjectAnimationUsingKeyFrames
                 {
                     Duration = TimeSpan.FromMilliseconds(500), // Dura of entire timeline
@@ -209,6 +213,10 @@ namespace WordScape
                 this.txtBlock.Visibility = Visibility.Visible;
                 IsShowing = true;
             }
+        }
+        public override string ToString()
+        {
+            return $"{_ltr}";
         }
     }
 
