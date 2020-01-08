@@ -74,7 +74,7 @@ namespace WordScape
                 StrokeThickness = 3,
                 Stroke = Brushes.Black
             };
-            _ptCirclePos = new Point(this.ActualWidth / 2 - circ.Width/2, 0); //new Point(60, 10);
+            _ptCirclePos = new Point(this.ActualWidth / 2 - circ.Width / 2, 0); //new Point(60, 10);
             Canvas.SetLeft(circ, _ptCirclePos.X);
             Canvas.SetTop(circ, _ptCirclePos.Y);
 
@@ -314,12 +314,12 @@ namespace WordScape
                 {
                     incy = 1;
                 }
-                //var altrPlaced = this._wordScapeWindow._gridgen._dictPlacedWords[this._wordScapeWindow._WordCont.InitialWord];
-                //var aTile = this._wordScapeWindow.unigrid.Children[altrPlaced.nY * this._wordScapeWindow._gridgen._MaxX + altrPlaced.nX] as LtrTile;
-                //aTile = this;
+
+                //var aTile = this.wordScapeWindow.unigrid.Children[0] as LtrTile;
+
                 //var anim = new DoubleAnimation()
                 //{
-                //    Duration = TimeSpan.FromMilliseconds(500), // Dura of entire timeline
+                //    Duration = TimeSpan.FromMilliseconds(2500), // Dura of entire timeline
                 //    From = aTile.ActualHeight,
                 //    To = aTile.ActualHeight + 20,
                 //    //                    RepeatBehavior = new RepeatBehavior(10) // # times to repeat duration. Total dura = RepeatCount * Dura
@@ -331,29 +331,14 @@ namespace WordScape
                 //    Springiness = 2,
                 //    EasingMode = EasingMode.EaseInOut
                 //};
-
-
                 //anim.FillBehavior = FillBehavior.Stop;
-                //this.txtBlock.BeginAnimation(TextBlock.HeightProperty, anim);
-                //this.txtBlock.BeginAnimation(TextBlock.WidthProperty, anim);
-
-                var aTile = this.wordScapeWindow.unigrid.Children[0] as LtrTile;
-
-                var anim = new DoubleAnimation()
+                var animDura = TimeSpan.FromSeconds(.2);
+                var anim = new ColorAnimation(fromValue: Colors.Transparent, toValue: Colors.Red, animDura)
                 {
-                    Duration = TimeSpan.FromMilliseconds(2500), // Dura of entire timeline
-                    From = aTile.ActualHeight,
-                    To = aTile.ActualHeight + 20,
-                    //                    RepeatBehavior = new RepeatBehavior(10) // # times to repeat duration. Total dura = RepeatCount * Dura
+                    FillBehavior = FillBehavior.Stop,
+                    RepeatBehavior = new RepeatBehavior(10)
                 };
 
-                anim.EasingFunction = new ElasticEase()
-                {
-                    Oscillations = 10,
-                    Springiness = 2,
-                    EasingMode = EasingMode.EaseInOut
-                };
-                anim.FillBehavior = FillBehavior.Stop;
 
                 for (int i = 0; i < wrdSoFar.Length; i++)
                 {
@@ -363,8 +348,22 @@ namespace WordScape
                         wrdStatus = WordStatus.IsShownInGridForFirstTime;
                         ltrTile.ShowLetter();
                     }
-                    ltrTile.txtBlock.BeginAnimation(TextBlock.HeightProperty, anim);
-                    ltrTile.txtBlock.BeginAnimation(TextBlock.WidthProperty, anim);
+                    ltrTile.txtBlock.Background = new SolidColorBrush(Colors.Transparent);
+                    ltrTile.txtBlock.Background.BeginAnimation(SolidColorBrush.ColorProperty, anim);
+
+
+
+                    //var ppath = new PropertyPath("Background"); // new PropertyPath("Background")
+                    //var sb = new Storyboard();
+                    //sb.Children.Add(anim);
+
+                    //Storyboard.SetTargetProperty(anim, ppath);
+                    //Storyboard.SetTarget(sb, ltrTile.txtBlock);
+                    //sb.Begin();
+                    //ltrTile.txtBlock.BeginAnimation(ppath, anim);
+                    //ltrTile.txtBlock.BeginAnimation()
+                    //ltrTile.txtBlock.BeginAnimation(TextBlock.HeightProperty, anim);
+                    //ltrTile.txtBlock.BeginAnimation(TextBlock.WidthProperty, anim);
                     x += incx; y += incy;
                 }
             }
@@ -393,25 +392,33 @@ namespace WordScape
                 }
                 if (newWord == wrd.word) //it's the new word
                 {
-                    var aTile = this.wordScapeWindow.unigrid.Children[0] as LtrTile;
-
-                    var anim = new DoubleAnimation()
+                    var animDura = TimeSpan.FromSeconds(.2);
+                    var anim = new ColorAnimation(fromValue: Colors.Transparent, toValue: Colors.Red, animDura)
                     {
-                        Duration = TimeSpan.FromMilliseconds(2500), // Dura of entire timeline
-                        From = aTile.ActualHeight,
-                        To = aTile.ActualHeight + 20,
-                        //                    RepeatBehavior = new RepeatBehavior(10) // # times to repeat duration. Total dura = RepeatCount * Dura
+                        FillBehavior = FillBehavior.Stop,
+                        RepeatBehavior = new RepeatBehavior(10)
                     };
+                    tb.Background = new SolidColorBrush(Colors.Transparent);
+                    tb.Background.BeginAnimation(SolidColorBrush.ColorProperty, anim);
+                    //var aTile = this.wordScapeWindow.unigrid.Children[0] as LtrTile;
 
-                    anim.EasingFunction = new ElasticEase()
-                    {
-                        Oscillations = 10,
-                        Springiness = 2,
-                        EasingMode = EasingMode.EaseInOut
-                    };
-                    anim.FillBehavior = FillBehavior.Stop;
-                    //                    tb.BeginAnimation(TextBlock.HeightProperty, anim);
-                    tb.BeginAnimation(TextBlock.WidthProperty, anim);
+                    //var anim = new DoubleAnimation()
+                    //{
+                    //    Duration = TimeSpan.FromMilliseconds(2500), // Dura of entire timeline
+                    //    From = aTile.ActualHeight,
+                    //    To = aTile.ActualHeight + 20,
+                    //    //                    RepeatBehavior = new RepeatBehavior(10) // # times to repeat duration. Total dura = RepeatCount * Dura
+                    //};
+
+                    //anim.EasingFunction = new ElasticEase()
+                    //{
+                    //    Oscillations = 10,
+                    //    Springiness = 2,
+                    //    EasingMode = EasingMode.EaseInOut
+                    //};
+                    //anim.FillBehavior = FillBehavior.Stop;
+                    ////                    tb.BeginAnimation(TextBlock.HeightProperty, anim);
+                    //tb.BeginAnimation(TextBlock.WidthProperty, anim);
 
                 }
                 this.wordScapeWindow.LstWrdsSoFar.Add(tb);
