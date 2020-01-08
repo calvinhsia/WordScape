@@ -43,7 +43,6 @@
             <!--wrdlist-->
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" Orientation="Horizontal">
-            <Button x:Name="BtnPlayAgain" Content="_Play Again" Margin="0,0,10,0" Click="BtnPlayAgain_Click"/>
             <Label Content="WordLen"/>
             <TextBox HorizontalAlignment="Left" Height="23"  Text="{Binding LenTargetWord}" VerticalAlignment="Top" Width="20" ToolTip="Length of longest word (max = 11, takes several seconds)"/>
             <Label Content="SubWordLen"/>
@@ -56,7 +55,20 @@
                    FontSize="24" 
                    Grid.Row="2" />
         <Grid Grid.Row="3">
-            <local:LetterWheel x:Name="ltrWheel" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Vertical">
+                    <Button x:Name="BtnPlayAgain" Content="_Play Again" Click="BtnPlayAgain_Click" Width="60" HorizontalAlignment="Left"/>
+                </StackPanel>
+                <local:LetterWheel x:Name="ltrWheel" Grid.Column="1" />
+                <StackPanel Orientation="Vertical" Grid.Column="2">
+                    <Button Content="_Shuffle" Click="BtnShuffle_Click" Width="60" HorizontalAlignment="Left"/>
+                </StackPanel>
+            </Grid>
         </Grid>
         <Grid Grid.Row="4">
             <DockPanel>
