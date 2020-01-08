@@ -29,7 +29,7 @@ namespace WordScape
         //        public List<string> _lstWordsPlaced = new List<string>();
         public Dictionary<string, LtrPlaced> _dictPlacedWords = new Dictionary<string, LtrPlaced>(); // subword to 1st letter
         public int nLtrsPlaced;
-        readonly List<LtrPlaced> _ltrsPlaced = new List<LtrPlaced>();
+        public readonly List<LtrPlaced> _ltrsPlaced = new List<LtrPlaced>();
         public GenGrid(int maxX, int maxY, WordContainer wordCont, Random rand)
         {
             this._random = rand;
