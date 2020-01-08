@@ -169,11 +169,11 @@ namespace WordScape
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
             base.OnMouseDown(e);
-            if (true)
+            if (!IsShowing)
             {
                 var anim = new ObjectAnimationUsingKeyFrames
                 {
-                    Duration = TimeSpan.FromMilliseconds(500), // Dura of entire timeline
+                    Duration = TimeSpan.FromMilliseconds(2500), // Dura of entire timeline
                                                                //                    RepeatBehavior = new RepeatBehavior(10) // # times to repeat duration. Total dura = RepeatCount * Dura
                 };
                 var frm1 = new DiscreteObjectKeyFrame(Visibility.Visible, TimeSpan.FromMilliseconds(10));

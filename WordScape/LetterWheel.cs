@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -234,6 +235,7 @@ namespace WordScape
                 if (_lstFoundWordsSoFar.Where(p => p.word == wrdSoFar).Any()) // user already found this word
                 {
                     foundWordType = FoundWordType.SubWordInGrid;
+                    this.RefreshWordList(wrdSoFar);
                 }
                 else
                 {
@@ -257,11 +259,9 @@ namespace WordScape
                             doRefreshList = true;
                             break;
                         case WordStatus.IsAlreadyInGrid:
-                            // animate word already found in grid
                             foundWordType = FoundWordType.SubWordInGrid;
                             break;
                         case WordStatus.IsShownInGridForFirstTime:
-                            // animate word found in grid for first time
                             foundWordType = FoundWordType.SubWordInGrid;
                             _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = foundWordType, word = wrdSoFar });
                             _WordsFound++;
@@ -271,7 +271,6 @@ namespace WordScape
                 }
                 if (doRefreshList)
                 {
-                    // animate new entry in list
                     this.RefreshWordList(wrdSoFar);
                 }
             }
@@ -341,7 +340,7 @@ namespace WordScape
 
                 var anim = new DoubleAnimation()
                 {
-                    Duration = TimeSpan.FromMilliseconds(500), // Dura of entire timeline
+                    Duration = TimeSpan.FromMilliseconds(2500), // Dura of entire timeline
                     From = aTile.ActualHeight,
                     To = aTile.ActualHeight + 20,
                     //                    RepeatBehavior = new RepeatBehavior(10) // # times to repeat duration. Total dura = RepeatCount * Dura
@@ -376,7 +375,7 @@ namespace WordScape
             this.wordScapeWindow.LstWrdsSoFar.Clear();
             foreach (var wrd in this._lstFoundWordsSoFar.OrderBy(p => p.word))
             {
-                var tb = new TextBlock() { Text = wrd.word, FontSize = 12 };
+                var tb = new MyTextBlockWithOnlineLookup() { Text = wrd.word, FontSize = 12 };
                 switch (wrd.foundStringType)
                 {
                     case FoundWordType.SubWordNotAWord:
@@ -397,7 +396,7 @@ namespace WordScape
 
                     var anim = new DoubleAnimation()
                     {
-                        Duration = TimeSpan.FromMilliseconds(500), // Dura of entire timeline
+                        Duration = TimeSpan.FromMilliseconds(2500), // Dura of entire timeline
                         From = aTile.ActualHeight,
                         To = aTile.ActualHeight + 20,
                         //                    RepeatBehavior = new RepeatBehavior(10) // # times to repeat duration. Total dura = RepeatCount * Dura
@@ -410,12 +409,24 @@ namespace WordScape
                         EasingMode = EasingMode.EaseInOut
                     };
                     anim.FillBehavior = FillBehavior.Stop;
-                    tb.BeginAnimation(TextBlock.HeightProperty, anim);
+                    //                    tb.BeginAnimation(TextBlock.HeightProperty, anim);
                     tb.BeginAnimation(TextBlock.WidthProperty, anim);
 
                 }
                 this.wordScapeWindow.LstWrdsSoFar.Add(tb);
             }
+        }
+    }
+    public class MyTextBlockWithOnlineLookup : TextBlock
+    {
+        protected override void OnMouseDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseDown(e);
+            var word = this.Text;
+            Task.Run(() =>
+            {
+                System.Diagnostics.Process.Start($"https://www.merriam-webster.com/dictionary/{word}");
+            });
         }
     }
     public class LetterWheelLetter : Border
