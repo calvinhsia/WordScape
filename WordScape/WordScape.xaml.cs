@@ -70,6 +70,11 @@ namespace WordScape
             BtnPlayAgain.RaiseEvent(new RoutedEventArgs() { RoutedEvent = Button.ClickEvent, Source = this });
         }
 
+        void BtnShuffle_Click(object sender, RoutedEventArgs e)
+        {
+            this.ltrWheel.Shuffle();
+        }
+
         private void BtnPlayAgain_Click(object sender, RoutedEventArgs e)
         {
             try

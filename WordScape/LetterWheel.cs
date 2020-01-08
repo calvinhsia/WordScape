@@ -64,7 +64,7 @@ namespace WordScape
         private void CreateCircle()
         {
             this.Children.Clear();
-            this.Background = Brushes.AliceBlue;
+//            this.Background = Brushes.AliceBlue;
             var circRadius = 110;
             var circ = new Ellipse()
             {
@@ -100,6 +100,15 @@ namespace WordScape
 
             this.Children.Add(polyLine);
         }
+
+        internal void Shuffle()
+        {
+            if (!_mouseIsDown)
+            {
+                CreateCircle();
+            }
+        }
+
         LetterWheelLetter LtrFromArgs(MouseEventArgs args)
         {
             var pt = args.GetPosition(this);
