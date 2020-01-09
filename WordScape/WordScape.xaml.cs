@@ -102,6 +102,18 @@ namespace WordScape
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            var timer = new DispatcherTimer(
+                TimeSpan.FromSeconds(1),
+                DispatcherPriority.Normal,
+                (o, et) =>
+                {
+                    if (TimerIsEnabled)
+                    {
+                        CountDownTime += 1;
+                    }
+                },
+                this.Dispatcher
+                );
             BtnPlayAgain.RaiseEvent(new RoutedEventArgs() { RoutedEvent = Button.ClickEvent, Source = this });
         }
 
@@ -141,18 +153,6 @@ namespace WordScape
                 //Grid.SetRow(this.ltrWheel, 3);
                 this.ltrWheel.LetterWheelInit(this, _WordCont, _gridgen);
                 TimerIsEnabled = true;
-                var timer = new DispatcherTimer(
-                    TimeSpan.FromSeconds(1),
-                    DispatcherPriority.Normal,
-                    (o, et) =>
-                    {
-                        if (TimerIsEnabled)
-                        {
-                            CountDownTime += 1;
-                        }
-                    },
-                    this.Dispatcher
-                    ); ;
             }
             catch (Exception ex)
             {
