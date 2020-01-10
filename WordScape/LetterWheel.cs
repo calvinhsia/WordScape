@@ -156,10 +156,6 @@ namespace WordScape
                         {
                             ltrUnderMouse = closestLetterWheelLetter;
                         }
-
-
-
-
                     }
                 }
             }
@@ -168,6 +164,8 @@ namespace WordScape
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
             base.OnMouseDown(e);
+            e.Handled = true;
+            this.CaptureMouse();
             polyLine.Points.Clear();
             _lstLtrsSelected.Clear();
             var ltrUnderMouse = LtrFromArgs(e);
@@ -237,6 +235,7 @@ namespace WordScape
         protected override void OnMouseUp(MouseButtonEventArgs e)
         {
             base.OnMouseUp(e);
+            this.ReleaseMouseCapture();
             var wrdSoFar = this.wordScapeWindow.StrWordSoFar;
             if (wrdSoFar.Length >= this.wordScapeWindow._wordGen._MinSubWordLen)
             {

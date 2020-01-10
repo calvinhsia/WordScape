@@ -86,7 +86,7 @@ namespace WordScape
         private int _NumWordsFound;
         public int NumWordsFound { get { return _NumWordsFound; } internal set { _NumWordsFound = value; OnMyPropertyChanged(); } }
 
-        public int NumWordsTotal { get { return _gridgen.NumWordsPlaced; } internal set { OnMyPropertyChanged(); } }
+        public int NumWordsTotal { get { return _gridgen == null ? 0 : _gridgen.NumWordsPlaced; } internal set { OnMyPropertyChanged(); } }
 
 
         public WordScapeWindow()
