@@ -29,6 +29,7 @@ namespace WordScape
         internal WordGenerator _wordGen;
         internal WordContainer _WordCont;
         internal GenGrid _gridgen;
+        static internal WordScapeWindow WordScapeWindowInstance;
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnMyPropertyChanged([CallerMemberName] string propertyName = "")
@@ -78,6 +79,10 @@ namespace WordScape
 
         private ObservableCollection<UIElement> _LstWrdsSoFar = new ObservableCollection<UIElement>();
         public ObservableCollection<UIElement> LstWrdsSoFar { get { return _LstWrdsSoFar; } set { _LstWrdsSoFar = value; OnMyPropertyChanged(); } }
+
+        private int _NumHintsUsed;
+        public int NumHintsUsed { get { return _NumHintsUsed; } internal set { _NumHintsUsed = value; OnMyPropertyChanged(); } }
+
         public WordScapeWindow()
         {
             InitializeComponent();
@@ -86,6 +91,7 @@ namespace WordScape
             this.Height = Properties.Settings.Default.WindowSize.Height;
             this.Top = Properties.Settings.Default.WindowPos.Y;
             this.Left = Properties.Settings.Default.WindowPos.X;
+            WordScapeWindowInstance = this;
             _random = new Random(
 #if DEBUG
                     //                        1
@@ -215,6 +221,7 @@ namespace WordScape
             base.OnMouseDown(e);
             if (!IsShowing)
             {
+                WordScapeWindow.WordScapeWindowInstance.NumHintsUsed++;
                 var anim = new ObjectAnimationUsingKeyFrames
                 {
                     Duration = TimeSpan.FromMilliseconds(2500), // Dura of entire timeline

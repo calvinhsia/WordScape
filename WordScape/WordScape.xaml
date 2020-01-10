@@ -64,6 +64,10 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Vertical">
                     <Button x:Name="BtnPlayAgain" Content="_Play Again" Click="BtnPlayAgain_Click" Width="60" HorizontalAlignment="Left"/>
+                    <StackPanel>
+                        <Label Content="#Hints"/>
+                        <TextBlock Text="{Binding NumHintsUsed}" />
+                    </StackPanel>
                 </StackPanel>
                 <local:LetterWheel x:Name="ltrWheel" Grid.Column="1" />
                 <StackPanel Orientation="Vertical" Grid.Column="2">
