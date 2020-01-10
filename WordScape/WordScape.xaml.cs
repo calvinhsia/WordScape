@@ -97,6 +97,8 @@ namespace WordScape
             this.Height = Properties.Settings.Default.WindowSize.Height;
             this.Top = Properties.Settings.Default.WindowPos.Y;
             this.Left = Properties.Settings.Default.WindowPos.X;
+            this.LenTargetWord = Properties.Settings.Default.WordLen;
+            this.MinSubWordLength = Properties.Settings.Default.SubWordLen;se
             WordScapeWindowInstance = this;
             _random = new Random(
 #if DEBUG
@@ -107,6 +109,8 @@ namespace WordScape
             {
                 Properties.Settings.Default.WindowPos = new System.Drawing.Point((int)this.Left, (int)this.Top);
                 Properties.Settings.Default.WindowSize = new System.Drawing.Size((int)this.Width, (int)this.Height);
+                Properties.Settings.Default.WordLen = this.LenTargetWord;
+                Properties.Settings.Default.SubWordLen = this.MinSubWordLength;
                 Properties.Settings.Default.Save();
             };
             this.Loaded += MainWindow_Loaded;
