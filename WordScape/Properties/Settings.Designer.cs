@@ -46,5 +46,29 @@ namespace WordScape.Properties {
                 this["WindowSize"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("7")]
+        public int WordLen {
+            get {
+                return ((int)(this["WordLen"]));
+            }
+            set {
+                this["WordLen"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public int SubWordLen {
+            get {
+                return ((int)(this["SubWordLen"]));
+            }
+            set {
+                this["SubWordLen"] = value;
+            }
+        }
     }
 }
