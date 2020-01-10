@@ -73,7 +73,7 @@
                 <StackPanel Orientation="Vertical" Grid.Column="2">
                     <Button Content="_Shuffle" Click="BtnShuffle_Click" Width="60" HorizontalAlignment="Left"/>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding NumWordsFound}" />
+                        <TextBlock x:Name="txtNumWordsFound" Text="{Binding NumWordsFound}" />
                         <Label Margin="0,-5,0,0" Content="/"/>
                         <TextBlock Text="{Binding NumWordsTotal}" />
                     </StackPanel>
