@@ -72,6 +72,11 @@
                 <local:LetterWheel x:Name="ltrWheel" Grid.Column="1" />
                 <StackPanel Orientation="Vertical" Grid.Column="2">
                     <Button Content="_Shuffle" Click="BtnShuffle_Click" Width="60" HorizontalAlignment="Left"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding NumWordsFound}" />
+                        <Label Margin="0,-5,0,0" Content="/"/>
+                        <TextBlock Text="{Binding NumWordsTotal}" />
+                    </StackPanel>
                 </StackPanel>
             </Grid>
         </Grid>

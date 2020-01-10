@@ -83,6 +83,12 @@ namespace WordScape
         private int _NumHintsUsed;
         public int NumHintsUsed { get { return _NumHintsUsed; } internal set { _NumHintsUsed = value; OnMyPropertyChanged(); } }
 
+        private int _NumWordsFound;
+        public int NumWordsFound { get { return _NumWordsFound; } internal set { _NumWordsFound = value; OnMyPropertyChanged(); } }
+
+        public int NumWordsTotal { get { return _gridgen.NumWordsPlaced; } internal set { OnMyPropertyChanged(); } }
+
+
         public WordScapeWindow()
         {
             InitializeComponent();
@@ -152,6 +158,8 @@ namespace WordScape
                 _WordCont = this._wordGen.GenerateWord(LenTargetWord);
                 _gridgen = new GenGrid(maxX: 12, maxY: 12, _WordCont, this._wordGen._rand);
                 FillGrid(_gridgen);
+                NumWordsTotal = 0; // force prop changed
+                NumWordsFound = 0;
                 StrWordSoFar = string.Empty;
                 LstWrdsSoFar.Clear();
                 CountDownTime = 0;

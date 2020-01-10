@@ -272,6 +272,7 @@ namespace WordScape
                             foundWordType = FoundWordType.SubWordInGrid;
                             break;
                         case WordStatus.IsShownInGridForFirstTime:
+                            WordScapeWindow.WordScapeWindowInstance.NumWordsFound++;
                             foundWordType = FoundWordType.SubWordInGrid;
                             _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = foundWordType, word = wrdSoFar });
                             _WordsFound++;
