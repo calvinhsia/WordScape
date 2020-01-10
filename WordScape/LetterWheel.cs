@@ -275,6 +275,17 @@ namespace WordScape
                             foundWordType = FoundWordType.SubWordInGrid;
                             _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = foundWordType, word = wrdSoFar });
                             _WordsFound++;
+                            var anim = new ColorAnimation(fromValue:
+                                Colors.Black,
+                                toValue: Colors.Transparent,
+                                duration: TimeSpan.FromMilliseconds(100)
+                                )
+                            {
+                                FillBehavior = FillBehavior.HoldEnd,
+                                RepeatBehavior = new RepeatBehavior(10)
+                            };
+                            WordScapeWindow.WordScapeWindowInstance.txtNumWordsFound.Background = new SolidColorBrush(Colors.Transparent);
+                            WordScapeWindow.WordScapeWindowInstance.txtNumWordsFound.Background.BeginAnimation(SolidColorBrush.ColorProperty, anim);
                             doRefreshList = true;
                             break;
                     }
