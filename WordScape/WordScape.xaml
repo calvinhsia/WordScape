@@ -82,10 +82,18 @@
         </Grid>
         <Grid Grid.Row="4">
             <DockPanel>
-                <ListBox x:Name="wrdsSoFar" ItemsSource="{Binding LstWrdsSoFar}" ScrollViewer.VerticalScrollBarVisibility="Disabled" >
+                <ListBox 
+                    x:Name="wrdsSoFar" 
+                    ItemsSource="{Binding LstWrdsSoFar}" 
+                    ScrollViewer.VerticalScrollBarVisibility="Disabled" >
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <WrapPanel IsItemsHost="True" Orientation="Vertical"/>
+                            <WrapPanel IsItemsHost="True" 
+                                        IsManipulationEnabled="False"
+                                        ManipulationStarting="WrapPanel_ManipulationStarting"
+                                        ManipulationDelta="WrapPanel_ManipulationDelta"
+                                        ManipulationInertiaStarting="WrapPanel_ManipulationInertiaStarting"
+                                       Orientation="Vertical"/>
                         </ItemsPanelTemplate>
                     </ListBox.ItemsPanel>
                 </ListBox>

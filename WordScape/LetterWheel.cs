@@ -396,7 +396,10 @@ namespace WordScape
             this.wordScapeWindow.LstWrdsSoFar.Clear();
             foreach (var wrd in this._lstFoundWordsSoFar.OrderBy(p => p.word))
             {
-                var tb = new MyTextBlockWithOnlineLookup() { Text = wrd.word, FontSize = 12 };
+                var tb = new MyTextBlockWithOnlineLookup() { 
+                    Text = wrd.word, 
+                    FontSize = 16
+                };
                 var colr = Colors.Transparent;
                 switch (wrd.foundStringType)
                 {
