@@ -98,7 +98,7 @@ namespace WordScape
             this.Top = Properties.Settings.Default.WindowPos.Y;
             this.Left = Properties.Settings.Default.WindowPos.X;
             this.LenTargetWord = Properties.Settings.Default.WordLen;
-            this.MinSubWordLength = Properties.Settings.Default.SubWordLen;se
+            this.MinSubWordLength = Properties.Settings.Default.SubWordLen;
             WordScapeWindowInstance = this;
             _random = new Random(
 #if DEBUG
@@ -158,7 +158,7 @@ namespace WordScape
                 this._wordGen = new WordGenerator(_random,
                     minSubWordLen: MinSubWordLength,
                     numMaxSubWords: 1500);
-
+                this.wrdsSoFar.RenderTransform = Transform.Identity;
                 _WordCont = this._wordGen.GenerateWord(LenTargetWord);
                 _gridgen = new GenGrid(maxX: 12, maxY: 12, _WordCont, this._wordGen._rand);
                 FillGrid(_gridgen);
@@ -193,6 +193,64 @@ namespace WordScape
                     unigrid.Children.Add(ltrTile);
                 }
             }
+        }
+
+        private void WrapPanel_ManipulationStarting(object sender, ManipulationStartingEventArgs e)
+        {
+            //            e.IsSingleTouchEnabled = false;
+            e.ManipulationContainer = this;
+            e.Handled = true;
+        }
+
+        private void WrapPanel_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
+        {
+            //this just gets the source. 
+            // I cast it to FE because I wanted to use ActualWidth for Center. You could try RenderSize as alternate
+            if (e.Source is FrameworkElement element)
+            {
+                //e.DeltaManipulation has the changes 
+                // Scale is a delta multiplier; 1.0 is last size,  (so 1.1 == scale 10%, 0.8 = shrink 20%) 
+                // Rotate = Rotation, in degrees
+                // Pan = Translation, == Translate offset, in Device Independent Pixels 
+
+                var deltaManipulation = e.DeltaManipulation;
+                var matrix = ((MatrixTransform)element.RenderTransform).Matrix;
+                // find the old center; arguaby this could be cached 
+                Point center = new Point(element.ActualWidth / 2, element.ActualHeight / 2);
+                // transform it to take into account transforms from previous manipulations 
+                center = matrix.Transform(center);
+                //this will be a Zoom. 
+                matrix.ScaleAt(deltaManipulation.Scale.X, deltaManipulation.Scale.Y, center.X, center.Y);
+                // Rotation 
+                matrix.RotateAt(e.DeltaManipulation.Rotation, center.X, center.Y);
+                //Translation (pan) 
+                matrix.Translate(e.DeltaManipulation.Translation.X, e.DeltaManipulation.Translation.Y);
+
+                element.RenderTransform = new MatrixTransform(matrix);
+                //                ((MatrixTransform)element.RenderTransform).Matrix = matrix;
+
+                e.Handled = true;
+            }
+        }
+
+        private void WrapPanel_ManipulationInertiaStarting(object sender, ManipulationInertiaStartingEventArgs e)
+        {
+            // Decrease the velocity of the Rectangle's movement by 
+            // 10 inches per second every second.
+            // (10 inches * 96 pixels per inch / 1000ms^2)
+            e.TranslationBehavior.DesiredDeceleration = 10.0 * 96.0 / (1000.0 * 1000.0);
+
+            // Decrease the velocity of the Rectangle's resizing by 
+            // 0.1 inches per second every second.
+            // (0.1 inches * 96 pixels per inch / (1000ms^2)
+            e.ExpansionBehavior.DesiredDeceleration = 0.1 * 96 / (1000.0 * 1000.0);
+
+            // Decrease the velocity of the Rectangle's rotation rate by 
+            // 2 rotations per second every second.
+            // (2 * 360 degrees / (1000ms^2)
+            e.RotationBehavior.DesiredDeceleration = 720 / (1000.0 * 1000.0);
+
+            e.Handled = true;
         }
     }
 
