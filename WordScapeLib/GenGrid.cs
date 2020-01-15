@@ -69,10 +69,17 @@ namespace WordScape
                     PlaceOneWord(subword, x, y, incX, incY);
                 }
                 else
-                {// not 1st word: find random common letter and see if it can be placed
+                {// not 1st word: find random common letter and see if it can be placed. don't do singular if plural already placed
                     if (!subword.EndsWith("S"))
                     {
                         if (_dictPlacedWords.ContainsKey(subword + "S"))
+                        {
+                            continue;
+                        }
+                    }
+                    if (!subword.EndsWith("D")) // past tense: if "removed", don't add "remove"
+                    {
+                        if (_dictPlacedWords.ContainsKey(subword + "D"))
                         {
                             continue;
                         }
