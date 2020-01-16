@@ -84,6 +84,8 @@ namespace WordScape
         public int NumHintsUsed { get { return _NumHintsUsed; } internal set { _NumHintsUsed = value; OnMyPropertyChanged(); } }
 
         private int _NumWordsFound;
+        private DispatcherTimer _timer;
+
         public int NumWordsFound { get { return _NumWordsFound; } internal set { _NumWordsFound = value; OnMyPropertyChanged(); } }
 
         public int NumWordsTotal { get { return _gridgen == null ? 0 : _gridgen.NumWordsPlaced; } internal set { OnMyPropertyChanged(); } }
@@ -107,6 +109,7 @@ namespace WordScape
                     );
             this.Closing += (o, ec) =>
             {
+                _timer?.Stop();
                 Properties.Settings.Default.WindowPos = new System.Drawing.Point((int)this.Left, (int)this.Top);
                 Properties.Settings.Default.WindowSize = new System.Drawing.Size((int)this.Width, (int)this.Height);
                 Properties.Settings.Default.WordLen = this.LenTargetWord;
@@ -118,7 +121,7 @@ namespace WordScape
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            var timer = new DispatcherTimer(
+            _timer = new DispatcherTimer(
                 TimeSpan.FromSeconds(1),
                 DispatcherPriority.Normal,
                 (o, et) =>
