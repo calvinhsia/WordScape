@@ -138,7 +138,7 @@ namespace WordScape
             this.ltrWheel.Shuffle();
         }
 
-        private void BtnPlayAgain_Click(object sender, RoutedEventArgs e)
+        private async void BtnPlayAgain_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -155,12 +155,18 @@ namespace WordScape
                     ow.ShowDialog();
                     return;
                 }
-                this._wordGen = new WordGenerator(_random,
-                    minSubWordLen: MinSubWordLength,
-                    numMaxSubWords: 1500);
+                this.BtnPlayAgain.IsEnabled = false;
                 this.wrdsSoFar.RenderTransform = Transform.Identity;
-                _WordCont = this._wordGen.GenerateWord(LenTargetWord);
-                _gridgen = new GenGrid(maxX: 12, maxY: 12, _WordCont, this._wordGen._rand);
+
+                await Task.Run(() =>
+                {
+                    this._wordGen = new WordGenerator(_random,
+                        minSubWordLen: MinSubWordLength,
+                        numMaxSubWords: 1500);
+                    _WordCont = this._wordGen.GenerateWord(LenTargetWord);
+                    _gridgen = new GenGrid(maxX: 12, maxY: 12, _WordCont, this._wordGen._rand);
+                });
+
                 FillGrid(_gridgen);
                 NumWordsTotal = 0; // force prop changed
                 NumWordsFound = 0;
@@ -176,6 +182,7 @@ namespace WordScape
             {
                 this.Content = ex.ToString();
             }
+            this.BtnPlayAgain.IsEnabled = true;
         }
 
         private void FillGrid(GenGrid gridgen)
