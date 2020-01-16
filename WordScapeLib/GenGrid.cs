@@ -84,6 +84,20 @@ namespace WordScape
                             continue;
                         }
                     }
+                    if (subword.EndsWith("R")) // "remover", "removed": allow only one
+                    {
+                        if (_dictPlacedWords.ContainsKey(subword.Substring(0, subword.Length-2) + "D"))
+                        {
+                            continue;
+                        }
+                    }
+                    if (subword.EndsWith("D")) // "remover", "removed": allow only one
+                    {
+                        if (_dictPlacedWords.ContainsKey(subword.Substring(0, subword.Length - 2) + "R"))
+                        {
+                            continue;
+                        }
+                    }
                     ShuffleLettersPlaced();
                     foreach (var ltrPlaced in _ltrsPlaced)
                     {
