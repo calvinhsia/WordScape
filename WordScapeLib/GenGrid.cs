@@ -86,7 +86,7 @@ namespace WordScape
                     }
                     if (subword.EndsWith("R")) // "remover", "removed": allow only one
                     {
-                        if (_dictPlacedWords.ContainsKey(subword.Substring(0, subword.Length-2) + "D"))
+                        if (_dictPlacedWords.ContainsKey(subword.Substring(0, subword.Length - 2) + "D"))
                         {
                             continue;
                         }
@@ -97,6 +97,10 @@ namespace WordScape
                         {
                             continue;
                         }
+                    }
+                    if (_dictPlacedWords.ContainsKey(subword + "ED")) // disobeyed : don't put disobey
+                    {
+                        continue;
                     }
                     ShuffleLettersPlaced();
                     foreach (var ltrPlaced in _ltrsPlaced)
