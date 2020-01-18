@@ -81,23 +81,26 @@
             </Grid>
         </Grid>
         <Grid Grid.Row="4">
-            <DockPanel>
-                <ListBox 
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="{Binding NumItemsInList}" />
+                <DockPanel>
+                    <ListBox 
                     x:Name="wrdsSoFar" 
                     ItemsSource="{Binding LstWrdsSoFar}" 
                     ScrollViewer.VerticalScrollBarVisibility="Disabled" >
-                    <ListBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel IsItemsHost="True" 
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel IsItemsHost="True" 
                                         IsManipulationEnabled="False"
                                         ManipulationStarting="WrapPanel_ManipulationStarting"
                                         ManipulationDelta="WrapPanel_ManipulationDelta"
                                         ManipulationInertiaStarting="WrapPanel_ManipulationInertiaStarting"
                                        Orientation="Vertical"/>
-                        </ItemsPanelTemplate>
-                    </ListBox.ItemsPanel>
-                </ListBox>
-            </DockPanel>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                    </ListBox>
+                </DockPanel>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

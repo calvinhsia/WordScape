@@ -450,6 +450,7 @@ namespace WordScape
 
                 }
                 this.wordScapeWindow.LstWrdsSoFar.Add(tb);
+                this.wordScapeWindow.OnMyPropertyChanged("NumItemsInList");
             }
         }
     }

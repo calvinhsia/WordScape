@@ -82,6 +82,7 @@ namespace WordScape
 
         private int _NumHintsUsed;
         public int NumHintsUsed { get { return _NumHintsUsed; } internal set { _NumHintsUsed = value; OnMyPropertyChanged(); } }
+        public int NumItemsInList { get { return _LstWrdsSoFar.Count; } }
 
         private int _NumWordsFound;
         private DispatcherTimer _timer;
