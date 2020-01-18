@@ -68,39 +68,7 @@ namespace WordScape
                     PlaceOneWord(subword, x, y, incX, incY);
                 }
                 else
-                {// not 1st word: find random common letter and see if it can be placed. don't do singular if plural already placed
-                    if (!subword.EndsWith("S"))
-                    {
-                        if (_dictPlacedWords.ContainsKey(subword + "S"))
-                        {
-                            continue;
-                        }
-                    }
-                    if (!subword.EndsWith("D")) // past tense: if "removed", don't add "remove"
-                    {
-                        if (_dictPlacedWords.ContainsKey(subword + "D"))
-                        {
-                            continue;
-                        }
-                    }
-                    if (subword.EndsWith("R")) // "remover", "removed": allow only one
-                    {
-                        if (_dictPlacedWords.ContainsKey(subword.Substring(0, subword.Length - 2) + "D"))
-                        {
-                            continue;
-                        }
-                    }
-                    if (subword.EndsWith("D")) // "remover", "removed": allow only one
-                    {
-                        if (_dictPlacedWords.ContainsKey(subword.Substring(0, subword.Length - 2) + "R"))
-                        {
-                            continue;
-                        }
-                    }
-                    if (_dictPlacedWords.ContainsKey(subword + "ED")) // disobeyed : don't put disobey
-                    {
-                        continue;
-                    }
+                {// not 1st word: find random common letter and see if it can be placed
                     ShuffleLettersPlaced();
                     foreach (var ltrPlaced in _ltrsPlaced)
                     {
