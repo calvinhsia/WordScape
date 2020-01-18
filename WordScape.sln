@@ -7,7 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordScape", "WordScape\Word
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordScapeTests", "WordScapeTests\WordScapeTests.csproj", "{F49BD99E-7C4F-49CF-90A0-CEB8635F2432}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordScapeLib", "WordScapeLib\WordScapeLib.csproj", "{1879E036-6832-409B-9183-783D50AE5B5F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WordScapeLib", "WordScapeLib\WordScapeLib.csproj", "{1879E036-6832-409B-9183-783D50AE5B5F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordScapes", "WordScapes\WordScapes.csproj", "{6096C8B1-2716-4CB7-885C-D52740E76119}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,12 @@ Global
 		{1879E036-6832-409B-9183-783D50AE5B5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1879E036-6832-409B-9183-783D50AE5B5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1879E036-6832-409B-9183-783D50AE5B5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6096C8B1-2716-4CB7-885C-D52740E76119}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6096C8B1-2716-4CB7-885C-D52740E76119}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6096C8B1-2716-4CB7-885C-D52740E76119}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{6096C8B1-2716-4CB7-885C-D52740E76119}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6096C8B1-2716-4CB7-885C-D52740E76119}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6096C8B1-2716-4CB7-885C-D52740E76119}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
