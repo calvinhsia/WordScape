@@ -8,37 +8,73 @@ using Android.Support.Design.Widget;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
+using WordScape;
 
 namespace WordScapes
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
-        public const int idtxtTimer = 10;
 
         public const int idBtnPlayAgain = 60;
+        public const int idtxtLenTargetWord = 10;
+        public const int idtxtLenSubWord = 10;
+        public const int idtxtTimer = 10;
         public const int idBtnShuffle = 70;
+        public const int idtxtWordSofar = 100;
+        private int idTitleText;
+
+        TextView _txtTitle;
         TextView _txtTimer;
+        TextView _txtLenTargetWord;
+        TextView _txtLenSubword;
+        TextView _txtWordSoFar;
         Button _btnNew;
 
         void createLayout()
         {
             SetContentView(Resource.Layout.content_main);
             var layout = FindViewById<RelativeLayout>(Resource.Id.container);
+            _txtTitle = FindViewById<TextView>(Resource.Id.textViewTitle);
+            idTitleText = _txtTitle.Id;
+
             _btnNew = new Button(this)
             {
+                Id = idBtnPlayAgain,
                 Text = "Play Again"
             };
             _btnNew.Click += BtnNew_Click;
             layout.AddView(_btnNew);
 
+            _txtLenTargetWord = new TextView(this)
+            {
+                Id = idtxtLenTargetWord,
+                Text = "9"
+            };
+            layout.AddView(_txtLenTargetWord);
+
+            _txtLenSubword = new TextView(this)
+            {
+                Id = idtxtLenSubWord,
+                Text = "5"
+            };
+            layout.AddView(_txtLenSubword);
+
             _txtTimer = new TextView(this)
             {
                 Id = idtxtTimer,
                 Text = "timer",
-                TextSize = 30
+                TextSize = 30,
             };
             layout.AddView(_txtTimer);
+
+            _txtWordSoFar = new TextView(this)
+            {
+                Id = idtxtWordSofar,
+                Text = "wsofar"
+            };
+            layout.AddView(_txtWordSoFar);
+
             SetLayoutForOrientation(Android.Content.Res.Orientation.Portrait);
         }
 
@@ -47,8 +83,20 @@ namespace WordScapes
             switch (orientation)
             {
                 case Android.Content.Res.Orientation.Portrait:
+                    _btnNew.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
+                    ((RelativeLayout.LayoutParams)(_btnNew.LayoutParameters)).AddRule(LayoutRules.Below, idTitleText);
+
+                    _txtLenTargetWord.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
+                    ((RelativeLayout.LayoutParams)(_txtLenTargetWord.LayoutParameters)).AddRule(LayoutRules.RightOf, idBtnPlayAgain);
+
+                    _txtLenSubword.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
+                    ((RelativeLayout.LayoutParams)(_txtLenSubword.LayoutParameters)).AddRule(LayoutRules.RightOf, idtxtLenTargetWord);
+
                     _txtTimer.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
                     ((RelativeLayout.LayoutParams)(_txtTimer.LayoutParameters)).AddRule(LayoutRules.AlignParentRight);
+
+                    _txtWordSoFar.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
+                    ((RelativeLayout.LayoutParams)(_txtWordSoFar.LayoutParameters)).AddRule(LayoutRules.Below, idBtnPlayAgain);
 
                     break;
             }
@@ -58,6 +106,8 @@ namespace WordScapes
         {
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+            MainActivity._instance = this;
+            this._Random = new Random();
             createLayout();
             BtnNew_Click(_btnNew, null);
             //Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
@@ -71,6 +121,11 @@ namespace WordScapes
         CancellationTokenSource _cts = null;
         int _nSecondsElapsed = 0;
         Task _tskTimer;
+        public static MainActivity _instance;
+        private Random _Random;
+        public WordGenerator _wordGenerator;
+        private WordContainer _wordCont;
+
         private async void BtnNew_Click(object sender, EventArgs e)
         {
             if (_cts != null)
@@ -99,6 +154,15 @@ namespace WordScapes
             _txtTimer.Text = string.Empty;
             _nSecondsElapsed = 0;
             _timerEnabled = true;
+            int.TryParse(_txtLenTargetWord.Text, out var LenTargetWord);
+            int.TryParse(_txtLenSubword.Text, out var minSubWordLen);
+            await Task.Run(() =>
+            {
+                _wordGenerator = new WordGenerator(_Random, minSubWordLen, numMaxSubWords: 1500);
+                _wordCont = _wordGenerator.GenerateWord(LenTargetWord);
+
+            });
+            this._txtWordSoFar.Text = _wordCont.InitialWord;
         }
 
         public static string GetTimeAsString(int tmpSecs)
