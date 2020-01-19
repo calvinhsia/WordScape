@@ -22,10 +22,10 @@ namespace WordScapes
         public const string prefTargWorLen = "TargWordLen";
         public const string prefSubWordLen = "SubWordLen";
 
-        public const int idBtnPlayAgain = 10;
+        public const int idtxtTimer = 10;
         public const int idtxtLenTargetWord = 20;
         public const int idtxtLenSubWord = 30;
-        public const int idtxtTimer = 40;
+        public const int idBtnPlayAgain = 40;
         public const int idBtnShuffle = 50;
         public const int idGrdXWord = 60;
         public const int idtxtWordSofar = 70;
@@ -82,13 +82,13 @@ namespace WordScapes
             _txtTitle = FindViewById<TextView>(Resource.Id.textViewTitle);
             idTitleText = _txtTitle.Id;
 
-            _btnNew = new Button(this)
+            _txtTimer = new TextView(this)
             {
-                Id = idBtnPlayAgain,
-                Text = "Play Again"
+                Id = idtxtTimer,
+                Text = "timer",
+                TextSize = 30,
             };
-            _btnNew.Click += BtnNew_Click;
-            layout.AddView(_btnNew);
+            layout.AddView(_txtTimer);
 
             _txtLenTargetWord = new EditText(this)
             {
@@ -104,13 +104,14 @@ namespace WordScapes
             };
             layout.AddView(_txtLenSubword);
 
-            _txtTimer = new TextView(this)
+            _btnNew = new Button(this)
             {
-                Id = idtxtTimer,
-                Text = "timer",
-                TextSize = 30,
+                Id = idBtnPlayAgain,
+                Text = "Play Again"
             };
-            layout.AddView(_txtTimer);
+            _btnNew.Click += BtnNew_Click;
+            layout.AddView(_btnNew);
+
 
             _grdXWord = new GridLayout(this)
             {
@@ -144,11 +145,8 @@ namespace WordScapes
             switch (orientation)
             {
                 case Android.Content.Res.Orientation.Portrait:
-                    _btnNew.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
-                    ((RelativeLayout.LayoutParams)(_btnNew.LayoutParameters)).AddRule(LayoutRules.Below, idTitleText);
 
                     _txtLenTargetWord.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
-                    ((RelativeLayout.LayoutParams)(_txtLenTargetWord.LayoutParameters)).AddRule(LayoutRules.RightOf, idBtnPlayAgain);
                     ((RelativeLayout.LayoutParams)(_txtLenTargetWord.LayoutParameters)).AddRule(LayoutRules.Below, idTitleText);
 
                     _txtLenSubword.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
@@ -156,10 +154,13 @@ namespace WordScapes
                     ((RelativeLayout.LayoutParams)(_txtLenSubword.LayoutParameters)).AddRule(LayoutRules.Below, idTitleText);
 
                     _txtTimer.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
-                    ((RelativeLayout.LayoutParams)(_txtTimer.LayoutParameters)).AddRule(LayoutRules.AlignParentRight);
+                    ((RelativeLayout.LayoutParams)(_txtTimer.LayoutParameters)).AddRule(LayoutRules.LeftOf, idBtnPlayAgain);
+
+                    _btnNew.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
+                    ((RelativeLayout.LayoutParams)(_btnNew.LayoutParameters)).AddRule(LayoutRules.AlignParentRight);
 
                     _grdXWord.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
-                    ((RelativeLayout.LayoutParams)(_grdXWord.LayoutParameters)).AddRule(LayoutRules.Below, idBtnPlayAgain);
+                    ((RelativeLayout.LayoutParams)(_grdXWord.LayoutParameters)).AddRule(LayoutRules.Below, idtxtLenTargetWord);
 
 
 
@@ -218,7 +219,7 @@ namespace WordScapes
                     _WordCont = _wordGen.GenerateWord(LenTargetWord);
                     _gridgen = new GenGrid(maxX: 12, maxY: 12, _WordCont, this._Random);
                     _gridgen.Generate();
-                    var xx = _gridgen.ShowGrid();
+//                    var xx = _gridgen.ShowGrid();
                 }
                 catch (Exception ex)
                 {
@@ -226,7 +227,7 @@ namespace WordScapes
                 }
             });
             _grdXWord.RemoveAllViews();
-            _grdXWord.Invalidate();
+//            _grdXWord.Invalidate();
             _nCols = _gridgen._MaxX;
             _nRows = _gridgen._MaxY;
             _grdXWord.ColumnCount= _nCols;
