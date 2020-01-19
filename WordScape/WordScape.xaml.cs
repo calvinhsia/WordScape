@@ -41,7 +41,7 @@ namespace WordScape
 
         public int LenTargetWord { get; set; } = 7;
         public int MinSubWordLength { get; set; } = 5;
-        private readonly Random _random;
+        private readonly Random _Random;
 
         private int _CountDownTime;
         public bool TimerIsEnabled = false;
@@ -103,9 +103,9 @@ namespace WordScape
             this.LenTargetWord = Properties.Settings.Default.WordLen;
             this.MinSubWordLength = Properties.Settings.Default.SubWordLen;
             WordScapeWindowInstance = this;
-            _random = new Random(
+            _Random = new Random(
 #if DEBUG
-                    //                        1
+                                            //1
 #endif
                     );
             this.Closing += (o, ec) =>
@@ -164,12 +164,13 @@ namespace WordScape
 
                 await Task.Run(() =>
                 {
-                    this._wordGen = new WordGenerator(_random)
+                    this._wordGen = new WordGenerator(_Random)
                     {
                         _MinSubWordLen = MinSubWordLength
                     };
                     _WordCont = this._wordGen.GenerateWord(LenTargetWord);
                     _gridgen = new GenGrid(maxX: 12, maxY: 12, _WordCont, this._wordGen._rand);
+                    _gridgen.Generate();
                 });
 
                 FillGrid(_gridgen);

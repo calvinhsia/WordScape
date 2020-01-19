@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+
+[assembly: InternalsVisibleTo("WordScapeTests")]
 
 namespace WordScape
 {
@@ -25,21 +28,34 @@ namespace WordScape
         public const char Blank = '_';
         readonly WordContainer _wordContainer;
         readonly public Random _random;
-        public readonly int _MaxY;
-        public readonly int _MaxX;
+        /// <summary>
+        /// initially, the max size of desired grid. Once grid filled in and recentered, 
+        /// these are recalculated to be potentially smaller
+        /// </summary>
+        public int _MaxY;
+        public int _MaxX;
         public char[,] _chars;
         public int NumWordsPlaced => _dictPlacedWords.Count;
         //        public List<string> _lstWordsPlaced = new List<string>();
         public Dictionary<string, LtrPlaced> _dictPlacedWords = new Dictionary<string, LtrPlaced>(); // subword to 1st letter
         public int nLtrsPlaced;
         public readonly List<LtrPlaced> _ltrsPlaced = new List<LtrPlaced>();
+
+        internal int _tmpminX;
+        internal int _tmpmaxX;
+        internal int _tmpminY;
+        internal int _tmpmaxY;
         public GenGrid(int maxX, int maxY, WordContainer wordCont, Random rand)
         {
             this._random = rand;
             this._wordContainer = wordCont;
             this._MaxY = maxY;
             this._MaxX = maxX;
-            _chars = new char[_MaxY, _MaxX];
+            _tmpminX = maxX;
+            _tmpminY = maxY;
+            _tmpmaxX = 0;
+            _tmpmaxY = 0;
+            _chars = new char[_MaxX, _MaxY];
             for (int y = 0; y < _MaxY; y++)
             {
                 for (int x = 0; x < _MaxX; x++)
@@ -47,10 +63,37 @@ namespace WordScape
                     _chars[x, y] = Blank;
                 }
             }
+        }
+        public void Generate()
+        {
             PlaceWords();
+            ResizeGridArraySmaller();
         }
 
-        private void PlaceWords()
+        internal void ResizeGridArraySmaller()
+        {
+            if (NumWordsPlaced > 1)
+            {
+                _MaxX = _tmpmaxX - _tmpminX + 1;
+                _MaxY = _tmpmaxY - _tmpminY + 1;
+                foreach (var ltr in _ltrsPlaced)
+                {
+                    ltr.nX -= _tmpminX;
+                    ltr.nY -= _tmpminY;
+                }
+                char[,] newCharArr = new char[_MaxX, _MaxY];
+                for (int y = 0; y < _MaxY; y++)
+                {
+                    for (int x = 0; x < _MaxX; x++)
+                    {
+                        newCharArr[x, y] = _chars[x + _tmpminX, y + _tmpminY];
+                    }
+                }
+                _chars = newCharArr;
+            }
+        }
+
+        internal void PlaceWords()
         {
             foreach (var subword in _wordContainer.subwords)
             {
@@ -124,6 +167,14 @@ namespace WordScape
         private void PlaceOneWord(string subword, int x, int y, int incX, int incY)
         {
             var isFirstLetter = true;
+            if (x < _tmpminX)
+            {
+                _tmpminX = x;
+            }
+            if (y < _tmpminY)
+            {
+                _tmpminY = y;
+            }
             foreach (var ltr in subword)
             {
                 var ltrPlaced = new LtrPlaced() { nX = x, nY = y, ltr = ltr, IsHoriz = incX > 0 };
@@ -137,6 +188,14 @@ namespace WordScape
                 x += incX;
                 y += incY;
                 nLtrsPlaced++;
+            }
+            if (x > _tmpmaxX)
+            {
+                _tmpmaxX = x - incX;
+            }
+            if (y > _tmpmaxY)
+            {
+                _tmpmaxY = y - incY;
             }
         }
 
@@ -271,7 +330,7 @@ namespace WordScape
 
         public string ShowGrid()
         {
-            var grid = string.Empty;
+            var grid = Environment.NewLine;
             for (int y = 0; y < _MaxY; y++)
             {
                 for (int x = 0; x < _MaxX; x++)

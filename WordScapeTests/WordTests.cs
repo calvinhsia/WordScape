@@ -11,6 +11,29 @@ namespace WordScapeTests
     public class WordTests : BaseTestClass
     {
         [TestMethod]
+        public void TestGridResizeSmaller()
+        {
+            var wordGen = new WordGenerator(new Random(1))
+            {
+                _MinSubWordLen = 5
+            };
+            for (int i = 0; i < 100; i++)
+            {
+                var wcont = wordGen.GenerateWord(Targetlen: 8);
+                LogMessage($"NumLookups = {wcont.cntLookups} #SubWords = {wcont.subwords.Count} {wcont.InitialWord}");
+                foreach (var sword in wcont.subwords)
+                {
+//                    LogMessage($"   {sword}");
+                }
+                var genGrid = new GenGrid(12, 12, wcont, wordGen._rand);
+                genGrid.PlaceWords();
+                LogMessage($"  ({genGrid._MaxX},{genGrid._MaxY})  ({genGrid._tmpminX},{genGrid._tmpminY}) ({genGrid._tmpmaxX},{genGrid._tmpmaxY}) {genGrid.ShowGrid()}");
+
+                genGrid.ResizeGridArraySmaller();
+                LogMessage($"  ({genGrid._MaxX},{genGrid._MaxY})  ({genGrid._tmpminX},{genGrid._tmpminY}) ({genGrid._tmpmaxX},{genGrid._tmpmaxY}) {genGrid.ShowGrid()}");
+            }
+        }
+        [TestMethod]
         public void TestGenGrid()
         {
             var wordGen = new WordGenerator(new Random(1))
@@ -26,8 +49,7 @@ namespace WordScapeTests
                     LogMessage($"   {sword}");
                 }
                 var genGrid = new GenGrid(12, 12, wcont, wordGen._rand);
-                var gr = Environment.NewLine + genGrid.ShowGrid();
-                LogMessage($"{gr}");
+                LogMessage($"{genGrid.ShowGrid()}");
                 LogMessage($"Grid Ltrs= {genGrid.nLtrsPlaced} Wrds= {genGrid.NumWordsPlaced}");
             }
         }

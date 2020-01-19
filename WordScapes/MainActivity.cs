@@ -54,6 +54,25 @@ namespace WordScapes
         public GenGrid _gridgen;
         internal int _nCols = 12;
         internal int _nRows = 12;
+        protected override void OnCreate(Bundle savedInstanceState)
+        {
+            base.OnCreate(savedInstanceState);
+            Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+            MainActivity._instance = this;
+            _Random = new Random(
+#if DEBUG
+                    1
+#endif
+                    );
+            createLayout();
+            _wordGen = new WordGenerator(_Random);
+            BtnNew_Click(_btnNew, null);
+            //Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
+            //SetSupportActionBar(toolbar);
+
+            //FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
+            //fab.Click += FabOnClick;
+        }
 
         void createLayout()
         {
@@ -98,6 +117,7 @@ namespace WordScapes
                 Id = idGrdXWord,
                 ColumnCount = _nCols,
                 RowCount = _nRows,
+                Orientation= GridOrientation.Vertical,
                 AlignmentMode = GridAlign.Bounds
             };
             //            _grdXWord.SetBackgroundColor(Color.Red);
@@ -155,21 +175,6 @@ namespace WordScapes
             }
         }
 
-        protected override void OnCreate(Bundle savedInstanceState)
-        {
-            base.OnCreate(savedInstanceState);
-            Xamarin.Essentials.Platform.Init(this, savedInstanceState);
-            MainActivity._instance = this;
-            this._Random = new Random();
-            createLayout();
-            _wordGen = new WordGenerator(_Random);
-            BtnNew_Click(_btnNew, null);
-            //Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
-            //SetSupportActionBar(toolbar);
-
-            //FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
-            //fab.Click += FabOnClick;
-        }
         private async void BtnNew_Click(object sender, EventArgs e)
         {
             _btnNew.Enabled = false;
@@ -212,12 +217,20 @@ namespace WordScapes
                 {
                     _WordCont = _wordGen.GenerateWord(LenTargetWord);
                     _gridgen = new GenGrid(maxX: 12, maxY: 12, _WordCont, this._Random);
+                    _gridgen.Generate();
+                    var xx = _gridgen.ShowGrid();
                 }
                 catch (Exception ex)
                 {
                     err = ex.ToString();
                 }
             });
+            _grdXWord.RemoveAllViews();
+            _grdXWord.Invalidate();
+            _nCols = _gridgen._MaxX;
+            _nRows = _gridgen._MaxY;
+            _grdXWord.ColumnCount= _nCols;
+            _grdXWord.RowCount = _nRows;
             if (string.IsNullOrEmpty(err))
             {
                 this._txtWordSoFar.Text = _WordCont.InitialWord;
@@ -232,13 +245,12 @@ namespace WordScapes
 
         private void DisplayXWords()
         {
-            _grdXWord.RemoveAllViews();
 
-            for (int iRow = 0; iRow < _nRows; iRow++)
+            for (int iCol = 0; iCol < _nCols; iCol++)
             {
-                for (int iCol = 0; iCol < _nCols; iCol++)
+                for (int iRow = 0; iRow < _nRows; iRow++)
                 {
-                    var ltrTile = new GridXCellView(this, _gridgen._chars[iRow, iCol]);
+                    var ltrTile = new GridXCellView(this, _gridgen._chars[iCol, iRow]);
                     _grdXWord.AddView(ltrTile);
 
                     //var x = new GridXCellView(this)
