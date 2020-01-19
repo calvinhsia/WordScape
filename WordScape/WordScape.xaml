@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WordScape"
         mc:Ignorable="d"
-        Title="WordScapes" Height="450" Width="800">
+        Title="WordScapes" Height="850" Width="500">
     <!--<Window.Resources>
         <Storyboard x:Key="blinkAnimation" Duration="0:0:5" >
             <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(TextBlock.Background).(SolidColorBrush.Color)" AutoReverse="True">
@@ -39,6 +39,7 @@
             <!--wordsofar-->
             <RowDefinition Height="230"/>
             <!--wheel-->
+            <RowDefinition Height="20"/>
             <RowDefinition Height="*"/>
             <!--wrdlist-->
         </Grid.RowDefinitions>
@@ -83,24 +84,26 @@
         <Grid Grid.Row="4">
             <StackPanel>
                 <TextBlock Text="{Binding NumItemsInList}" />
-                <DockPanel>
-                    <ListBox 
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Row="5">
+            <DockPanel>
+                <ListBox 
                     x:Name="wrdsSoFar" 
                     ItemsSource="{Binding LstWrdsSoFar}" 
                     ScrollViewer.VerticalScrollBarVisibility="Disabled" >
-                        <ListBox.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel IsItemsHost="True" 
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel IsItemsHost="True" 
                                         IsManipulationEnabled="False"
                                         ManipulationStarting="WrapPanel_ManipulationStarting"
                                         ManipulationDelta="WrapPanel_ManipulationDelta"
                                         ManipulationInertiaStarting="WrapPanel_ManipulationInertiaStarting"
                                        Orientation="Vertical"/>
-                            </ItemsPanelTemplate>
-                        </ListBox.ItemsPanel>
-                    </ListBox>
-                </DockPanel>
-            </StackPanel>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                </ListBox>
+            </DockPanel>
         </Grid>
     </Grid>
 </Window>
