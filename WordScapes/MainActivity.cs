@@ -14,7 +14,7 @@ using WordScape;
 
 namespace WordScapes
 {
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, ScreenOrientation= Android.Content.PM.ScreenOrientation.Portrait)]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, ScreenOrientation = Android.Content.PM.ScreenOrientation.Portrait)]
     public class MainActivity : AppCompatActivity
     {
         public Point _ptScreenSize = new Point(); // Samsung Galaxy 9Plus : X = 1440, Y = 2792   GetRealSize x=1440, y=2960
@@ -26,18 +26,20 @@ namespace WordScapes
         public const int idtxtLenTargetWord = 20;
         public const int idtxtLenSubWord = 30;
         public const int idtxtTimer = 40;
-        public const int idBtnShuffle = 70;
-        public const int idGrdXWord = 80;
-        public const int idtxtWordSofar = 100;
+        public const int idBtnShuffle = 50;
+        public const int idGrdXWord = 60;
+        public const int idtxtWordSofar = 70;
+        public const int idLtrWheelView = 80;
         private int idTitleText;
 
         TextView _txtTitle;
-        TextView _txtTimer;
+        Button _btnNew;
         TextView _txtLenTargetWord;
         TextView _txtLenSubword;
+        TextView _txtTimer;
         TextView _txtWordSoFar;
         GridLayout _grdXWord;
-        Button _btnNew;
+        LetterWheelView _LetterWheelView;
 
 
         bool _timerEnabled = false;
@@ -93,20 +95,26 @@ namespace WordScapes
 
             _grdXWord = new GridLayout(this)
             {
-                Id= idGrdXWord,
+                Id = idGrdXWord,
                 ColumnCount = _nCols,
                 RowCount = _nRows,
                 AlignmentMode = GridAlign.Bounds
             };
-//            _grdXWord.SetBackgroundColor(Color.Red);
+            //            _grdXWord.SetBackgroundColor(Color.Red);
             layout.AddView(_grdXWord);
 
             _txtWordSoFar = new TextView(this)
             {
                 Id = idtxtWordSofar,
-                Text = "wsofar"
             };
             layout.AddView(_txtWordSoFar);
+
+            _LetterWheelView = new LetterWheelView(this)
+            {
+                Id = idLtrWheelView,
+                LayoutParameters = new ViewGroup.LayoutParams(_ptScreenSize.X, 200)
+            };
+
 
             SetLayoutForOrientation(Android.Content.Res.Orientation.Portrait);
         }
@@ -139,6 +147,8 @@ namespace WordScapes
                     ((RelativeLayout.LayoutParams)(_txtWordSoFar.LayoutParameters)).AddRule(LayoutRules.Below, idGrdXWord);
 
 
+                    _LetterWheelView.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
+                    ((RelativeLayout.LayoutParams)(_LetterWheelView.LayoutParameters)).AddRule(LayoutRules.Below, idtxtWordSofar);
 
 
                     break;

@@ -39,5 +39,9 @@ namespace WordScapes
             }
 
         }
+        protected override void OnDraw(Canvas canvas)
+        {
+            base.OnDraw(canvas);
+        }
     }
 }
