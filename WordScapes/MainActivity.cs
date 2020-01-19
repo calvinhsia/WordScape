@@ -14,9 +14,11 @@ using WordScape;
 
 namespace WordScapes
 {
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, ScreenOrientation= Android.Content.PM.ScreenOrientation.Portrait)]
     public class MainActivity : AppCompatActivity
     {
+        public Point _ptScreenSize = new Point(); // Samsung Galaxy 9Plus : X = 1440, Y = 2792   GetRealSize x=1440, y=2960
+
         public const string prefTargWorLen = "TargWordLen";
         public const string prefSubWordLen = "SubWordLen";
 
@@ -48,11 +50,12 @@ namespace WordScapes
         public WordGenerator _wordGen;
         public WordContainer _WordCont;
         public GenGrid _gridgen;
-        private int _nCols = 12;
-        private int _nRows = 12;
+        internal int _nCols = 12;
+        internal int _nRows = 12;
 
         void createLayout()
         {
+            WindowManager.DefaultDisplay.GetSize(_ptScreenSize);
             SetContentView(Resource.Layout.content_main);
             var layout = FindViewById<RelativeLayout>(Resource.Id.container);
             _txtTitle = FindViewById<TextView>(Resource.Id.textViewTitle);
@@ -95,7 +98,7 @@ namespace WordScapes
                 RowCount = _nRows,
                 AlignmentMode = GridAlign.Bounds
             };
-            _grdXWord.SetBackgroundColor(Color.Red);
+//            _grdXWord.SetBackgroundColor(Color.Red);
             layout.AddView(_grdXWord);
 
             _txtWordSoFar = new TextView(this)
@@ -225,11 +228,14 @@ namespace WordScapes
             {
                 for (int iCol = 0; iCol < _nCols; iCol++)
                 {
-                    var x = new TextView(this)
-                    {
-                        Text = (iRow * _nRows + iCol).ToString()
-                    };
-                    _grdXWord.AddView(x);
+                    var ltrTile = new GridXCellView(this, _gridgen._chars[iRow, iCol]);
+                    _grdXWord.AddView(ltrTile);
+
+                    //var x = new GridXCellView(this)
+                    //{
+                    //    Text = "A"
+                    //};
+                    //_grdXWord.AddView(x);
                 }
             }
         }
