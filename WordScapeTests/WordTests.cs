@@ -13,7 +13,10 @@ namespace WordScapeTests
         [TestMethod]
         public void TestGenGrid()
         {
-            var wordGen = new WordGenerator(new Random(1), minSubWordLen: 3, numMaxSubWords: 1500);
+            var wordGen = new WordGenerator(new Random(1))
+            {
+                _MinSubWordLen = 3
+            };
             for (int i = 0; i < 100; i++)
             {
                 var wcont = wordGen.GenerateWord(Targetlen: 7);

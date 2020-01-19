@@ -16,10 +16,10 @@ namespace WordScapes
     public class MainActivity : AppCompatActivity
     {
 
-        public const int idBtnPlayAgain = 60;
-        public const int idtxtLenTargetWord = 10;
-        public const int idtxtLenSubWord = 10;
-        public const int idtxtTimer = 10;
+        public const int idBtnPlayAgain = 10;
+        public const int idtxtLenTargetWord = 20;
+        public const int idtxtLenSubWord = 30;
+        public const int idtxtTimer = 40;
         public const int idBtnShuffle = 70;
         public const int idtxtWordSofar = 100;
         private int idTitleText;
@@ -30,6 +30,17 @@ namespace WordScapes
         TextView _txtLenSubword;
         TextView _txtWordSoFar;
         Button _btnNew;
+
+        bool _timerEnabled = false;
+        CancellationTokenSource _cts = null;
+        int _nSecondsElapsed = 0;
+        Task _tskTimer;
+
+        public static MainActivity _instance;
+        private Random _Random;
+        public WordGenerator _wordGen;
+        public WordContainer _WordCont;
+        public GenGrid _gridgen;
 
         void createLayout()
         {
@@ -46,14 +57,14 @@ namespace WordScapes
             _btnNew.Click += BtnNew_Click;
             layout.AddView(_btnNew);
 
-            _txtLenTargetWord = new TextView(this)
+            _txtLenTargetWord = new EditText(this)
             {
                 Id = idtxtLenTargetWord,
                 Text = "9"
             };
             layout.AddView(_txtLenTargetWord);
 
-            _txtLenSubword = new TextView(this)
+            _txtLenSubword = new EditText(this)
             {
                 Id = idtxtLenSubWord,
                 Text = "5"
@@ -88,15 +99,23 @@ namespace WordScapes
 
                     _txtLenTargetWord.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
                     ((RelativeLayout.LayoutParams)(_txtLenTargetWord.LayoutParameters)).AddRule(LayoutRules.RightOf, idBtnPlayAgain);
+                    ((RelativeLayout.LayoutParams)(_txtLenTargetWord.LayoutParameters)).AddRule(LayoutRules.Below, idTitleText);
 
                     _txtLenSubword.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
                     ((RelativeLayout.LayoutParams)(_txtLenSubword.LayoutParameters)).AddRule(LayoutRules.RightOf, idtxtLenTargetWord);
+                    ((RelativeLayout.LayoutParams)(_txtLenSubword.LayoutParameters)).AddRule(LayoutRules.Below, idTitleText);
 
                     _txtTimer.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
                     ((RelativeLayout.LayoutParams)(_txtTimer.LayoutParameters)).AddRule(LayoutRules.AlignParentRight);
 
+
+
+
                     _txtWordSoFar.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
                     ((RelativeLayout.LayoutParams)(_txtWordSoFar.LayoutParameters)).AddRule(LayoutRules.Below, idBtnPlayAgain);
+
+
+
 
                     break;
             }
@@ -109,6 +128,7 @@ namespace WordScapes
             MainActivity._instance = this;
             this._Random = new Random();
             createLayout();
+            _wordGen = new WordGenerator(_Random);
             BtnNew_Click(_btnNew, null);
             //Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
             //SetSupportActionBar(toolbar);
@@ -117,17 +137,9 @@ namespace WordScapes
             //fab.Click += FabOnClick;
         }
 
-        bool _timerEnabled = false;
-        CancellationTokenSource _cts = null;
-        int _nSecondsElapsed = 0;
-        Task _tskTimer;
-        public static MainActivity _instance;
-        private Random _Random;
-        public WordGenerator _wordGenerator;
-        private WordContainer _wordCont;
-
         private async void BtnNew_Click(object sender, EventArgs e)
         {
+            _btnNew.Enabled = false;
             if (_cts != null)
             {
                 _cts.Cancel();
@@ -156,13 +168,29 @@ namespace WordScapes
             _timerEnabled = true;
             int.TryParse(_txtLenTargetWord.Text, out var LenTargetWord);
             int.TryParse(_txtLenSubword.Text, out var minSubWordLen);
+            _wordGen._MinSubWordLen = minSubWordLen;
+            var err = string.Empty;
             await Task.Run(() =>
             {
-                _wordGenerator = new WordGenerator(_Random, minSubWordLen, numMaxSubWords: 1500);
-                _wordCont = _wordGenerator.GenerateWord(LenTargetWord);
-
+                try
+                {
+                    _WordCont = _wordGen.GenerateWord(LenTargetWord);
+                    _gridgen = new GenGrid(maxX: 12, maxY: 12, _WordCont, this._Random);
+                }
+                catch (Exception ex)
+                {
+                    err = ex.ToString();
+                }
             });
-            this._txtWordSoFar.Text = _wordCont.InitialWord;
+            if (string.IsNullOrEmpty(err))
+            {
+                this._txtWordSoFar.Text = _WordCont.InitialWord;
+            }
+            else
+            {
+                this._txtWordSoFar.Text = err;
+            }
+            _btnNew.Enabled = true;
         }
 
         public static string GetTimeAsString(int tmpSecs)

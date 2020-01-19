@@ -164,9 +164,10 @@ namespace WordScape
 
                 await Task.Run(() =>
                 {
-                    this._wordGen = new WordGenerator(_random,
-                        minSubWordLen: MinSubWordLength,
-                        numMaxSubWords: 1500);
+                    this._wordGen = new WordGenerator(_random)
+                    {
+                        _MinSubWordLen = MinSubWordLength
+                    };
                     _WordCont = this._wordGen.GenerateWord(LenTargetWord);
                     _gridgen = new GenGrid(maxX: 12, maxY: 12, _WordCont, this._wordGen._rand);
                 });

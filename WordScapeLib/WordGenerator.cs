@@ -21,12 +21,10 @@ namespace WordScape
         public readonly Random _rand;
         public readonly DictionaryLib.DictionaryLib _dictionaryLibSmall;
         public readonly DictionaryLib.DictionaryLib _dictionaryLibLarge;
-        public readonly int _MinSubWordLen = 5;
-        public readonly int _numMaxSubWords = 1500;
-        public WordGenerator(Random rand = null, int minSubWordLen = 5, int numMaxSubWords = 1500)
+        public int _MinSubWordLen = 5;
+        public int _numMaxSubWords = 1500;
+        public WordGenerator(Random rand = null)
         {
-            this._MinSubWordLen = minSubWordLen;
-            this._numMaxSubWords = numMaxSubWords;
             if (rand == null)
             {
                 _rand = new Random();
