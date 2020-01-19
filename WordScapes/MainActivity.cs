@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Android.App;
+using Android.Graphics;
 using Android.OS;
 using Android.Runtime;
 using Android.Support.Design.Widget;
@@ -24,6 +25,7 @@ namespace WordScapes
         public const int idtxtLenSubWord = 30;
         public const int idtxtTimer = 40;
         public const int idBtnShuffle = 70;
+        public const int idGrdXWord = 80;
         public const int idtxtWordSofar = 100;
         private int idTitleText;
 
@@ -32,7 +34,9 @@ namespace WordScapes
         TextView _txtLenTargetWord;
         TextView _txtLenSubword;
         TextView _txtWordSoFar;
+        GridLayout _grdXWord;
         Button _btnNew;
+
 
         bool _timerEnabled = false;
         CancellationTokenSource _cts = null;
@@ -44,6 +48,8 @@ namespace WordScapes
         public WordGenerator _wordGen;
         public WordContainer _WordCont;
         public GenGrid _gridgen;
+        private int _nCols = 12;
+        private int _nRows = 12;
 
         void createLayout()
         {
@@ -82,6 +88,16 @@ namespace WordScapes
             };
             layout.AddView(_txtTimer);
 
+            _grdXWord = new GridLayout(this)
+            {
+                Id= idGrdXWord,
+                ColumnCount = _nCols,
+                RowCount = _nRows,
+                AlignmentMode = GridAlign.Bounds
+            };
+            _grdXWord.SetBackgroundColor(Color.Red);
+            layout.AddView(_grdXWord);
+
             _txtWordSoFar = new TextView(this)
             {
                 Id = idtxtWordSofar,
@@ -111,11 +127,13 @@ namespace WordScapes
                     _txtTimer.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
                     ((RelativeLayout.LayoutParams)(_txtTimer.LayoutParameters)).AddRule(LayoutRules.AlignParentRight);
 
+                    _grdXWord.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
+                    ((RelativeLayout.LayoutParams)(_grdXWord.LayoutParameters)).AddRule(LayoutRules.Below, idBtnPlayAgain);
 
 
 
                     _txtWordSoFar.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
-                    ((RelativeLayout.LayoutParams)(_txtWordSoFar.LayoutParameters)).AddRule(LayoutRules.Below, idBtnPlayAgain);
+                    ((RelativeLayout.LayoutParams)(_txtWordSoFar.LayoutParameters)).AddRule(LayoutRules.Below, idGrdXWord);
 
 
 
@@ -195,7 +213,25 @@ namespace WordScapes
             {
                 this._txtWordSoFar.Text = err;
             }
+            DisplayXWords();
             _btnNew.Enabled = true;
+        }
+
+        private void DisplayXWords()
+        {
+            _grdXWord.RemoveAllViews();
+
+            for (int iRow = 0; iRow < _nRows; iRow++)
+            {
+                for (int iCol = 0; iCol < _nCols; iCol++)
+                {
+                    var x = new TextView(this)
+                    {
+                        Text = (iRow * _nRows + iCol).ToString()
+                    };
+                    _grdXWord.AddView(x);
+                }
+            }
         }
 
         public static string GetTimeAsString(int tmpSecs)
