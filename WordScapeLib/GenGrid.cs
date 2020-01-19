@@ -17,6 +17,9 @@ namespace WordScape
             return $"({nX,2},{nY,2}) {ltr} IsHorz={IsHoriz}";
         }
     }
+    /// <summary>
+    /// Given a set or words, places them in an array of char
+    /// </summary>
     public class GenGrid
     {
         public const char Blank = '_';

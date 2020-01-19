@@ -8,6 +8,7 @@ using Android.Support.Design.Widget;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
+using Java.Util.Prefs;
 using WordScape;
 
 namespace WordScapes
@@ -15,6 +16,8 @@ namespace WordScapes
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
+        public const string prefTargWorLen = "TargWordLen";
+        public const string prefSubWordLen = "SubWordLen";
 
         public const int idBtnPlayAgain = 10;
         public const int idtxtLenTargetWord = 20;
@@ -60,14 +63,14 @@ namespace WordScapes
             _txtLenTargetWord = new EditText(this)
             {
                 Id = idtxtLenTargetWord,
-                Text = "9"
+                Text = Xamarin.Essentials.Preferences.Get(prefTargWorLen, 7).ToString()
             };
             layout.AddView(_txtLenTargetWord);
 
             _txtLenSubword = new EditText(this)
             {
                 Id = idtxtLenSubWord,
-                Text = "5"
+                Text = Xamarin.Essentials.Preferences.Get(prefSubWordLen, 5).ToString()
             };
             layout.AddView(_txtLenSubword);
 
@@ -136,7 +139,6 @@ namespace WordScapes
             //FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
             //fab.Click += FabOnClick;
         }
-
         private async void BtnNew_Click(object sender, EventArgs e)
         {
             _btnNew.Enabled = false;
@@ -168,6 +170,9 @@ namespace WordScapes
             _timerEnabled = true;
             int.TryParse(_txtLenTargetWord.Text, out var LenTargetWord);
             int.TryParse(_txtLenSubword.Text, out var minSubWordLen);
+            Xamarin.Essentials.Preferences.Set(prefTargWorLen, LenTargetWord);
+            Xamarin.Essentials.Preferences.Set(prefSubWordLen, minSubWordLen);
+
             _wordGen._MinSubWordLen = minSubWordLen;
             var err = string.Empty;
             await Task.Run(() =>
