@@ -148,6 +148,10 @@ namespace WordScape
                     {
                         continue;
                     }
+                    if (_dictPlacedWords.ContainsKey(subword + "ER")) // disobeyer : don't put disobey
+                    {
+                        continue;
+                    }
                     ShuffleLettersPlaced();
                     foreach (var ltrPlaced in _ltrsPlaced)
                     {

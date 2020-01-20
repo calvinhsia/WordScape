@@ -8,10 +8,11 @@ namespace WordScapes
     internal class GridXCellView : TextView
     {
 
-        public const int margin = 10;
+        public const int margin = 1;
         public char _ltr;
-        public GridXCellView(Context context, char ltr) : base(context)
+        public GridXCellView(Context context, GenGrid gridgen, int x, int y) : base(context)
         {
+            char ltr = gridgen._chars[x, y];
             this._ltr = ltr;
             var layoutParam = new GridLayout.LayoutParams();
             layoutParam.SetMargins(margin, margin, margin, margin);
@@ -31,10 +32,15 @@ namespace WordScapes
             }
             else
             {
+                var fontSize = 15;
+                if (gridgen._MaxX > 12)
+                {
+                    fontSize = 13;
+                }
                 SetBackgroundColor(Color.DarkCyan);
                 SetTextColor(Color.White);
                 this.Text = _ltr.ToString();
-                this.TextSize = 15;
+                this.TextSize = fontSize;
                 this.SetTypeface(null, TypefaceStyle.Bold);
             }
 

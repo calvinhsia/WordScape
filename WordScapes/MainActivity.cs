@@ -135,7 +135,7 @@ namespace WordScapes
                 Id = idLtrWheelView,
                 LayoutParameters = new ViewGroup.LayoutParams(_ptScreenSize.X, 200)
             };
-
+            layout.AddView(_LetterWheelView);
 
             SetLayoutForOrientation(Android.Content.Res.Orientation.Portrait);
         }
@@ -247,11 +247,11 @@ namespace WordScapes
         private void DisplayXWords()
         {
 
-            for (int iCol = 0; iCol < _nCols; iCol++)
+            for (int x = 0; x < _nCols; x++)
             {
-                for (int iRow = 0; iRow < _nRows; iRow++)
+                for (int y = 0; y < _nRows; y++)
                 {
-                    var ltrTile = new GridXCellView(this, _gridgen._chars[iCol, iRow]);
+                    var ltrTile = new GridXCellView(this, _gridgen,x, y);
                     _grdXWord.AddView(ltrTile);
 
                     //var x = new GridXCellView(this)
@@ -284,6 +284,26 @@ namespace WordScapes
                 secs = tmpSecs.ToString();
             }
             return $"{hrs}{mins}{secs}";
+        }
+        public static (double X, double Y) GetScreenCoordinates<TRenderer>(TRenderer renderer) where TRenderer : Android.Views.View
+        {
+            double screenCoordinateX = renderer.GetX();
+            double screenCoordinateY = renderer.GetY();
+            Android.Views.IViewParent viewParent = renderer.Parent;
+            while (viewParent != null)
+            {
+                if (viewParent is Android.Views.ViewGroup group)
+                {
+                    screenCoordinateX += group.GetX();
+                    screenCoordinateY += group.GetY();
+                    viewParent = group.Parent;
+                }
+                else
+                {
+                    viewParent = null;
+                }
+            }
+            return (screenCoordinateX, screenCoordinateY);
         }
 
         public override bool OnCreateOptionsMenu(IMenu menu)

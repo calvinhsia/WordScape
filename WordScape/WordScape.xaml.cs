@@ -105,7 +105,7 @@ namespace WordScape
             WordScapeWindowInstance = this;
             _Random = new Random(
 #if DEBUG
-                                            //1
+                    //1
 #endif
                     );
             this.Closing += (o, ec) =>
@@ -169,7 +169,7 @@ namespace WordScape
                         _MinSubWordLen = MinSubWordLength
                     };
                     _WordCont = this._wordGen.GenerateWord(LenTargetWord);
-                    _gridgen = new GenGrid(maxX: 12, maxY: 12, _WordCont, this._wordGen._rand);
+                    _gridgen = new GenGrid(maxX: 15, maxY: 15, _WordCont, this._wordGen._rand);
                     _gridgen.Generate();
                 });
 
@@ -202,7 +202,7 @@ namespace WordScape
                 for (int x = 0; x < gridgen._MaxX; x++)
                 {
                     //unigrid.Children.Add(new TextBlock() { Text = "AA" });
-                    var ltrTile = new LtrTile(gridgen._chars[x, y]);
+                    var ltrTile = new LtrTile(gridgen, x, y);
                     unigrid.Children.Add(ltrTile);
                 }
             }
@@ -272,17 +272,23 @@ namespace WordScape
         private readonly char _ltr;
         public bool IsShowing;
         internal readonly TextBlock txtBlock;
-        public LtrTile(char ltr)
+        public LtrTile(GenGrid gengrid, int x, int y)
         {
+            var ltr = gengrid._chars[x, y];
             this._ltr = ltr;
-            Margin = new Thickness(2, 2, 2, 2);
+            var fontsize = 20;
+            if (gengrid._MaxX > 12)
+            {
+                fontsize = 17;
+            }
+            Margin = new Thickness(1, 1, 1, 1);
             if (ltr != GenGrid.Blank)
             {
                 Background = Brushes.DarkCyan;
                 txtBlock = new TextBlock()
                 {
                     Text = ltr == GenGrid.Blank ? " " : ltr.ToString().ToUpper(),
-                    FontSize = 20,
+                    FontSize = fontsize,
                     Foreground = Brushes.White,
                     //                    Background = Brushes.Black,
                     HorizontalAlignment = HorizontalAlignment.Center,
