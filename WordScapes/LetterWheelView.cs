@@ -17,11 +17,61 @@ namespace WordScapes
         List<LtrWheelLetterLayout> _lstLtrWheelLetterLayouts = new List<LtrWheelLetterLayout>();
         List<LtrWheelLetterLayout> _lstSelected = new List<LtrWheelLetterLayout>();
         private MainActivity _mainActivity;
+        Point _ptCircleCtr;
+        int circRadius = 600;
+        private bool fDidLayout;
+        private readonly double _pctRadiusLettersInCircle = .7; // the letters (are in the within the circle, forming a smaller circle) are at this fraction of the circle radius
+
 
         public LetterWheelLayout(MainActivity mainActivity) : base(mainActivity)
         {
             this._mainActivity = mainActivity;
             this.Touch += LetterWheelLayout_Touch;
+        }
+        internal void CreateWheelLetters(MainActivity mainActivity)
+        {
+            this.RemoveAllViews();
+            fDidLayout = false;
+            this._lstLtrWheelLetterLayouts.Clear();
+            //            this.LayoutParameters = layoutParametersWheel;
+            for (int i = 0; i < mainActivity._WordCont.InitialWord.Length; i++)
+            {
+                var wheelLetter = new LtrWheelLetterLayout(mainActivity, mainActivity._WordCont.InitialWord[i]);
+
+                this._lstLtrWheelLetterLayouts.Add(wheelLetter);
+                this.AddView(wheelLetter);
+            }
+        }
+        protected override void OnLayout(bool changed, int l, int t, int r, int b)
+        {
+            base.OnLayout(changed, l, t, r, b);
+            if (!fDidLayout)
+            {
+                r = _mainActivity._ptScreenSize.X;
+                Rect rect = new Rect(l, t, r, b);
+
+                "rect = ({rect.Left},{ rect.Top}) ({rect.Right},{rect.Bottom})".ToString();
+                _ptCircleCtr = new Point(rect.Left + (rect.Right - rect.Left) / 2, rect.Top + (rect.Bottom - rect.Top) / 2);
+                if (_ptCircleCtr.X != 0 && _ptCircleCtr.Y != 0)
+                {
+                    fDidLayout = true;
+                }
+                this._mainActivity._txtWordSoFar.Text = _ptCircleCtr.ToString() + " " + rect.ToString();
+
+                int ndx = 0;
+                var radsPerLetter = (2 * Math.PI / _lstLtrWheelLetterLayouts.Count);
+                foreach (var ltr in _lstLtrWheelLetterLayouts)
+                {
+                    var x = _ptCircleCtr.X + _pctRadiusLettersInCircle * circRadius * Math.Cos(radsPerLetter * ndx);// - ltr.Width / 2;
+                    var y = _ptCircleCtr.Y - _pctRadiusLettersInCircle * circRadius * Math.Sin(radsPerLetter * ndx);// - ltr.Height / 2;
+                    var letpt = new Point((int)x, (int)y);
+                    var layoutParametersWheel = new RelativeLayout.LayoutParams(ltr.Width, ltr.Height);
+                    layoutParametersWheel.LeftMargin = letpt.X - rect.Left;
+                    layoutParametersWheel.TopMargin = letpt.Y - rect.Top + circRadius/2 + 40;
+                    ltr.LayoutParameters = layoutParametersWheel;
+                    ndx++;
+                }
+            }
         }
 
         private void LetterWheelLayout_Touch(object sender, TouchEventArgs e)
@@ -91,13 +141,21 @@ namespace WordScapes
             var location = new int[2];
             view.GetLocationOnScreen(location);
             int viewX = location[0];
+            int viewY = location[1];
+
+            Rect rect = new Rect();
+            this.GetHitRect(rect);
+
 
             //point is inside view bounds
+            // xxz ({x}, {y}) {viewX},{viewY})  rect = {rect.Left},{ rect.Top}) ({rect.Right},{rect.Bottom})
             if (x > viewX && x < (viewX + view.Width))
             {
-                return true;
+                if (y > viewY && y < viewY + view.Width)
+                {
+                    return true;
+                }
             }
-
             return false;
         }
         protected override void OnDraw(Canvas canvas)
@@ -125,23 +183,6 @@ namespace WordScapes
             //canvas.DrawPaint(red);
             //            canvas.DrawRect(0, 0, middle, canvas.Height, green);
         }
-
-        internal void CreateWheelLetters(MainActivity mainActivity)
-        {
-            this.RemoveAllViews();
-            this._lstLtrWheelLetterLayouts.Clear();
-            //            this.LayoutParameters = layoutParametersWheel;
-            for (int i = 0; i < mainActivity._WordCont.InitialWord.Length; i++)
-            {
-                var wheelLetter = new LtrWheelLetterLayout(mainActivity, mainActivity._WordCont.InitialWord[i]);
-                this._lstLtrWheelLetterLayouts.Add(wheelLetter);
-                var layoutParametersWheel = new RelativeLayout.LayoutParams(100, 100);
-                wheelLetter.LayoutParameters = layoutParametersWheel;
-                layoutParametersWheel.LeftMargin = 10 + i * 100;
-                layoutParametersWheel.TopMargin = 10 + i * 100;
-                this.AddView(wheelLetter);
-            }
-        }
     }
     public class LtrWheelLetterLayout : RelativeLayout
     {
@@ -151,10 +192,12 @@ namespace WordScapes
         {
             textView = new LtrWheelLetterAnd(context, letter);
             this.AddView(textView);
-            Rect rect = new Rect();
-            this.GetHitRect(rect);
-            var location = new int[2];
-            this.GetLocationOnScreen(location);
+            this.SetBackgroundColor(Color.CornflowerBlue);
+//            this.LayoutParameters = new ViewGroup.LayoutParams(90, 90);
+            //Rect rect = new Rect();
+            //this.GetHitRect(rect);
+            //var location = new int[2];
+            //this.GetLocationOnScreen(location);
         }
 
         internal void Select()
@@ -176,12 +219,24 @@ namespace WordScapes
             }
         }
 
+        //        public class myshape : RoutingEffect
+        //        {
+        //            public myshape() 
+        //            {
+        ////                this.re
+        //            }
+
+        //            public override void Draw(Canvas canvas, Paint paint)
+        //            {
+        //                throw new NotImplementedException();
+        //            }
+        //        }
         public class LtrWheelLetterAnd : TextView
         {
             public LtrWheelLetterAnd(Context context, char letter) : base(context)
             {
                 this.Text = letter.ToString();
-                this.TextSize = 34;
+                this.TextSize = 42;
                 this.SetTypeface(null, TypefaceStyle.Bold);
                 this.SetTextColor(Color.Black);
             }

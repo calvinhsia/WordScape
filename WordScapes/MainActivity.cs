@@ -234,7 +234,6 @@ namespace WordScapes
             _grdXWord.RowCount = _nRows;
             if (string.IsNullOrEmpty(err))
             {
-                this._txtWordSoFar.Text = _WordCont.InitialWord;
             }
             else
             {
