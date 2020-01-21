@@ -37,9 +37,9 @@ namespace WordScapes
         TextView _txtLenTargetWord;
         TextView _txtLenSubword;
         TextView _txtTimer;
-        TextView _txtWordSoFar;
+        public TextView _txtWordSoFar;
         GridLayout _grdXWord;
-        LetterWheelView _LetterWheelView;
+        LetterWheelLayout _LetterWheelView;
 
 
         bool _timerEnabled = false;
@@ -130,7 +130,7 @@ namespace WordScapes
             };
             layout.AddView(_txtWordSoFar);
 
-            _LetterWheelView = new LetterWheelView(this)
+            _LetterWheelView = new LetterWheelLayout(this)
             {
                 Id = idLtrWheelView,
                 LayoutParameters = new ViewGroup.LayoutParams(_ptScreenSize.X, 200)
@@ -241,6 +241,9 @@ namespace WordScapes
                 this._txtWordSoFar.Text = err;
             }
             DisplayXWords();
+
+            _LetterWheelView.CreateWheelLetters(this);
+
             _btnNew.Enabled = true;
         }
 
