@@ -58,7 +58,7 @@ namespace WordScapes
                 {
                     fDidLayout = true;
                 }
-                this._mainActivity._txtWordSoFar.Text = _ptCircleCtr.ToString() + " " + rect.ToString();
+                //                this._mainActivity._txtWordSoFar.Text = _ptCircleCtr.ToString() + " " + rect.ToString();
 
                 int ndx = 0;
                 var radsPerLetter = (2 * Math.PI / _lstLtrWheelLetterLayouts.Count);
@@ -81,6 +81,9 @@ namespace WordScapes
             switch (e.Event.Action)
             {
                 case MotionEventActions.Down:
+                    _mainActivity._txtWordSoFar.Text = string.Empty;
+                    _mainActivity._txtWordSoFar.SetBackgroundColor(Color.White);
+                    _mainActivity._txtWordSoFar.SetTextColor(Color.Black);
                     goto case MotionEventActions.Move;
                 case MotionEventActions.Move:
                     var ltr = GetLetterFromTouch(e);
@@ -92,6 +95,21 @@ namespace WordScapes
                             _lstSelected.Add(ltr);
                             UpdateWordSofar();
                         }
+                        else
+                        { // already in select list. Should we unselect?
+                            if (_lstSelected.Count > 1)
+                            {
+                                var at = _lstSelected.IndexOf(ltr);
+                                if (at == _lstSelected.Count - 2)
+                                {
+                                    _lstSelected[_lstSelected.Count - 1].UnSelect();
+                                    _lstSelected.RemoveAt(_lstSelected.Count - 1);
+                                    UpdateWordSofar();
+                                }
+                            }
+                        }
+
+
                     }
                     break;
                 case MotionEventActions.Up:
@@ -131,6 +149,7 @@ namespace WordScapes
                                     break;
                                 case WordStatus.IsShownInGridForFirstTime:
                                     _mainActivity.NumWordsFound++;
+                                    _mainActivity.UpdateScore();
                                     foundWordType = FoundWordType.SubWordInGrid;
                                     _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = foundWordType, word = wrdSoFar });
                                     //var anim = new ColorAnimation(fromValue:
@@ -150,6 +169,27 @@ namespace WordScapes
                         }
                         if (doRefreshList)
                         {
+                            var colr = Color.Transparent;
+                            var forecolr = Color.Black;
+                            switch (foundWordType)
+                            {
+                                case FoundWordType.SubWordNotAWord:
+                                    colr = Color.LightPink;
+                                    break;
+                                case FoundWordType.SubWordInLargeDictionary:
+                                    colr = Color.LightSeaGreen;
+                                    break;
+                                case FoundWordType.SubWordInGrid:
+                                    colr = Color.DarkCyan;
+                                    forecolr = Color.White;
+                                    break;
+                                case FoundWordType.SubWordNotInGrid:
+                                    colr = Color.LightBlue;
+                                    break;
+                            }
+                            this._mainActivity._txtWordSoFar.SetBackgroundColor(colr);
+                            this._mainActivity._txtWordSoFar.SetTextColor(forecolr);
+
                             this.RefreshWordList(wrdSoFar);
                         }
                     }
@@ -225,7 +265,7 @@ namespace WordScapes
             {
                 letr.UnSelect();
             }
-            _mainActivity._txtWordSoFar.Text = string.Empty;
+            // don't clear wordsofar yet because user can see what the word was entered
         }
 
         private LtrWheelLetterLayout GetLetterFromTouch(TouchEventArgs e)
@@ -310,7 +350,11 @@ namespace WordScapes
             textView = new LtrWheelLetterAnd(context, letter);
             this.AddView(textView);
             //            this.SetBackgroundColor(Color.CornflowerBlue);
-            //            this.LayoutParameters = new ViewGroup.LayoutParams(90, 90);
+            var parms = new RelativeLayout.LayoutParams(195, 195);
+            //parms.AddRule(LayoutRules.CenterHorizontal);
+            //parms.AddRule(LayoutRules.CenterVertical);
+            //parms.TopMargin = -20;
+            textView.LayoutParameters = parms;
             //Rect rect = new Rect();
             //this.GetHitRect(rect);
             //var location = new int[2];
@@ -353,7 +397,8 @@ namespace WordScapes
             public LtrWheelLetterAnd(Context context, char letter) : base(context)
             {
                 this.Text = letter.ToString();
-                this.TextSize = 42;
+                this.TextSize = 40;
+                this.TextAlignment = TextAlignment.Center;
                 this.SetTypeface(null, TypefaceStyle.Bold);
                 this.SetTextColor(Color.Black);
             }

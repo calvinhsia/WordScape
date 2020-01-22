@@ -51,7 +51,7 @@
             <TextBox Width="90" Margin="20,0,0,0" FontSize="20" HorizontalAlignment="Right" IsReadOnly="True" Text="{Binding CountDownTimeStr, Mode=OneWay}"/>
         </StackPanel>
         <UniformGrid Grid.Row="1" Name="unigrid"/>
-        <TextBlock x:Name="TxtLtrsSoFar" 
+        <TextBlock x:Name="TxtWrdSoFar" 
                    HorizontalAlignment="Center" 
                    Text="{Binding StrWordSoFar}"
                    FontSize="24" 

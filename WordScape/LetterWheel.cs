@@ -153,6 +153,9 @@ namespace WordScape
             base.OnMouseDown(e);
             e.Handled = true;
             this.CaptureMouse();
+            this.wordScapeWindow.StrWordSoFar = string.Empty;
+            this.wordScapeWindow.TxtWrdSoFar.Foreground = Brushes.Black;
+            this.wordScapeWindow.TxtWrdSoFar.Background = Brushes.White;
             polyLine.Points.Clear();
             _lstLtrsSelected.Clear();
             var ltrUnderMouse = LtrFromArgs(e);
@@ -184,7 +187,7 @@ namespace WordScape
                 var ltrUnderMouse = LtrFromArgs(e);
                 if (ltrUnderMouse != null)
                 {
-                    if (_lstLtrsSelected.Contains(ltrUnderMouse))
+                    if (ltrUnderMouse.IsSelected)
                     {
                         if (_lstLtrsSelected.Count > 1)
                         {
@@ -278,6 +281,26 @@ namespace WordScape
                 }
                 if (doRefreshList)
                 {
+                    var backcolor = Brushes.Transparent;
+                    var forecolor = Brushes.Black;
+                    switch (foundWordType)
+                    {
+                        case FoundWordType.SubWordNotAWord:
+                            backcolor = Brushes.LightPink;
+                            break;
+                        case FoundWordType.SubWordInLargeDictionary:
+                            backcolor = Brushes.LightSeaGreen;
+                            break;
+                        case FoundWordType.SubWordInGrid:
+                            backcolor = Brushes.DarkCyan;
+                            forecolor = Brushes.White;
+                            break;
+                        case FoundWordType.SubWordNotInGrid:
+                            backcolor = Brushes.LightBlue;
+                            break;
+                    }
+                    this.wordScapeWindow.TxtWrdSoFar.Background = backcolor;
+                    this.wordScapeWindow.TxtWrdSoFar.Foreground = forecolor;
                     this.RefreshWordList(wrdSoFar);
                 }
             }
@@ -296,7 +319,7 @@ namespace WordScape
             }
             else
             {
-                this.wordScapeWindow.StrWordSoFar = string.Empty;
+                // don't clear wordsofar yet because user can see what the word was entered
             }
         }
 

@@ -25,6 +25,7 @@ namespace WordScapes
         public const int idtxtTimer = 10;
         public const int idtxtLenTargetWord = 20;
         public const int idtxtLenSubWord = 30;
+        public const int idtxtScore = 35;
         public const int idBtnPlayAgain = 40;
         public const int idBtnShuffle = 50;
         public const int idGrdXWord = 60;
@@ -36,6 +37,7 @@ namespace WordScapes
         Button _btnNew;
         TextView _txtLenTargetWord;
         TextView _txtLenSubword;
+        TextView _txtScore;
         TextView _txtTimer;
         public TextView _txtWordSoFar;
         public MyGridLayout _grdXWord;
@@ -62,7 +64,7 @@ namespace WordScapes
             MainActivity._instance = this;
             _Random = new Random(
 #if DEBUG
-                    1
+//                    1
 #endif
                     );
             createLayout();
@@ -86,8 +88,8 @@ namespace WordScapes
             _txtTimer = new TextView(this)
             {
                 Id = idtxtTimer,
-                Text = "timer",
-                TextSize = 30,
+                TextSize = 20,
+                TextAlignment = TextAlignment.TextEnd
             };
             layout.AddView(_txtTimer);
 
@@ -104,6 +106,12 @@ namespace WordScapes
                 Text = Xamarin.Essentials.Preferences.Get(prefSubWordLen, 5).ToString()
             };
             layout.AddView(_txtLenSubword);
+
+            _txtScore = new TextView(this)
+            {
+                Id = idtxtScore
+            };
+            layout.AddView(_txtScore);
 
             _btnNew = new Button(this)
             {
@@ -128,6 +136,7 @@ namespace WordScapes
             _txtWordSoFar = new TextView(this)
             {
                 Id = idtxtWordSofar,
+                TextSize= 16
             };
             layout.AddView(_txtWordSoFar);
 
@@ -154,8 +163,14 @@ namespace WordScapes
                     ((RelativeLayout.LayoutParams)(_txtLenSubword.LayoutParameters)).AddRule(LayoutRules.RightOf, idtxtLenTargetWord);
                     ((RelativeLayout.LayoutParams)(_txtLenSubword.LayoutParameters)).AddRule(LayoutRules.Below, idTitleText);
 
-                    _txtTimer.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
+                    _txtScore.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
+                    ((RelativeLayout.LayoutParams)(_txtScore.LayoutParameters)).AddRule(LayoutRules.LeftOf, idtxtTimer);
+                    ((RelativeLayout.LayoutParams)(_txtScore.LayoutParameters)).AddRule(LayoutRules.Below, idTitleText);
+
+
+                    _txtTimer.LayoutParameters = new RelativeLayout.LayoutParams(300, RelativeLayout.LayoutParams.WrapContent);
                     ((RelativeLayout.LayoutParams)(_txtTimer.LayoutParameters)).AddRule(LayoutRules.LeftOf, idBtnPlayAgain);
+                    ((RelativeLayout.LayoutParams)(_txtTimer.LayoutParameters)).AddRule(LayoutRules.AlignRight);
 
                     _btnNew.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
                     ((RelativeLayout.LayoutParams)(_btnNew.LayoutParameters)).AddRule(LayoutRules.AlignParentRight);
@@ -166,7 +181,9 @@ namespace WordScapes
 
 
                     _txtWordSoFar.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
+                    ((RelativeLayout.LayoutParams)(_txtWordSoFar.LayoutParameters)).TopMargin = 30;
                     ((RelativeLayout.LayoutParams)(_txtWordSoFar.LayoutParameters)).AddRule(LayoutRules.Below, idGrdXWord);
+                    ((RelativeLayout.LayoutParams)(_txtWordSoFar.LayoutParameters)).AddRule(LayoutRules.CenterHorizontal);
 
 
                     _LetterWheelView.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
@@ -177,13 +194,64 @@ namespace WordScapes
             }
         }
 
+        public void UpdateScore()
+        {
+            _txtScore.Text = $"{NumWordsFound}/{_gridgen.NumWordsPlaced}";
+        }
+
         private async void BtnNew_Click(object sender, EventArgs e)
         {
             _btnNew.Enabled = false;
+            //            _grdXWord.Invalidate();
+            _txtScore.Text = string.Empty;
+            NumWordsFound = 0;
             if (_cts != null)
             {
                 _cts.Cancel();
                 _timerEnabled = false;
+            }
+            int.TryParse(_txtLenTargetWord.Text, out var LenTargetWord);
+            int.TryParse(_txtLenSubword.Text, out var minSubWordLen);
+            Xamarin.Essentials.Preferences.Set(prefTargWorLen, LenTargetWord);
+            Xamarin.Essentials.Preferences.Set(prefSubWordLen, minSubWordLen);
+
+            _wordGen._MinSubWordLen = minSubWordLen;
+
+            var err = string.Empty;
+            await Task.Run(() =>
+            {
+                try
+                {
+                    _wordCont = _wordGen.GenerateWord(LenTargetWord);
+                    _gridgen = new GenGrid(maxX: 12, maxY: 12, _wordCont, this._Random);
+                    _gridgen.Generate();
+                    //                    var xx = _gridgen.ShowGrid();
+                }
+                catch (Exception ex)
+                {
+                    err = ex.ToString();
+                }
+            });
+
+            if (string.IsNullOrEmpty(err))
+            {
+            }
+            else
+            {
+                this._txtWordSoFar.Text = err;
+            }
+            _grdXWord.ClearViews();
+            _nCols = _gridgen._MaxX;
+            _nRows = _gridgen._MaxY;
+            _grdXWord.ColumnCount = _nCols;
+            _grdXWord.RowCount = _nRows;
+
+            DisplayXWords();
+            UpdateScore();
+            _LetterWheelView.CreateWheelLetters(this);
+
+            if (_tskTimer != null)
+            {
                 await _tskTimer;
             }
             _cts = new CancellationTokenSource();
@@ -206,43 +274,6 @@ namespace WordScapes
             _txtTimer.Text = string.Empty;
             _nSecondsElapsed = 0;
             _timerEnabled = true;
-            int.TryParse(_txtLenTargetWord.Text, out var LenTargetWord);
-            int.TryParse(_txtLenSubword.Text, out var minSubWordLen);
-            Xamarin.Essentials.Preferences.Set(prefTargWorLen, LenTargetWord);
-            Xamarin.Essentials.Preferences.Set(prefSubWordLen, minSubWordLen);
-
-            _wordGen._MinSubWordLen = minSubWordLen;
-            var err = string.Empty;
-            await Task.Run(() =>
-            {
-                try
-                {
-                    _wordCont = _wordGen.GenerateWord(LenTargetWord);
-                    _gridgen = new GenGrid(maxX: 12, maxY: 12, _wordCont, this._Random);
-                    _gridgen.Generate();
-                    //                    var xx = _gridgen.ShowGrid();
-                }
-                catch (Exception ex)
-                {
-                    err = ex.ToString();
-                }
-            });
-            _grdXWord.ClearViews();
-            //            _grdXWord.Invalidate();
-            _nCols = _gridgen._MaxX;
-            _nRows = _gridgen._MaxY;
-            _grdXWord.ColumnCount = _nCols;
-            _grdXWord.RowCount = _nRows;
-            if (string.IsNullOrEmpty(err))
-            {
-            }
-            else
-            {
-                this._txtWordSoFar.Text = err;
-            }
-            DisplayXWords();
-
-            _LetterWheelView.CreateWheelLetters(this);
 
             _btnNew.Enabled = true;
         }
