@@ -202,7 +202,7 @@ namespace WordScapes
         private async void BtnNew_Click(object sender, EventArgs e)
         {
             _btnNew.Enabled = false;
-            //            _grdXWord.Invalidate();
+            _txtWordSoFar.Text = string.Empty;
             _txtScore.Text = string.Empty;
             NumWordsFound = 0;
             if (_cts != null)

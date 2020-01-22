@@ -118,15 +118,15 @@ namespace WordScape
                 if (NumWordsPlaced == 0)
                 {
                     int x, y, incY = 0, incX = 0;
-                    if (_random.NextDouble() < .5) // horiz
+                    if (_random.NextDouble() < .5) // horiz. Try to make 1st word centrally located
                     {
-                        y = _random.Next(_MaxY);
+                        y = _MaxY / 4 + _random.Next(_MaxY / 2);
                         x = _random.Next(_MaxX - subword.Length);
                         incX = 1;
                     }
                     else
                     { // up/down
-                        x = _random.Next(_MaxX);
+                        x = _MaxX / 4 + _random.Next(_MaxX / 2);
                         y = _random.Next(_MaxY - subword.Length);
                         incY = 1;
                     }
