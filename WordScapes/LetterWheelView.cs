@@ -6,6 +6,7 @@ using Android.Views;
 using Android.Widget;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using WordScape;
 
 namespace WordScapes
@@ -21,6 +22,7 @@ namespace WordScapes
         int circRadius = 600;
         private bool fDidLayout;
         private readonly double _pctRadiusLettersInCircle = .7; // the letters (are in the within the circle, forming a smaller circle) are at this fraction of the circle radius
+        private readonly List<FoundWord> _lstFoundWordsSoFar = new List<FoundWord>();
 
 
         public LetterWheelLayout(MainActivity mainActivity) : base(mainActivity)
@@ -34,9 +36,9 @@ namespace WordScapes
             fDidLayout = false;
             this._lstLtrWheelLetterLayouts.Clear();
             //            this.LayoutParameters = layoutParametersWheel;
-            for (int i = 0; i < mainActivity._WordCont.InitialWord.Length; i++)
+            for (int i = 0; i < mainActivity._wordCont.InitialWord.Length; i++)
             {
-                var wheelLetter = new LtrWheelLetterLayout(mainActivity, mainActivity._WordCont.InitialWord[i]);
+                var wheelLetter = new LtrWheelLetterLayout(mainActivity, mainActivity._wordCont.InitialWord[i]);
 
                 this._lstLtrWheelLetterLayouts.Add(wheelLetter);
                 this.AddView(wheelLetter);
@@ -67,7 +69,7 @@ namespace WordScapes
                     var letpt = new Point((int)x, (int)y);
                     var layoutParametersWheel = new RelativeLayout.LayoutParams(ltr.Width, ltr.Height);
                     layoutParametersWheel.LeftMargin = letpt.X - rect.Left;
-                    layoutParametersWheel.TopMargin = letpt.Y - rect.Top + circRadius/2 + 40;
+                    layoutParametersWheel.TopMargin = letpt.Y - rect.Top + circRadius / 2 + 40;
                     ltr.LayoutParameters = layoutParametersWheel;
                     ndx++;
                 }
@@ -93,9 +95,117 @@ namespace WordScapes
                     }
                     break;
                 case MotionEventActions.Up:
+                    var wrdSoFar = _mainActivity._txtWordSoFar.Text;
+                    if (wrdSoFar.Length >= _mainActivity._wordGen._MinSubWordLen)
+                    {
+                        var doRefreshList = false;
+                        var foundWordType = FoundWordType.SubWordNotAWord;
+                        if (_lstFoundWordsSoFar.Where(p => p.word == wrdSoFar).Any()) // user already found this word
+                        {
+                            foundWordType = FoundWordType.SubWordInGrid;
+                            this.RefreshWordList(wrdSoFar);
+                        }
+                        else
+                        {
+                            var stat = this.ShowWord(wrdSoFar);
+                            switch (stat)
+                            {
+                                case WordStatus.IsNotInGrid:
+                                    foundWordType = FoundWordType.SubWordNotInGrid;
+                                    if (!_mainActivity._wordCont.subwords.Contains(wrdSoFar))
+                                    {
+                                        if (this._mainActivity._wordGen._dictionaryLibLarge.IsWord(wrdSoFar.ToLower()))
+                                        {
+                                            foundWordType = FoundWordType.SubWordInLargeDictionary;
+                                        }
+                                        else
+                                        {
+                                            foundWordType = FoundWordType.SubWordNotAWord;
+                                        }
+                                    }
+                                    _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = foundWordType, word = wrdSoFar });
+                                    doRefreshList = true;
+                                    break;
+                                case WordStatus.IsAlreadyInGrid:
+                                    foundWordType = FoundWordType.SubWordInGrid;
+                                    break;
+                                case WordStatus.IsShownInGridForFirstTime:
+                                    _mainActivity.NumWordsFound++;
+                                    foundWordType = FoundWordType.SubWordInGrid;
+                                    _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = foundWordType, word = wrdSoFar });
+                                    //var anim = new ColorAnimation(fromValue:
+                                    //    Colors.Black,
+                                    //    toValue: Colors.Transparent,
+                                    //    duration: TimeSpan.FromMilliseconds(100)
+                                    //    )
+                                    //{
+                                    //    FillBehavior = FillBehavior.HoldEnd,
+                                    //    RepeatBehavior = new RepeatBehavior(10)
+                                    //};
+                                    //WordScapeWindow.WordScapeWindowInstance.txtNumWordsFound.Background = new SolidColorBrush(Colors.Transparent);
+                                    //WordScapeWindow.WordScapeWindowInstance.txtNumWordsFound.Background.BeginAnimation(SolidColorBrush.ColorProperty, anim);
+                                    doRefreshList = true;
+                                    break;
+                            }
+                        }
+                        if (doRefreshList)
+                        {
+                            this.RefreshWordList(wrdSoFar);
+                        }
+                    }
                     ClearSelection();
                     break;
             }
+        }
+
+        private WordStatus ShowWord(string wrdSoFar)
+        {
+            var wrdStatus = WordStatus.IsNotInGrid;
+            if ( _mainActivity._gridgen._dictPlacedWords.TryGetValue(wrdSoFar, out var ltrPlaced))
+            {
+                wrdStatus = WordStatus.IsAlreadyInGrid;
+                int incx = 0, incy = 0, x = ltrPlaced.nX, y = ltrPlaced.nY;
+                if (ltrPlaced.IsHoriz)
+                {
+                    incx = 1;
+                }
+                else
+                {
+                    incy = 1;
+                }
+
+                for (int i = 0; i < wrdSoFar.Length; i++)
+                {
+                    var ltrTile = this._mainActivity._grdXWord._lstViews[y * _mainActivity._gridgen._MaxX + x] as GridXCellView;
+                    if (!ltrTile.IsShowing)
+                    {
+                        wrdStatus = WordStatus.IsShownInGridForFirstTime;
+                        ltrTile.ShowLetter();
+                    }
+                    //ltrTile.txtBlock.Background = new SolidColorBrush(Colors.Transparent);
+                    //ltrTile.txtBlock.Background.BeginAnimation(SolidColorBrush.ColorProperty, anim);
+
+
+
+                    //var ppath = new PropertyPath("Background"); // new PropertyPath("Background")
+                    //var sb = new Storyboard();
+                    //sb.Children.Add(anim);
+
+                    //Storyboard.SetTargetProperty(anim, ppath);
+                    //Storyboard.SetTarget(sb, ltrTile.txtBlock);
+                    //sb.Begin();
+                    //ltrTile.txtBlock.BeginAnimation(ppath, anim);
+                    //ltrTile.txtBlock.BeginAnimation()
+                    //ltrTile.txtBlock.BeginAnimation(TextBlock.HeightProperty, anim);
+                    //ltrTile.txtBlock.BeginAnimation(TextBlock.WidthProperty, anim);
+                    x += incx; y += incy;
+                }
+            }
+            return wrdStatus;
+        }
+
+        private void RefreshWordList(string wrdSoFar)
+        {
         }
 
         private void UpdateWordSofar()
@@ -199,8 +309,8 @@ namespace WordScapes
         {
             textView = new LtrWheelLetterAnd(context, letter);
             this.AddView(textView);
-            this.SetBackgroundColor(Color.CornflowerBlue);
-//            this.LayoutParameters = new ViewGroup.LayoutParams(90, 90);
+            //            this.SetBackgroundColor(Color.CornflowerBlue);
+            //            this.LayoutParameters = new ViewGroup.LayoutParams(90, 90);
             //Rect rect = new Rect();
             //this.GetHitRect(rect);
             //var location = new int[2];

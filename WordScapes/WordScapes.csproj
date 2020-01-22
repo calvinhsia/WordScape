@@ -26,10 +26,10 @@
     <AndroidUseAapt2>true</AndroidUseAapt2>
     <AndroidHttpClientHandlerType>Xamarin.Android.Net.AndroidClientHandler</AndroidHttpClientHandlerType>
   </PropertyGroup>
-<PropertyGroup>
+  <PropertyGroup>
     <MSBuildWarningsAsMessages>XA5302</MSBuildWarningsAsMessages>
-</PropertyGroup>
-	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
     <DebugType>portable</DebugType>
     <Optimize>False</Optimize>
@@ -68,6 +68,7 @@
     <Compile Include="GridXCellView.cs" />
     <Compile Include="LetterWheelView.cs" />
     <Compile Include="MainActivity.cs" />
+    <Compile Include="MyGridLayout.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

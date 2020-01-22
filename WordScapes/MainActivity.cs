@@ -38,7 +38,7 @@ namespace WordScapes
         TextView _txtLenSubword;
         TextView _txtTimer;
         public TextView _txtWordSoFar;
-        GridLayout _grdXWord;
+        public MyGridLayout _grdXWord;
         LetterWheelLayout _LetterWheelView;
 
 
@@ -50,8 +50,9 @@ namespace WordScapes
         public static MainActivity _instance;
         private Random _Random;
         public WordGenerator _wordGen;
-        public WordContainer _WordCont;
+        public WordContainer _wordCont;
         public GenGrid _gridgen;
+        public int NumWordsFound;
         internal int _nCols = 12;
         internal int _nRows = 12;
         protected override void OnCreate(Bundle savedInstanceState)
@@ -113,12 +114,12 @@ namespace WordScapes
             layout.AddView(_btnNew);
 
 
-            _grdXWord = new GridLayout(this)
+            _grdXWord = new MyGridLayout(this)
             {
                 Id = idGrdXWord,
                 ColumnCount = _nCols,
                 RowCount = _nRows,
-                Orientation= GridOrientation.Vertical,
+                Orientation = GridOrientation.Horizontal,
                 AlignmentMode = GridAlign.Bounds
             };
             //            _grdXWord.SetBackgroundColor(Color.Red);
@@ -216,21 +217,21 @@ namespace WordScapes
             {
                 try
                 {
-                    _WordCont = _wordGen.GenerateWord(LenTargetWord);
-                    _gridgen = new GenGrid(maxX: 12, maxY: 12, _WordCont, this._Random);
+                    _wordCont = _wordGen.GenerateWord(LenTargetWord);
+                    _gridgen = new GenGrid(maxX: 12, maxY: 12, _wordCont, this._Random);
                     _gridgen.Generate();
-//                    var xx = _gridgen.ShowGrid();
+                    //                    var xx = _gridgen.ShowGrid();
                 }
                 catch (Exception ex)
                 {
                     err = ex.ToString();
                 }
             });
-            _grdXWord.RemoveAllViews();
-//            _grdXWord.Invalidate();
+            _grdXWord.ClearViews();
+            //            _grdXWord.Invalidate();
             _nCols = _gridgen._MaxX;
             _nRows = _gridgen._MaxY;
-            _grdXWord.ColumnCount= _nCols;
+            _grdXWord.ColumnCount = _nCols;
             _grdXWord.RowCount = _nRows;
             if (string.IsNullOrEmpty(err))
             {
@@ -249,11 +250,11 @@ namespace WordScapes
         private void DisplayXWords()
         {
 
-            for (int x = 0; x < _nCols; x++)
+            for (int y = 0; y < _nRows; y++)
             {
-                for (int y = 0; y < _nRows; y++)
+                for (int x = 0; x < _nCols; x++)
                 {
-                    var ltrTile = new GridXCellView(this, _gridgen,x, y);
+                    var ltrTile = new GridXCellView(this, _gridgen, x, y);
                     _grdXWord.AddView(ltrTile);
 
                     //var x = new GridXCellView(this)

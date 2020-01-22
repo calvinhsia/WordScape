@@ -1,12 +1,15 @@
 ﻿using Android.Content;
 using Android.Graphics;
 using Android.Widget;
+using System;
+using System.Threading.Tasks;
 using WordScape;
 
 namespace WordScapes
 {
-    internal class GridXCellView : TextView
+    public class GridXCellView : TextView
     {
+        public bool IsShowing { get; internal set; }
 
         public const int margin = 1;
         public char _ltr;
@@ -26,11 +29,7 @@ namespace WordScapes
             }
             this.TextAlignment = Android.Views.TextAlignment.Center;
             this.LayoutParameters = layoutParam;
-            if (this._ltr == GenGrid.Blank)
-            {
-                this.Visibility = Android.Views.ViewStates.Invisible;
-            }
-            else
+            if (this._ltr != GenGrid.Blank)
             {
                 var fontSize = 15;
                 if (gridgen._MaxX > 12)
@@ -39,15 +38,34 @@ namespace WordScapes
                 }
                 SetBackgroundColor(Color.DarkCyan);
                 SetTextColor(Color.White);
-                this.Text = _ltr.ToString();
                 this.TextSize = fontSize;
                 this.SetTypeface(null, TypefaceStyle.Bold);
+                this.Touch += GridXCellView_Touch;
             }
-
+            else
+            {
+                this.Visibility = Android.Views.ViewStates.Invisible;
+                IsShowing = true;
+            }
         }
-        protected override void OnDraw(Canvas canvas)
+
+        private async void GridXCellView_Touch(object sender, TouchEventArgs e)
         {
-            base.OnDraw(canvas);
+            if (!IsShowing)
+            {
+                Text = _ltr.ToString();
+                await Task.Delay(TimeSpan.FromSeconds(2.5));
+                Text = string.Empty;
+            }
+        }
+
+        internal void ShowLetter()
+        {
+            if (!IsShowing && this._ltr != GenGrid.Blank)
+            {
+                Text = _ltr.ToString();
+                IsShowing = true;
+            }
         }
     }
 }

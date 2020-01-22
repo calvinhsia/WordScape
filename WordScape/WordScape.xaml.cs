@@ -270,7 +270,7 @@ namespace WordScape
     public class LtrTile : DockPanel
     {
         private readonly char _ltr;
-        public bool IsShowing;
+        public bool IsShowing { get; internal set; }
         internal readonly TextBlock txtBlock;
         public LtrTile(GenGrid gengrid, int x, int y)
         {
@@ -299,8 +299,6 @@ namespace WordScape
             }
             else
             {
-                this.txtBlock = new TextBlock();
-                this.Children.Add(txtBlock);
                 IsShowing = true;
             }
         }

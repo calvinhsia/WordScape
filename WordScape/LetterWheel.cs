@@ -14,22 +14,9 @@ namespace WordScape
 {
     public class LetterWheel : Canvas
     {
-        enum FoundWordType
-        {
-            SubWordNotAWord,
-            SubWordInGrid,
-            SubWordNotInGrid,
-            SubWordInLargeDictionary
-        };
-        class FoundWord
-        {
-            public FoundWordType foundStringType;
-            public string word;
-        }
         private WordScapeWindow wordScapeWindow;
         private WordContainer _wordCont;
         private GenGrid gridgen;
-        int _WordsFound;
 
         private readonly List<LetterWheelLetter> _lstLetters = new List<LetterWheelLetter>();
         private readonly Polyline polyLine = new Polyline()
@@ -57,14 +44,14 @@ namespace WordScape
             this._wordCont = wordCont;
             this.gridgen = gridgen;
             this.CreateCircle();
-            _WordsFound = 0;
+            wordScapeWindow.NumWordsFound = 0;
             _lstFoundWordsSoFar.Clear();
         }
 
         private void CreateCircle()
         {
             this.Children.Clear();
-//            this.Background = Brushes.AliceBlue;
+            //            this.Background = Brushes.AliceBlue;
             var circRadius = 110;
             var circ = new Ellipse()
             {
@@ -274,7 +261,6 @@ namespace WordScape
                             WordScapeWindow.WordScapeWindowInstance.NumWordsFound++;
                             foundWordType = FoundWordType.SubWordInGrid;
                             _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = foundWordType, word = wrdSoFar });
-                            _WordsFound++;
                             var anim = new ColorAnimation(fromValue:
                                 Colors.Black,
                                 toValue: Colors.Transparent,
@@ -303,7 +289,7 @@ namespace WordScape
                 ltr.UnSelect();
             }
             _lstLtrsSelected.Clear();
-            if (_WordsFound == this.gridgen._dictPlacedWords.Count)
+            if (wordScapeWindow.NumWordsFound == this.gridgen._dictPlacedWords.Count)
             {
                 this.wordScapeWindow.StrWordSoFar = "YAYYY!";
                 this.wordScapeWindow.TimerIsEnabled = false;
@@ -312,12 +298,6 @@ namespace WordScape
             {
                 this.wordScapeWindow.StrWordSoFar = string.Empty;
             }
-        }
-        public enum WordStatus
-        {
-            IsAlreadyInGrid,
-            IsShownInGridForFirstTime,
-            IsNotInGrid
         }
 
         internal WordStatus ShowWord(string wrdSoFar)
@@ -396,8 +376,9 @@ namespace WordScape
             this.wordScapeWindow.LstWrdsSoFar.Clear();
             foreach (var wrd in this._lstFoundWordsSoFar.OrderBy(p => p.word))
             {
-                var tb = new MyTextBlockWithOnlineLookup() { 
-                    Text = wrd.word, 
+                var tb = new MyTextBlockWithOnlineLookup()
+                {
+                    Text = wrd.word,
                     FontSize = 16
                 };
                 var colr = Colors.Transparent;

@@ -9,6 +9,24 @@ using System.Threading.Tasks;
 
 namespace WordScape
 {
+    public enum WordStatus
+    {
+        IsAlreadyInGrid,
+        IsShownInGridForFirstTime,
+        IsNotInGrid
+    }
+    public enum FoundWordType
+    {
+        SubWordNotAWord,
+        SubWordInGrid,
+        SubWordNotInGrid,
+        SubWordInLargeDictionary
+    };
+    public class FoundWord
+    {
+        public FoundWordType foundStringType;
+        public string word;
+    }
     public class LtrPlaced
     {
         public int nX;
