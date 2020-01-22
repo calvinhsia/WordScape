@@ -19,7 +19,7 @@ namespace WordScapes
         List<LtrWheelLetterLayout> _lstSelected = new List<LtrWheelLetterLayout>();
         private MainActivity _mainActivity;
         Point _ptCircleCtr;
-        int circRadius = 600;
+        int circRadius = 500;
         private bool fDidLayout;
         private readonly double _pctRadiusLettersInCircle = .7; // the letters (are in the within the circle, forming a smaller circle) are at this fraction of the circle radius
         private readonly List<FoundWord> _lstFoundWordsSoFar = new List<FoundWord>();
@@ -36,9 +36,9 @@ namespace WordScapes
             fDidLayout = false;
             this._lstLtrWheelLetterLayouts.Clear();
             //            this.LayoutParameters = layoutParametersWheel;
-            for (int i = 0; i < mainActivity._wordCont.InitialWord.Length; i++)
+            foreach (var ltr in mainActivity._wordCont.InitialWord.OrderBy(p => mainActivity._Random.NextDouble()))
             {
-                var wheelLetter = new LtrWheelLetterLayout(mainActivity, mainActivity._wordCont.InitialWord[i]);
+                var wheelLetter = new LtrWheelLetterLayout(mainActivity, ltr);
 
                 this._lstLtrWheelLetterLayouts.Add(wheelLetter);
                 this.AddView(wheelLetter);
@@ -161,7 +161,7 @@ namespace WordScapes
         private WordStatus ShowWord(string wrdSoFar)
         {
             var wrdStatus = WordStatus.IsNotInGrid;
-            if ( _mainActivity._gridgen._dictPlacedWords.TryGetValue(wrdSoFar, out var ltrPlaced))
+            if (_mainActivity._gridgen._dictPlacedWords.TryGetValue(wrdSoFar, out var ltrPlaced))
             {
                 wrdStatus = WordStatus.IsAlreadyInGrid;
                 int incx = 0, incy = 0, x = ltrPlaced.nX, y = ltrPlaced.nY;

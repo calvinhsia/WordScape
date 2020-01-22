@@ -48,7 +48,7 @@ namespace WordScapes
         Task _tskTimer;
 
         public static MainActivity _instance;
-        private Random _Random;
+        public Random _Random;
         public WordGenerator _wordGen;
         public WordContainer _wordCont;
         public GenGrid _gridgen;

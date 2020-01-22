@@ -70,7 +70,7 @@ namespace WordScape
 
             int ndx = 0;
             var radsPerLetter = (2 * Math.PI / NumLtrs);
-            foreach (var ltr in _wordCont.InitialWord.ToUpper().OrderBy(p => gridgen._random.NextDouble()))
+            foreach (var ltr in _wordCont.InitialWord.ToUpper().OrderBy(p => gridgen._random.NextDouble())) // shuffle
             //                foreach (var ltr in wordCont.InitialWord.ToUpper().OrderBy(p => Guid.NewGuid()))
             {
                 var lett = new LetterWheelLetter(ltr);
