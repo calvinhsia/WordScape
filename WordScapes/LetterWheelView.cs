@@ -122,12 +122,12 @@ namespace WordScapes
         {
             int[] locg = new int[2];
             this.GetLocationInWindow(locg);
-            var X = (int)e.Event.RawX - locg[0];
-            var Y = (int)e.Event.RawY - locg[1];
+            var X = (int)e.Event.RawX;// - locg[0];
+            var Y = (int)e.Event.RawY;// - locg[1];
             LtrWheelLetterLayout ltrWheelLetterLayout = null;
             foreach (var ltr in _lstLtrWheelLetterLayouts)
             {
-                if (IsPointInsideView(X, Y, ltr.textView))
+                if (IsPointInsideView(X, Y, ltr))
                 {
                     ltrWheelLetterLayout = ltr;
                     break;
@@ -136,27 +136,34 @@ namespace WordScapes
             return ltrWheelLetterLayout;
         }
 
-        private bool IsPointInsideView(float x, float y, View view)
+        private bool IsPointInsideView(float x, float y, LtrWheelLetterLayout view)
         {
             var location = new int[2];
             view.GetLocationOnScreen(location);
             int viewX = location[0];
             int viewY = location[1];
+            this.GetLocationOnScreen(location);
+            x -= location[0];
+            y -= location[1];
 
             Rect rect = new Rect();
-            this.GetHitRect(rect);
+            view.GetHitRect(rect);
+            var isin = rect.Contains((int)x, (int)y);
 
+            var margx = (view.LayoutParameters as RelativeLayout.LayoutParams)?.LeftMargin;
+            var margy = (view.LayoutParameters as RelativeLayout.LayoutParams)?.TopMargin;
 
+            //this._mainActivity._txtWordSoFar.Text = $"view={view.textView.Text} rect={rect}  ({viewX},{viewY}) ({margx}, {margy})  ({view.Width},{view.Height})";
             //point is inside view bounds
             // xxz ({x}, {y}) {viewX},{viewY})  rect = {rect.Left},{ rect.Top}) ({rect.Right},{rect.Bottom})
             if (x > viewX && x < (viewX + view.Width))
             {
-                if (y > viewY && y < viewY + view.Width)
+                if (y > viewY && y < viewY + view.Height)
                 {
                     return true;
                 }
             }
-            return false;
+            return isin;
         }
         protected override void OnDraw(Canvas canvas)
         {
