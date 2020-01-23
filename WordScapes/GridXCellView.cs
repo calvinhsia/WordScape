@@ -51,21 +51,21 @@ namespace WordScapes
 
         private async void GridXCellView_Touch(object sender, TouchEventArgs e)
         {
-            if (!IsShowing)
+            if (e.Event.Action == Android.Views.MotionEventActions.Down)
             {
-                Text = _ltr.ToString();
-                await Task.Delay(TimeSpan.FromSeconds(2.5));
-                Text = string.Empty;
+                if (!IsShowing)
+                {
+                    Text = _ltr.ToString();
+                    await Task.Delay(TimeSpan.FromSeconds(2.5));
+                    Text = string.Empty;
+                }
             }
         }
 
         internal void ShowLetter()
         {
-            if (!IsShowing && this._ltr != GenGrid.Blank)
-            {
-                Text = _ltr.ToString();
-                IsShowing = true;
-            }
+            Text = _ltr.ToString();
+            IsShowing = true;
         }
     }
 }
