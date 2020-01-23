@@ -49,7 +49,7 @@ namespace WordScapes
             base.OnLayout(changed, l, t, r, b);
             if (!fDidLayout)
             {
-                r = _mainActivity._ptScreenSize.X;
+                //                r = _mainActivity._ptScreenSize.X;
                 Rect rect = new Rect(l, t, r, b);
 
                 "rect = ({rect.Left},{ rect.Top}) ({rect.Right},{rect.Bottom})".ToString();
@@ -68,7 +68,7 @@ namespace WordScapes
                     var y = _ptCircleCtr.Y - _pctRadiusLettersInCircle * circRadius * Math.Sin(radsPerLetter * ndx);// - ltr.Height / 2;
                     var letpt = new Point((int)x, (int)y);
                     var layoutParametersWheel = new RelativeLayout.LayoutParams(ltr.Width, ltr.Height);
-                    layoutParametersWheel.LeftMargin = letpt.X - rect.Left;
+                    layoutParametersWheel.LeftMargin = letpt.X - rect.Left + circRadius / 2 + 40;
                     layoutParametersWheel.TopMargin = letpt.Y - rect.Top + circRadius / 2 + 40;
                     ltr.LayoutParameters = layoutParametersWheel;
                     ndx++;
@@ -196,6 +196,11 @@ namespace WordScapes
                     ClearSelection();
                     break;
             }
+        }
+
+        internal void Shuffle()
+        {
+            CreateWheelLetters(this._mainActivity);
         }
 
         private WordStatus ShowWord(string wrdSoFar)
@@ -397,7 +402,7 @@ namespace WordScapes
             public LtrWheelLetterAnd(Context context, char letter) : base(context)
             {
                 this.Text = letter.ToString();
-                this.TextSize = 40;
+                this.TextSize = 36;
                 this.TextAlignment = TextAlignment.Center;
                 this.SetTypeface(null, TypefaceStyle.Bold);
                 this.SetTextColor(Color.Black);

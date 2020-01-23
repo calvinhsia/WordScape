@@ -41,7 +41,10 @@ namespace WordScapes
         TextView _txtTimer;
         public TextView _txtWordSoFar;
         public MyGridLayout _grdXWord;
+        public Button _btnShuffle;
         LetterWheelLayout _LetterWheelView;
+        GridLayout _gridLayoutLetterWheel;
+
 
 
         bool _timerEnabled = false;
@@ -64,7 +67,7 @@ namespace WordScapes
             MainActivity._instance = this;
             _Random = new Random(
 #if DEBUG
-//                    1
+                    //                    1
 #endif
                     );
             createLayout();
@@ -107,21 +110,6 @@ namespace WordScapes
             };
             layout.AddView(_txtLenSubword);
 
-            _txtScore = new TextView(this)
-            {
-                Id = idtxtScore
-            };
-            layout.AddView(_txtScore);
-
-            _btnNew = new Button(this)
-            {
-                Id = idBtnPlayAgain,
-                Text = "Play Again"
-            };
-            _btnNew.Click += BtnNew_Click;
-            layout.AddView(_btnNew);
-
-
             _grdXWord = new MyGridLayout(this)
             {
                 Id = idGrdXWord,
@@ -136,16 +124,69 @@ namespace WordScapes
             _txtWordSoFar = new TextView(this)
             {
                 Id = idtxtWordSofar,
-                TextSize= 16
+                TextSize = 16
             };
             layout.AddView(_txtWordSoFar);
+
+
+            /// the letterwheel is a circle. want some buttons/ui on either side, so use a 3 col grid layout
+            /// 
+            var specRow0 = GridLayout.InvokeSpec(0); // 1 row
+            var specRow1 = GridLayout.InvokeSpec(0); // 1st row
+            var specRow2 = GridLayout.InvokeSpec(0); // 1st row
+            var specCol0 = GridLayout.InvokeSpec(0, GridLayout.LeftAlighment);
+            var specCol1 = GridLayout.InvokeSpec(1, GridLayout.Center);
+            var specCol2 = GridLayout.InvokeSpec(2, GridLayout.RightAlighment);
+            _gridLayoutLetterWheel = new GridLayout(this)
+            {
+                RowCount = 1,
+                ColumnCount = 3
+            };
+            layout.AddView(_gridLayoutLetterWheel);
+
+            var linearLayoutCol0 = new LinearLayout(this)
+            {
+                Orientation = Orientation.Vertical,
+            };
+
+            _txtScore = new TextView(this)
+            {
+                Id = idtxtScore
+            };
+            _txtScore.LayoutParameters = new LinearLayout.LayoutParams(250, LinearLayout.LayoutParams.MatchParent);
+            linearLayoutCol0.AddView(_txtScore);
+
+            _btnShuffle = new Button(this)
+            {
+                Text = "Shuffle",
+                TextSize = 8
+            };
+            linearLayoutCol0.AddView(_btnShuffle);
+
+            _gridLayoutLetterWheel.AddView(linearLayoutCol0, new GridLayout.LayoutParams(specRow0, specCol0));
+
 
             _LetterWheelView = new LetterWheelLayout(this)
             {
                 Id = idLtrWheelView,
-                LayoutParameters = new ViewGroup.LayoutParams(_ptScreenSize.X, 200)
+                LayoutParameters = new LinearLayout.LayoutParams(_ptScreenSize.X, 100)
             };
-            layout.AddView(_LetterWheelView);
+            _gridLayoutLetterWheel.AddView(_LetterWheelView, new GridLayout.LayoutParams(specRow1, specCol1));
+            _btnShuffle.Click += (o, e) =>
+              {
+                  _LetterWheelView.Shuffle();
+              };
+
+            _btnNew = new Button(this)
+            {
+                Id = idBtnPlayAgain,
+                Text = "Again",
+                TextSize = 12
+            };
+            _btnNew.Click += BtnNew_Click;
+            _gridLayoutLetterWheel.AddView(_btnNew, new GridLayout.LayoutParams(specRow2, specCol2));
+
+
 
             SetLayoutForOrientation(Android.Content.Res.Orientation.Portrait);
         }
@@ -163,17 +204,13 @@ namespace WordScapes
                     ((RelativeLayout.LayoutParams)(_txtLenSubword.LayoutParameters)).AddRule(LayoutRules.RightOf, idtxtLenTargetWord);
                     ((RelativeLayout.LayoutParams)(_txtLenSubword.LayoutParameters)).AddRule(LayoutRules.Below, idTitleText);
 
-                    _txtScore.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
-                    ((RelativeLayout.LayoutParams)(_txtScore.LayoutParameters)).AddRule(LayoutRules.LeftOf, idtxtTimer);
-                    ((RelativeLayout.LayoutParams)(_txtScore.LayoutParameters)).AddRule(LayoutRules.Below, idTitleText);
 
 
                     _txtTimer.LayoutParameters = new RelativeLayout.LayoutParams(300, RelativeLayout.LayoutParams.WrapContent);
-                    ((RelativeLayout.LayoutParams)(_txtTimer.LayoutParameters)).AddRule(LayoutRules.LeftOf, idBtnPlayAgain);
-                    ((RelativeLayout.LayoutParams)(_txtTimer.LayoutParameters)).AddRule(LayoutRules.AlignRight);
+                    ((RelativeLayout.LayoutParams)(_txtTimer.LayoutParameters)).AddRule(LayoutRules.AlignParentRight);
 
-                    _btnNew.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
-                    ((RelativeLayout.LayoutParams)(_btnNew.LayoutParameters)).AddRule(LayoutRules.AlignParentRight);
+                    //                    _btnNew.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
+                    //                    ((RelativeLayout.LayoutParams)(_btnNew.LayoutParameters)).AddRule(LayoutRules.AlignParentRight);
 
                     _grdXWord.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
                     ((RelativeLayout.LayoutParams)(_grdXWord.LayoutParameters)).AddRule(LayoutRules.Below, idtxtLenTargetWord);
@@ -186,8 +223,11 @@ namespace WordScapes
                     ((RelativeLayout.LayoutParams)(_txtWordSoFar.LayoutParameters)).AddRule(LayoutRules.CenterHorizontal);
 
 
-                    _LetterWheelView.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
-                    ((RelativeLayout.LayoutParams)(_LetterWheelView.LayoutParameters)).AddRule(LayoutRules.Below, idtxtWordSofar);
+
+                    //                    _txtScore.LayoutParameters = new GridLayout.LayoutParams(200, RelativeLayout.LayoutParams.WrapContent);
+
+                    _gridLayoutLetterWheel.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
+                    ((RelativeLayout.LayoutParams)(_gridLayoutLetterWheel.LayoutParameters)).AddRule(LayoutRules.Below, idtxtWordSofar);
 
 
                     break;
