@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Android.App;
+using Android.Content;
 using Android.Graphics;
 using Android.OS;
 using Android.Runtime;
@@ -126,6 +127,19 @@ namespace WordScapes
                 Id = idtxtWordSofar,
                 TextSize = 16
             };
+            _txtWordSoFar.Click += (o, e) =>
+              {
+                  try
+                  {
+                      var uri = Android.Net.Uri.Parse($@"https://www.merriam-webster.com/dictionary/{_txtWordSoFar.Text}");
+                      var intent = new Intent(Intent.ActionView, uri);
+                      StartActivity(intent);
+                  }
+                  catch (Exception)
+                  {
+                  }
+              };
+
             layout.AddView(_txtWordSoFar);
 
 
@@ -198,11 +212,10 @@ namespace WordScapes
                 case Android.Content.Res.Orientation.Portrait:
 
                     _txtLenTargetWord.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
-                    ((RelativeLayout.LayoutParams)(_txtLenTargetWord.LayoutParameters)).AddRule(LayoutRules.Below, idTitleText);
+                    ((RelativeLayout.LayoutParams)(_txtLenTargetWord.LayoutParameters)).AddRule(LayoutRules.RightOf, idTitleText);
 
                     _txtLenSubword.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
                     ((RelativeLayout.LayoutParams)(_txtLenSubword.LayoutParameters)).AddRule(LayoutRules.RightOf, idtxtLenTargetWord);
-                    ((RelativeLayout.LayoutParams)(_txtLenSubword.LayoutParameters)).AddRule(LayoutRules.Below, idTitleText);
 
 
 

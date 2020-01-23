@@ -19,7 +19,7 @@ namespace WordScapes
         List<LtrWheelLetterLayout> _lstSelected = new List<LtrWheelLetterLayout>();
         private MainActivity _mainActivity;
         Point _ptCircleCtr;
-        int circRadius = 500;
+        int _circRadius = 500;
         private bool fDidLayout;
         private readonly double _pctRadiusLettersInCircle = .7; // the letters (are in the within the circle, forming a smaller circle) are at this fraction of the circle radius
         private readonly List<FoundWord> _lstFoundWordsSoFar = new List<FoundWord>();
@@ -29,6 +29,7 @@ namespace WordScapes
         {
             this._mainActivity = mainActivity;
             this.Touch += LetterWheelLayout_Touch;
+//            this.SetBackgroundColor(Color.White);
         }
         internal void CreateWheelLetters(MainActivity mainActivity)
         {
@@ -47,6 +48,7 @@ namespace WordScapes
         protected override void OnLayout(bool changed, int l, int t, int r, int b)
         {
             base.OnLayout(changed, l, t, r, b);
+
             if (!fDidLayout)
             {
                 //                r = _mainActivity._ptScreenSize.X;
@@ -57,21 +59,22 @@ namespace WordScapes
                 if (_ptCircleCtr.X != 0 && _ptCircleCtr.Y != 0)
                 {
                     fDidLayout = true;
-                }
-                //                this._mainActivity._txtWordSoFar.Text = _ptCircleCtr.ToString() + " " + rect.ToString();
+                    //                this._mainActivity._txtWordSoFar.Text = _ptCircleCtr.ToString() + " " + rect.ToString();
 
-                int ndx = 0;
-                var radsPerLetter = (2 * Math.PI / _lstLtrWheelLetterLayouts.Count);
-                foreach (var ltr in _lstLtrWheelLetterLayouts)
-                {
-                    var x = _ptCircleCtr.X + _pctRadiusLettersInCircle * circRadius * Math.Cos(radsPerLetter * ndx);// - ltr.Width / 2;
-                    var y = _ptCircleCtr.Y - _pctRadiusLettersInCircle * circRadius * Math.Sin(radsPerLetter * ndx);// - ltr.Height / 2;
-                    var letpt = new Point((int)x, (int)y);
-                    var layoutParametersWheel = new RelativeLayout.LayoutParams(ltr.Width, ltr.Height);
-                    layoutParametersWheel.LeftMargin = letpt.X - rect.Left + circRadius / 2 + 40;
-                    layoutParametersWheel.TopMargin = letpt.Y - rect.Top + circRadius / 2 + 40;
-                    ltr.LayoutParameters = layoutParametersWheel;
-                    ndx++;
+//                    _circRadius = (rect.Right - rect.Left) / 2;
+                    int ndx = 0;
+                    var radsPerLetter = (2 * Math.PI / _lstLtrWheelLetterLayouts.Count);
+                    foreach (var ltr in _lstLtrWheelLetterLayouts)
+                    {
+                        var x = _ptCircleCtr.X + _pctRadiusLettersInCircle * _circRadius * Math.Cos(radsPerLetter * ndx);// - ltr.Width / 2;
+                        var y = _ptCircleCtr.Y - _pctRadiusLettersInCircle * _circRadius * Math.Sin(radsPerLetter * ndx);// - ltr.Height / 2;
+                        var letpt = new Point((int)x, (int)y);
+                        var layoutParametersWheel = new RelativeLayout.LayoutParams(ltr.Width, ltr.Height);
+                        layoutParametersWheel.LeftMargin = letpt.X - rect.Left + _circRadius / 2 + 40;
+                        layoutParametersWheel.TopMargin = letpt.Y - rect.Top + _circRadius / 2 + 40;
+                        ltr.LayoutParameters = layoutParametersWheel;
+                        ndx++;
+                    }
                 }
             }
         }
@@ -330,17 +333,26 @@ namespace WordScapes
             //};
             //green.SetStyle(Paint.Style.Stroke);
 
-            Paint red = new Paint
+            var circlePaint = new Paint
             {
                 AntiAlias = true,
                 Color = Color.Rgb(0xff, 0x44, 0x44)
             };
-            red.StrokeWidth = 5;
-            red.SetStyle(Paint.Style.Fill);
-            var xx = new ShapeDrawable(new OvalShape());
-            xx.Paint.Set(red);
-            xx.SetBounds(0, 0, 1100, 1100);
-            xx.Draw(canvas);
+            circlePaint.StrokeWidth = 15;
+            circlePaint.SetStyle(Paint.Style.Stroke);
+            var xCircle = new ShapeDrawable(new OvalShape());
+            xCircle.Paint.Set(circlePaint);
+            Rect rect = new Rect();
+            this.GetHitRect(rect);
+            rect.Left = _ptCircleCtr.X - _circRadius + _circRadius / 2;
+            rect.Top = _ptCircleCtr.Y - _circRadius + _circRadius / 2;
+            rect.Right = rect.Left + 2 * _circRadius;
+            rect.Bottom = rect.Top + 2 * _circRadius;
+
+
+            xCircle.SetBounds(rect.Left, rect.Top, rect.Right, rect.Bottom);
+            //            xCircle.SetBounds(0, 0, 1100, 1100);
+            xCircle.Draw(canvas);
             float middle = canvas.Width * 0.25f;
             //canvas.DrawPaint(red);
             //            canvas.DrawRect(0, 0, middle, canvas.Height, green);
