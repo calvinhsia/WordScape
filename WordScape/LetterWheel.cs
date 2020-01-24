@@ -254,7 +254,7 @@ namespace WordScape
                                     foundWordType = FoundWordType.SubWordNotAWord;
                                 }
                             }
-                            _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = foundWordType, word = wrdSoFar });
+                            _lstFoundWordsSoFar.Add(new FoundWord() { foundWordType = foundWordType, word = wrdSoFar });
                             doRefreshList = true;
                             break;
                         case WordStatus.IsAlreadyInGrid:
@@ -263,7 +263,7 @@ namespace WordScape
                         case WordStatus.IsShownInGridForFirstTime:
                             WordScapeWindow.WordScapeWindowInstance.NumWordsFound++;
                             foundWordType = FoundWordType.SubWordInGrid;
-                            _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = foundWordType, word = wrdSoFar });
+                            _lstFoundWordsSoFar.Add(new FoundWord() { foundWordType = foundWordType, word = wrdSoFar });
                             var anim = new ColorAnimation(fromValue:
                                 Colors.Black,
                                 toValue: Colors.Transparent,
@@ -405,7 +405,7 @@ namespace WordScape
                     FontSize = 16
                 };
                 var colr = Colors.Transparent;
-                switch (wrd.foundStringType)
+                switch (wrd.foundWordType)
                 {
                     case FoundWordType.SubWordNotAWord:
                         colr = Colors.LightPink;

@@ -24,7 +24,7 @@ namespace WordScape
     };
     public class FoundWord
     {
-        public FoundWordType foundStringType;
+        public FoundWordType foundWordType;
         public string word;
     }
     public class LtrPlaced

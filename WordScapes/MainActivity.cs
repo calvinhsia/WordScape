@@ -45,6 +45,7 @@ namespace WordScapes
         public Button _btnShuffle;
         LetterWheelLayout _LetterWheelView;
         GridLayout _gridLayoutLetterWheel;
+        public WordListControl _ctrlWordList;
 
 
 
@@ -61,6 +62,7 @@ namespace WordScapes
         public int NumWordsFound;
         internal int _nCols = 12;
         internal int _nRows = 12;
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
@@ -71,7 +73,23 @@ namespace WordScapes
                     //                    1
 #endif
                     );
-            createLayout();
+            try
+            {
+                CreateLayout();
+
+            }
+            catch (Exception ex)
+            {
+                SetContentView(Resource.Layout.content_main);
+                var layout = FindViewById<RelativeLayout>(Resource.Id.container);
+                var textv = new TextView(this)
+                {
+                    Text = ex.ToString()
+                };
+                layout.AddView(textv);
+
+                return;
+            }
             _wordGen = new WordGenerator(_Random);
             BtnNew_Click(_btnNew, null);
             //Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
@@ -81,7 +99,7 @@ namespace WordScapes
             //fab.Click += FabOnClick;
         }
 
-        void createLayout()
+        void CreateLayout()
         {
             WindowManager.DefaultDisplay.GetSize(_ptScreenSize);
             SetContentView(Resource.Layout.content_main);
@@ -153,6 +171,7 @@ namespace WordScapes
             var specCol2 = GridLayout.InvokeSpec(2, GridLayout.RightAlighment);
             _gridLayoutLetterWheel = new GridLayout(this)
             {
+                Id = idLtrWheelView,
                 RowCount = 1,
                 ColumnCount = 3
             };
@@ -182,7 +201,6 @@ namespace WordScapes
 
             _LetterWheelView = new LetterWheelLayout(this)
             {
-                Id = idLtrWheelView,
                 LayoutParameters = new LinearLayout.LayoutParams(_ptScreenSize.X, 100)
             };
             _gridLayoutLetterWheel.AddView(_LetterWheelView, new GridLayout.LayoutParams(specRow1, specCol1));
@@ -200,6 +218,13 @@ namespace WordScapes
             _btnNew.Click += BtnNew_Click;
             _gridLayoutLetterWheel.AddView(_btnNew, new GridLayout.LayoutParams(specRow2, specCol2));
 
+
+
+            _ctrlWordList = new WordListControl(this);
+            {
+            };
+            _ctrlWordList.AddTestWords();
+            layout.AddView(_ctrlWordList);
 
 
             SetLayoutForOrientation(Android.Content.Res.Orientation.Portrait);
@@ -241,6 +266,10 @@ namespace WordScapes
 
                     _gridLayoutLetterWheel.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
                     ((RelativeLayout.LayoutParams)(_gridLayoutLetterWheel.LayoutParameters)).AddRule(LayoutRules.Below, idtxtWordSofar);
+
+
+                    _ctrlWordList.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MatchParent, RelativeLayout.LayoutParams.MatchParent);
+                    ((RelativeLayout.LayoutParams)(_ctrlWordList.LayoutParameters)).AddRule(LayoutRules.Below, idLtrWheelView);
 
 
                     break;
@@ -301,6 +330,7 @@ namespace WordScapes
 
             DisplayXWords();
             UpdateScore();
+            _ctrlWordList.AddTestWords();
             _LetterWheelView.CreateWheelLetters(this);
 
             if (_tskTimer != null)

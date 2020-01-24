@@ -12,7 +12,7 @@ using WordScape;
 namespace WordScapes
 {
     // https://stackoverflow.com/questions/3294590/set-the-absolute-position-of-a-view
-    internal class LetterWheelLayout : RelativeLayout
+    public class LetterWheelLayout : RelativeLayout
     {
 
         List<LtrWheelLetterLayout> _lstLtrWheelLetterLayouts = new List<LtrWheelLetterLayout>();
@@ -36,6 +36,7 @@ namespace WordScapes
             this.RemoveAllViews();
             fDidLayout = false;
             this._lstLtrWheelLetterLayouts.Clear();
+            _lstFoundWordsSoFar.Clear();
             //            this.LayoutParameters = layoutParametersWheel;
             foreach (var ltr in mainActivity._wordCont.InitialWord.OrderBy(p => mainActivity._Random.NextDouble()))
             {
@@ -144,7 +145,7 @@ namespace WordScapes
                                             foundWordType = FoundWordType.SubWordNotAWord;
                                         }
                                     }
-                                    _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = foundWordType, word = wrdSoFar });
+                                    _lstFoundWordsSoFar.Add(new FoundWord() { foundWordType = foundWordType, word = wrdSoFar });
                                     doRefreshList = true;
                                     break;
                                 case WordStatus.IsAlreadyInGrid:
@@ -154,7 +155,7 @@ namespace WordScapes
                                     _mainActivity.NumWordsFound++;
                                     _mainActivity.UpdateScore();
                                     foundWordType = FoundWordType.SubWordInGrid;
-                                    _lstFoundWordsSoFar.Add(new FoundWord() { foundStringType = foundWordType, word = wrdSoFar });
+                                    _lstFoundWordsSoFar.Add(new FoundWord() { foundWordType = foundWordType, word = wrdSoFar });
                                     //var anim = new ColorAnimation(fromValue:
                                     //    Colors.Black,
                                     //    toValue: Colors.Transparent,
@@ -172,31 +173,36 @@ namespace WordScapes
                         }
                         if (doRefreshList)
                         {
-                            var colr = Color.Transparent;
-                            var forecolr = Color.Black;
-                            switch (foundWordType)
-                            {
-                                case FoundWordType.SubWordNotAWord:
-                                    colr = Color.LightPink;
-                                    break;
-                                case FoundWordType.SubWordInLargeDictionary:
-                                    colr = Color.LightSeaGreen;
-                                    break;
-                                case FoundWordType.SubWordInGrid:
-                                    colr = Color.DarkCyan;
-                                    forecolr = Color.White;
-                                    break;
-                                case FoundWordType.SubWordNotInGrid:
-                                    colr = Color.LightBlue;
-                                    break;
-                            }
-                            this._mainActivity._txtWordSoFar.SetBackgroundColor(colr);
+                            GetColorFromFoundWordType(foundWordType, out var forecolr, out var backColr);
+                            this._mainActivity._txtWordSoFar.SetBackgroundColor(backColr);
                             this._mainActivity._txtWordSoFar.SetTextColor(forecolr);
 
                             this.RefreshWordList(wrdSoFar);
                         }
                     }
                     ClearSelection();
+                    break;
+            }
+        }
+
+        public static void GetColorFromFoundWordType(FoundWordType foundWordType, out Color forecolr, out Color backColr)
+        {
+            backColr = Color.Transparent;
+            forecolr = Color.Black;
+            switch (foundWordType)
+            {
+                case FoundWordType.SubWordNotAWord:
+                    backColr = Color.LightPink;
+                    break;
+                case FoundWordType.SubWordInLargeDictionary:
+                    backColr = Color.LightSeaGreen;
+                    break;
+                case FoundWordType.SubWordInGrid:
+                    backColr = Color.DarkCyan;
+                    forecolr = Color.White;
+                    break;
+                case FoundWordType.SubWordNotInGrid:
+                    backColr = Color.LightBlue;
                     break;
             }
         }
@@ -254,6 +260,7 @@ namespace WordScapes
 
         private void RefreshWordList(string wrdSoFar)
         {
+            _mainActivity._ctrlWordList.SetWordList(_lstFoundWordsSoFar.OrderBy(p=>p.word));
         }
 
         private void UpdateWordSofar()
