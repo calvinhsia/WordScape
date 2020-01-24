@@ -29,7 +29,7 @@ namespace WordScapes
         {
             this._mainActivity = mainActivity;
             this.Touch += LetterWheelLayout_Touch;
-//            this.SetBackgroundColor(Color.White);
+            //            this.SetBackgroundColor(Color.White);
         }
         internal void CreateWheelLetters(MainActivity mainActivity)
         {
@@ -62,7 +62,7 @@ namespace WordScapes
                     fDidLayout = true;
                     //                this._mainActivity._txtWordSoFar.Text = _ptCircleCtr.ToString() + " " + rect.ToString();
 
-//                    _circRadius = (rect.Right - rect.Left) / 2;
+                    //                    _circRadius = (rect.Right - rect.Left) / 2;
                     int ndx = 0;
                     var radsPerLetter = (2 * Math.PI / _lstLtrWheelLetterLayouts.Count);
                     foreach (var ltr in _lstLtrWheelLetterLayouts)
@@ -71,7 +71,7 @@ namespace WordScapes
                         var y = _ptCircleCtr.Y - _pctRadiusLettersInCircle * _circRadius * Math.Sin(radsPerLetter * ndx);// - ltr.Height / 2;
                         var letpt = new Point((int)x, (int)y);
                         var layoutParametersWheel = new RelativeLayout.LayoutParams(ltr.Width, ltr.Height);
-                        layoutParametersWheel.LeftMargin = letpt.X - rect.Left + _circRadius / 2 + 40;
+                        layoutParametersWheel.LeftMargin = letpt.X - rect.Left;// + _circRadius / 2 + 40;
                         layoutParametersWheel.TopMargin = letpt.Y - rect.Top + _circRadius / 2 + 40;
                         ltr.LayoutParameters = layoutParametersWheel;
                         ndx++;
@@ -82,106 +82,114 @@ namespace WordScapes
 
         private void LetterWheelLayout_Touch(object sender, TouchEventArgs e)
         {
-            switch (e.Event.Action)
+            try
             {
-                case MotionEventActions.Down:
-                    _mainActivity._txtWordSoFar.Text = string.Empty;
-                    _mainActivity._txtWordSoFar.SetBackgroundColor(Color.White);
-                    _mainActivity._txtWordSoFar.SetTextColor(Color.Black);
-                    goto case MotionEventActions.Move;
-                case MotionEventActions.Move:
-                    var ltr = GetLetterFromTouch(e);
-                    if (ltr != null)
-                    {
-                        if (!ltr._IsSelected)
+
+                switch (e.Event.Action)
+                {
+                    case MotionEventActions.Down:
+                        _mainActivity._txtWordSoFar.Text = string.Empty;
+                        _mainActivity._txtWordSoFar.SetBackgroundColor(Color.White);
+                        _mainActivity._txtWordSoFar.SetTextColor(Color.Black);
+                        goto case MotionEventActions.Move;
+                    case MotionEventActions.Move:
+                        var ltr = GetLetterFromTouch(e);
+                        if (ltr != null)
                         {
-                            ltr.Select();
-                            _lstSelected.Add(ltr);
-                            UpdateWordSofar();
-                        }
-                        else
-                        { // already in select list. Should we unselect?
-                            if (_lstSelected.Count > 1)
+                            if (!ltr._IsSelected)
                             {
-                                var at = _lstSelected.IndexOf(ltr);
-                                if (at == _lstSelected.Count - 2)
+                                ltr.Select();
+                                _lstSelected.Add(ltr);
+                                UpdateWordSofar();
+                            }
+                            else
+                            { // already in select list. Should we unselect?
+                                if (_lstSelected.Count > 1)
                                 {
-                                    _lstSelected[_lstSelected.Count - 1].UnSelect();
-                                    _lstSelected.RemoveAt(_lstSelected.Count - 1);
-                                    UpdateWordSofar();
+                                    var at = _lstSelected.IndexOf(ltr);
+                                    if (at == _lstSelected.Count - 2)
+                                    {
+                                        _lstSelected[_lstSelected.Count - 1].UnSelect();
+                                        _lstSelected.RemoveAt(_lstSelected.Count - 1);
+                                        UpdateWordSofar();
+                                    }
                                 }
                             }
-                        }
 
 
-                    }
-                    break;
-                case MotionEventActions.Up:
-                    var wrdSoFar = _mainActivity._txtWordSoFar.Text;
-                    if (wrdSoFar.Length >= _mainActivity._wordGen._MinSubWordLen)
-                    {
-                        var doRefreshList = false;
-                        var foundWordType = FoundWordType.SubWordNotAWord;
-                        if (_lstFoundWordsSoFar.Where(p => p.word == wrdSoFar).Any()) // user already found this word
-                        {
-                            foundWordType = FoundWordType.SubWordInGrid;
-                            this.RefreshWordList(wrdSoFar);
                         }
-                        else
+                        break;
+                    case MotionEventActions.Up:
+                        var wrdSoFar = _mainActivity._txtWordSoFar.Text;
+                        if (wrdSoFar.Length >= _mainActivity._wordGen._MinSubWordLen)
                         {
-                            var stat = this.ShowWord(wrdSoFar);
-                            switch (stat)
+                            var doRefreshList = false;
+                            var foundWordType = FoundWordType.SubWordNotAWord;
+                            if (_lstFoundWordsSoFar.Where(p => p.word == wrdSoFar).Any()) // user already found this word
                             {
-                                case WordStatus.IsNotInGrid:
-                                    foundWordType = FoundWordType.SubWordNotInGrid;
-                                    if (!_mainActivity._wordCont.subwords.Contains(wrdSoFar))
-                                    {
-                                        if (this._mainActivity._wordGen._dictionaryLibLarge.IsWord(wrdSoFar.ToLower()))
+                                foundWordType = FoundWordType.SubWordInGrid;
+                                this.RefreshWordList(wrdSoFar);
+                            }
+                            else
+                            {
+                                var stat = this.ShowWord(wrdSoFar);
+                                switch (stat)
+                                {
+                                    case WordStatus.IsNotInGrid:
+                                        foundWordType = FoundWordType.SubWordNotInGrid;
+                                        if (!_mainActivity._wordCont.subwords.Contains(wrdSoFar))
                                         {
-                                            foundWordType = FoundWordType.SubWordInLargeDictionary;
+                                            if (this._mainActivity._wordGen._dictionaryLibLarge.IsWord(wrdSoFar.ToLower()))
+                                            {
+                                                foundWordType = FoundWordType.SubWordInLargeDictionary;
+                                            }
+                                            else
+                                            {
+                                                foundWordType = FoundWordType.SubWordNotAWord;
+                                            }
                                         }
-                                        else
-                                        {
-                                            foundWordType = FoundWordType.SubWordNotAWord;
-                                        }
-                                    }
-                                    _lstFoundWordsSoFar.Add(new FoundWord() { foundWordType = foundWordType, word = wrdSoFar });
-                                    doRefreshList = true;
-                                    break;
-                                case WordStatus.IsAlreadyInGrid:
-                                    foundWordType = FoundWordType.SubWordInGrid;
-                                    break;
-                                case WordStatus.IsShownInGridForFirstTime:
-                                    _mainActivity.NumWordsFound++;
-                                    _mainActivity.UpdateScore();
-                                    foundWordType = FoundWordType.SubWordInGrid;
-                                    _lstFoundWordsSoFar.Add(new FoundWord() { foundWordType = foundWordType, word = wrdSoFar });
-                                    //var anim = new ColorAnimation(fromValue:
-                                    //    Colors.Black,
-                                    //    toValue: Colors.Transparent,
-                                    //    duration: TimeSpan.FromMilliseconds(100)
-                                    //    )
-                                    //{
-                                    //    FillBehavior = FillBehavior.HoldEnd,
-                                    //    RepeatBehavior = new RepeatBehavior(10)
-                                    //};
-                                    //WordScapeWindow.WordScapeWindowInstance.txtNumWordsFound.Background = new SolidColorBrush(Colors.Transparent);
-                                    //WordScapeWindow.WordScapeWindowInstance.txtNumWordsFound.Background.BeginAnimation(SolidColorBrush.ColorProperty, anim);
-                                    doRefreshList = true;
-                                    break;
+                                        _lstFoundWordsSoFar.Add(new FoundWord() { foundWordType = foundWordType, word = wrdSoFar });
+                                        doRefreshList = true;
+                                        break;
+                                    case WordStatus.IsAlreadyInGrid:
+                                        foundWordType = FoundWordType.SubWordInGrid;
+                                        break;
+                                    case WordStatus.IsShownInGridForFirstTime:
+                                        _mainActivity.NumWordsFound++;
+                                        _mainActivity.UpdateScore();
+                                        foundWordType = FoundWordType.SubWordInGrid;
+                                        _lstFoundWordsSoFar.Add(new FoundWord() { foundWordType = foundWordType, word = wrdSoFar });
+                                        //var anim = new ColorAnimation(fromValue:
+                                        //    Colors.Black,
+                                        //    toValue: Colors.Transparent,
+                                        //    duration: TimeSpan.FromMilliseconds(100)
+                                        //    )
+                                        //{
+                                        //    FillBehavior = FillBehavior.HoldEnd,
+                                        //    RepeatBehavior = new RepeatBehavior(10)
+                                        //};
+                                        //WordScapeWindow.WordScapeWindowInstance.txtNumWordsFound.Background = new SolidColorBrush(Colors.Transparent);
+                                        //WordScapeWindow.WordScapeWindowInstance.txtNumWordsFound.Background.BeginAnimation(SolidColorBrush.ColorProperty, anim);
+                                        doRefreshList = true;
+                                        break;
+                                }
+                            }
+                            if (doRefreshList)
+                            {
+                                GetColorFromFoundWordType(foundWordType, out var forecolr, out var backColr);
+                                this._mainActivity._txtWordSoFar.SetBackgroundColor(backColr);
+                                this._mainActivity._txtWordSoFar.SetTextColor(forecolr);
+
+                                this.RefreshWordList(wrdSoFar);
                             }
                         }
-                        if (doRefreshList)
-                        {
-                            GetColorFromFoundWordType(foundWordType, out var forecolr, out var backColr);
-                            this._mainActivity._txtWordSoFar.SetBackgroundColor(backColr);
-                            this._mainActivity._txtWordSoFar.SetTextColor(forecolr);
-
-                            this.RefreshWordList(wrdSoFar);
-                        }
-                    }
-                    ClearSelection();
-                    break;
+                        ClearSelection();
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _mainActivity._txtWordSoFar.Text = ex.ToString();
             }
         }
 
@@ -260,7 +268,7 @@ namespace WordScapes
 
         private void RefreshWordList(string wrdSoFar)
         {
-            _mainActivity._ctrlWordList.SetWordList(_lstFoundWordsSoFar.OrderBy(p=>p.word));
+            _mainActivity._ctrlWordList.SetWordList(_lstFoundWordsSoFar.OrderBy(p => p.word));
         }
 
         private void UpdateWordSofar()

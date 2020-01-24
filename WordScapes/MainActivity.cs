@@ -45,7 +45,7 @@ namespace WordScapes
         public GridLayout _grdXWord;
         public Button _btnShuffle;
         LetterWheelLayout _LetterWheelView;
-        GridLayout _gridLayoutLetterWheel;
+        LinearLayout _gridLayoutLetterWheel;
         public CheckBox _chkShowWordList;
         public WordListControl _ctrlWordList;
 
@@ -102,9 +102,7 @@ namespace WordScapes
 
         void CreateLayout()
         {
-
-
-            //            The costructor wants pixels and not dp(Density Pixels), here's a formula to convert PXs from DPs:
+            //            dp(Density Pixels), here's a formula to convert PXs from DPs:
             //(int)(< numberOfDPs > *getContext().getResources().getDisplayMetrics().density + 0.5f)
             WindowManager.DefaultDisplay.GetSize(_ptScreenSize);
             SetContentView(Resource.Layout.content_main);
@@ -147,17 +145,10 @@ namespace WordScapes
 
             /// the letterwheel is a circle. want some buttons/ui on either side, so use a 3 col grid layout
             /// 
-            var specRow0 = GridLayout.InvokeSpec(0); // 1 row
-            var specRow1 = GridLayout.InvokeSpec(0); // 1st row
-            var specRow2 = GridLayout.InvokeSpec(0); // 1st row
-            var specCol0 = GridLayout.InvokeSpec(0, GridLayout.LeftAlighment);
-            var specCol1 = GridLayout.InvokeSpec(1, GridLayout.Center);
-            var specCol2 = GridLayout.InvokeSpec(2, GridLayout.RightAlighment);
-            _gridLayoutLetterWheel = new GridLayout(this)
+            _gridLayoutLetterWheel = new LinearLayout(this)
             {
                 Id = idLtrWheelView,
-                RowCount = 1,
-                ColumnCount = 3
+                Orientation= Orientation.Horizontal,
             };
             layout.AddView(_gridLayoutLetterWheel);
 
@@ -168,16 +159,17 @@ namespace WordScapes
 
             _btnShuffle = new Button(this)
             {
-                Text = "Shuffle",
-                TextSize = 8
+                Text = "Shuf",
+                TextSize = 8,
+                LayoutParameters= new LinearLayout.LayoutParams(200, LinearLayout.LayoutParams.WrapContent)
             };
             linearLayoutCol0.AddView(_btnShuffle);
 
             _txtScore = new TextView(this)
             {
-                Id = idtxtScore
+                Id = idtxtScore,
             };
-            _txtScore.LayoutParameters = new LinearLayout.LayoutParams(250, LinearLayout.LayoutParams.MatchParent);
+            _txtScore.LayoutParameters = new LinearLayout.LayoutParams(200, LinearLayout.LayoutParams.MatchParent);
             linearLayoutCol0.AddView(_txtScore);
 
             _txtLenTargetWord = new EditText(this)
@@ -202,8 +194,9 @@ namespace WordScapes
 
             _chkShowWordList = new CheckBox(this)
             {
-                Text = "Words",
+                Text = "List",
                 TextSize = 8,
+                LayoutParameters = new LinearLayout.LayoutParams(200, LinearLayout.LayoutParams.WrapContent),
                 Checked = Xamarin.Essentials.Preferences.Get(prefShowWordList, true)
             };
             _chkShowWordList.CheckedChange += (o, e) =>
@@ -213,14 +206,15 @@ namespace WordScapes
             };
             linearLayoutCol0.AddView(_chkShowWordList);
 
-            _gridLayoutLetterWheel.AddView(linearLayoutCol0, new GridLayout.LayoutParams(specRow0, specCol0));
+            _gridLayoutLetterWheel.AddView(linearLayoutCol0, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WrapContent, LinearLayout.LayoutParams.WrapContent));
 
 
             _LetterWheelView = new LetterWheelLayout(this)
             {
-                LayoutParameters = new LinearLayout.LayoutParams(_ptScreenSize.X, 100)
+                LayoutParameters = new LinearLayout.LayoutParams(900, LinearLayout.LayoutParams.WrapContent)
             };
-            _gridLayoutLetterWheel.AddView(_LetterWheelView, new GridLayout.LayoutParams(specRow1, specCol1));
+            _LetterWheelView.SetGravity(GravityFlags.Center);
+            _gridLayoutLetterWheel.AddView(_LetterWheelView);
             _btnShuffle.Click += (o, e) =>
             {
                 _LetterWheelView.Shuffle();
@@ -233,7 +227,7 @@ namespace WordScapes
                 TextSize = 12
             };
             _btnNew.Click += BtnNew_Click;
-            _gridLayoutLetterWheel.AddView(_btnNew, new GridLayout.LayoutParams(specRow2, specCol2));
+            _gridLayoutLetterWheel.AddView(_btnNew, new LinearLayout.LayoutParams(400, LinearLayout.LayoutParams.WrapContent));
 
 
             _ctrlWordList = new WordListControl(this);
@@ -301,6 +295,11 @@ namespace WordScapes
         public void UpdateScore()
         {
             _txtScore.Text = $"{NumWordsFound}/{_gridgen.NumWordsPlaced}";
+            if (NumWordsFound == _gridgen.NumWordsPlaced)
+            {
+                var str = $"You Won in {_txtTimer.Text}";
+                Android.Widget.Toast.MakeText(this, str, Android.Widget.ToastLength.Long).Show();
+            }
         }
 
         private async void BtnNew_Click(object sender, EventArgs e)
