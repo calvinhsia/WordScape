@@ -42,7 +42,7 @@ namespace WordScapes
         TextView _txtScore;
         TextView _txtTimer;
         public TextView _txtWordSoFar;
-        public MyGridLayout _grdXWord;
+        public GridLayout _grdXWord;
         public Button _btnShuffle;
         LetterWheelLayout _LetterWheelView;
         GridLayout _gridLayoutLetterWheel;
@@ -102,6 +102,10 @@ namespace WordScapes
 
         void CreateLayout()
         {
+
+
+            //            The costructor wants pixels and not dp(Density Pixels), here's a formula to convert PXs from DPs:
+            //(int)(< numberOfDPs > *getContext().getResources().getDisplayMetrics().density + 0.5f)
             WindowManager.DefaultDisplay.GetSize(_ptScreenSize);
             SetContentView(Resource.Layout.content_main);
             var layout = FindViewById<RelativeLayout>(Resource.Id.container);
@@ -117,7 +121,7 @@ namespace WordScapes
             layout.AddView(_txtTimer);
 
 
-            _grdXWord = new MyGridLayout(this)
+            _grdXWord = new GridLayout(this)
             {
                 Id = idGrdXWord,
                 ColumnCount = _nCols,
@@ -203,10 +207,10 @@ namespace WordScapes
                 Checked = Xamarin.Essentials.Preferences.Get(prefShowWordList, true)
             };
             _chkShowWordList.CheckedChange += (o, e) =>
-             {
-                 Xamarin.Essentials.Preferences.Set(prefShowWordList, _chkShowWordList.Checked);
-                 _ctrlWordList.Visibility = _chkShowWordList.Checked ? ViewStates.Visible : ViewStates.Invisible;
-             };
+            {
+                Xamarin.Essentials.Preferences.Set(prefShowWordList, _chkShowWordList.Checked);
+                _ctrlWordList.Visibility = _chkShowWordList.Checked ? ViewStates.Visible : ViewStates.Invisible;
+            };
             linearLayoutCol0.AddView(_chkShowWordList);
 
             _gridLayoutLetterWheel.AddView(linearLayoutCol0, new GridLayout.LayoutParams(specRow0, specCol0));
@@ -218,25 +222,24 @@ namespace WordScapes
             };
             _gridLayoutLetterWheel.AddView(_LetterWheelView, new GridLayout.LayoutParams(specRow1, specCol1));
             _btnShuffle.Click += (o, e) =>
-              {
-                  _LetterWheelView.Shuffle();
-              };
+            {
+                _LetterWheelView.Shuffle();
+            };
 
             _btnNew = new Button(this)
             {
                 Id = idBtnPlayAgain,
-                Text = "Again",
+                Text = "New",
                 TextSize = 12
             };
             _btnNew.Click += BtnNew_Click;
             _gridLayoutLetterWheel.AddView(_btnNew, new GridLayout.LayoutParams(specRow2, specCol2));
 
 
-
             _ctrlWordList = new WordListControl(this);
             {
             };
-//            _ctrlWordList.AddTestWords();
+            //            _ctrlWordList.AddTestWords();
             layout.AddView(_ctrlWordList);
 
 
@@ -283,7 +286,7 @@ namespace WordScapes
 
                     //                    _txtScore.LayoutParameters = new GridLayout.LayoutParams(200, RelativeLayout.LayoutParams.WrapContent);
 
-                    _gridLayoutLetterWheel.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
+                    _gridLayoutLetterWheel.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MatchParent, RelativeLayout.LayoutParams.WrapContent);
                     ((RelativeLayout.LayoutParams)(_gridLayoutLetterWheel.LayoutParameters)).AddRule(LayoutRules.Below, idtxtWordSofar);
 
 
@@ -341,7 +344,8 @@ namespace WordScapes
             {
                 this._txtWordSoFar.Text = err;
             }
-            _grdXWord.ClearViews();
+            _grdXWord.RemoveAllViews();
+            _ctrlWordList.SetWordList(lstWords: null);
             _nCols = _gridgen._MaxX;
             _nRows = _gridgen._MaxY;
             _grdXWord.ColumnCount = _nCols;
@@ -349,7 +353,6 @@ namespace WordScapes
 
             DisplayXWords();
             UpdateScore();
-            _ctrlWordList.AddTestWords();
             _LetterWheelView.CreateWheelLetters(this);
 
             if (_tskTimer != null)

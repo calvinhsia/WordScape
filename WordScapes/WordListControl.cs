@@ -16,11 +16,6 @@ namespace WordScapes
         public WordListControl(MainActivity mainActivity) : base(mainActivity)
         {
             this._mainActivity = mainActivity;
-        }
-
-        public void AddTestWords()
-        {
-            RemoveAllViews();
             var linearLayout = new LinearLayout(_mainActivity)
             {
                 LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent),
@@ -30,34 +25,35 @@ namespace WordScapes
             _grdWordList = new GridLayout(_mainActivity)
             {
                 Orientation = GridOrientation.Vertical,
-//                ColumnCount = 15,
+                //                ColumnCount = 15,
                 RowCount = 5,
                 LayoutParameters = new LinearLayout.LayoutParams(2400, LinearLayout.LayoutParams.MatchParent)
             };
-//            linearLayout.AddView(_grdWordList);
+            //            linearLayout.AddView(_grdWordList);
 
-            for (int ndx = 0; ndx < 50; ndx++)
-            {
-                var x = ndx / _grdWordList.RowCount;
-                var y = ndx - x * _grdWordList.RowCount;
-                var v = new TextView(_mainActivity)
-                {
-                    Text = $"adsfadf{ndx} ",
-                    LayoutParameters = new GridLayout.LayoutParams(GridLayout.InvokeSpec(y), GridLayout.InvokeSpec(x))
-                };
+            //for (int ndx = 0; ndx < 50; ndx++)
+            //{
+            //    var x = ndx / _grdWordList.RowCount;
+            //    var y = ndx - x * _grdWordList.RowCount;
+            //    var v = new TextView(_mainActivity)
+            //    {
+            //        Text = $"adsfadf{ndx} ",
+            //        LayoutParameters = new GridLayout.LayoutParams(GridLayout.InvokeSpec(y), GridLayout.InvokeSpec(x))
+            //    };
 
-                _grdWordList.AddView(v);
-            }
+            //    _grdWordList.AddView(v);
+            //}
 
             AddView(_grdWordList);
         }
-        public void SetWordList(IEnumerable<FoundWord> _lstWords)
+
+        public void SetWordList(IEnumerable<FoundWord> lstWords)
         {
             _grdWordList.RemoveAllViews();
-            if (_mainActivity._chkShowWordList.Checked)
+            if (lstWords != null && _mainActivity._chkShowWordList.Checked)
             {
                 int ndx = 0;
-                foreach (var item in _lstWords)
+                foreach (var item in lstWords)
                 {
                     LetterWheelLayout.GetColorFromFoundWordType(item.foundWordType, out var forecolr, out var backColr);
                     var tv = new TextView(_mainActivity)

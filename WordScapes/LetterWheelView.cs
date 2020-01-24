@@ -230,7 +230,7 @@ namespace WordScapes
 
                 for (int i = 0; i < wrdSoFar.Length; i++)
                 {
-                    var ltrTile = this._mainActivity._grdXWord._lstViews[y * _mainActivity._gridgen._MaxX + x] as GridXCellView;
+                    var ltrTile = this._mainActivity._grdXWord.GetChildAt(y * _mainActivity._gridgen._MaxX + x) as GridXCellView;
                     if (!ltrTile.IsShowing)
                     {
                         wrdStatus = WordStatus.IsShownInGridForFirstTime;
