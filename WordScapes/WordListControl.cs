@@ -54,25 +54,29 @@ namespace WordScapes
         public void SetWordList(IEnumerable<FoundWord> _lstWords)
         {
             _grdWordList.RemoveAllViews();
-            int ndx = 0;
-            foreach (var item in _lstWords)
+            if (_mainActivity._chkShowWordList.Checked)
             {
-                LetterWheelLayout.GetColorFromFoundWordType(item.foundWordType, out var forecolr, out var backColr);
-                var tv = new TextView(_mainActivity)
+                int ndx = 0;
+                foreach (var item in _lstWords)
                 {
-                    Text = item.word
-                };
-                tv.SetBackgroundColor(backColr);
-                tv.SetTextColor(forecolr);
-                var x = ndx / _grdWordList.RowCount;
-                var y = ndx - x * _grdWordList.RowCount;
-                tv.LayoutParameters = new GridLayout.LayoutParams(GridLayout.InvokeSpec(y), GridLayout.InvokeSpec(x));
-
-
-                _grdWordList.AddView(tv);
-
-
-                ndx++;
+                    LetterWheelLayout.GetColorFromFoundWordType(item.foundWordType, out var forecolr, out var backColr);
+                    var tv = new TextView(_mainActivity)
+                    {
+                        Text = item.word,
+                    };
+                    tv.SetBackgroundColor(backColr);
+                    tv.SetTextColor(forecolr);
+                    tv.Click += (o, e) =>
+                    {
+                        MainActivity.DoLookupOnlineDictionary(tv.Text);
+                    };
+                    var x = ndx / _grdWordList.RowCount;
+                    var y = ndx - x * _grdWordList.RowCount;
+                    tv.LayoutParameters = new GridLayout.LayoutParams(GridLayout.InvokeSpec(y), GridLayout.InvokeSpec(x));
+                    ((GridLayout.LayoutParams)(tv.LayoutParameters)).RightMargin = 2;
+                    _grdWordList.AddView(tv);
+                    ndx++;
+                }
             }
 
         }

@@ -31,10 +31,10 @@ namespace WordScapes
             this.LayoutParameters = layoutParam;
             if (this._ltr != GenGrid.Blank)
             {
-                var fontSize = 15;
+                var fontSize = 14;
                 if (gridgen._MaxX > 12)
                 {
-                    fontSize = 13;
+                    fontSize = 12;
                 }
                 SetBackgroundColor(Color.DarkCyan);
                 SetTextColor(Color.White);

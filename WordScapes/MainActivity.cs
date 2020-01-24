@@ -22,6 +22,7 @@ namespace WordScapes
 
         public const string prefTargWorLen = "TargWordLen";
         public const string prefSubWordLen = "SubWordLen";
+        public const string prefShowWordList = "ShowWordList";
 
         public const int idtxtTimer = 10;
         public const int idtxtLenTargetWord = 20;
@@ -45,6 +46,7 @@ namespace WordScapes
         public Button _btnShuffle;
         LetterWheelLayout _LetterWheelView;
         GridLayout _gridLayoutLetterWheel;
+        public CheckBox _chkShowWordList;
         public WordListControl _ctrlWordList;
 
 
@@ -76,7 +78,6 @@ namespace WordScapes
             try
             {
                 CreateLayout();
-
             }
             catch (Exception ex)
             {
@@ -115,19 +116,6 @@ namespace WordScapes
             };
             layout.AddView(_txtTimer);
 
-            _txtLenTargetWord = new EditText(this)
-            {
-                Id = idtxtLenTargetWord,
-                Text = Xamarin.Essentials.Preferences.Get(prefTargWorLen, 7).ToString()
-            };
-            layout.AddView(_txtLenTargetWord);
-
-            _txtLenSubword = new EditText(this)
-            {
-                Id = idtxtLenSubWord,
-                Text = Xamarin.Essentials.Preferences.Get(prefSubWordLen, 5).ToString()
-            };
-            layout.AddView(_txtLenSubword);
 
             _grdXWord = new MyGridLayout(this)
             {
@@ -143,19 +131,11 @@ namespace WordScapes
             _txtWordSoFar = new TextView(this)
             {
                 Id = idtxtWordSofar,
-                TextSize = 16
+                TextSize = 15
             };
             _txtWordSoFar.Click += (o, e) =>
               {
-                  try
-                  {
-                      var uri = Android.Net.Uri.Parse($@"https://www.merriam-webster.com/dictionary/{_txtWordSoFar.Text}");
-                      var intent = new Intent(Intent.ActionView, uri);
-                      StartActivity(intent);
-                  }
-                  catch (Exception)
-                  {
-                  }
+                  DoLookupOnlineDictionary(_txtWordSoFar.Text);
               };
 
             layout.AddView(_txtWordSoFar);
@@ -182,6 +162,13 @@ namespace WordScapes
                 Orientation = Orientation.Vertical,
             };
 
+            _btnShuffle = new Button(this)
+            {
+                Text = "Shuffle",
+                TextSize = 8
+            };
+            linearLayoutCol0.AddView(_btnShuffle);
+
             _txtScore = new TextView(this)
             {
                 Id = idtxtScore
@@ -189,12 +176,38 @@ namespace WordScapes
             _txtScore.LayoutParameters = new LinearLayout.LayoutParams(250, LinearLayout.LayoutParams.MatchParent);
             linearLayoutCol0.AddView(_txtScore);
 
-            _btnShuffle = new Button(this)
+            _txtLenTargetWord = new EditText(this)
             {
-                Text = "Shuffle",
-                TextSize = 8
+                Id = idtxtLenTargetWord,
+                Text = Xamarin.Essentials.Preferences.Get(prefTargWorLen, 7).ToString(),
+                TextSize = 14,
+                LayoutParameters = new LinearLayout.LayoutParams(120, LinearLayout.LayoutParams.WrapContent)
             };
-            linearLayoutCol0.AddView(_btnShuffle);
+            linearLayoutCol0.AddView(_txtLenTargetWord);
+
+            _txtLenSubword = new EditText(this)
+            {
+                Id = idtxtLenSubWord,
+                Text = Xamarin.Essentials.Preferences.Get(prefSubWordLen, 5).ToString(),
+                TextSize = 14,
+                LayoutParameters = new LinearLayout.LayoutParams(120, LinearLayout.LayoutParams.WrapContent)
+            };
+            linearLayoutCol0.AddView(_txtLenSubword);
+
+
+
+            _chkShowWordList = new CheckBox(this)
+            {
+                Text = "Words",
+                TextSize = 8,
+                Checked = Xamarin.Essentials.Preferences.Get(prefShowWordList, true)
+            };
+            _chkShowWordList.CheckedChange += (o, e) =>
+             {
+                 Xamarin.Essentials.Preferences.Set(prefShowWordList, _chkShowWordList.Checked);
+                 _ctrlWordList.Visibility = _chkShowWordList.Checked ? ViewStates.Visible : ViewStates.Invisible;
+             };
+            linearLayoutCol0.AddView(_chkShowWordList);
 
             _gridLayoutLetterWheel.AddView(linearLayoutCol0, new GridLayout.LayoutParams(specRow0, specCol0));
 
@@ -223,11 +236,24 @@ namespace WordScapes
             _ctrlWordList = new WordListControl(this);
             {
             };
-            _ctrlWordList.AddTestWords();
+//            _ctrlWordList.AddTestWords();
             layout.AddView(_ctrlWordList);
 
 
             SetLayoutForOrientation(Android.Content.Res.Orientation.Portrait);
+        }
+
+        public static void DoLookupOnlineDictionary(string text)
+        {
+            try
+            {
+                var uri = Android.Net.Uri.Parse($@"https://www.merriam-webster.com/dictionary/{text}");
+                var intent = new Intent(Intent.ActionView, uri);
+                MainActivity._instance.StartActivity(intent);
+            }
+            catch (Exception)
+            {
+            }
         }
 
         private void SetLayoutForOrientation(Android.Content.Res.Orientation orientation)
@@ -235,13 +261,6 @@ namespace WordScapes
             switch (orientation)
             {
                 case Android.Content.Res.Orientation.Portrait:
-
-                    _txtLenTargetWord.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
-                    ((RelativeLayout.LayoutParams)(_txtLenTargetWord.LayoutParameters)).AddRule(LayoutRules.RightOf, idTitleText);
-
-                    _txtLenSubword.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
-                    ((RelativeLayout.LayoutParams)(_txtLenSubword.LayoutParameters)).AddRule(LayoutRules.RightOf, idtxtLenTargetWord);
-
 
 
                     _txtTimer.LayoutParameters = new RelativeLayout.LayoutParams(300, RelativeLayout.LayoutParams.WrapContent);
@@ -251,7 +270,7 @@ namespace WordScapes
                     //                    ((RelativeLayout.LayoutParams)(_btnNew.LayoutParameters)).AddRule(LayoutRules.AlignParentRight);
 
                     _grdXWord.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
-                    ((RelativeLayout.LayoutParams)(_grdXWord.LayoutParameters)).AddRule(LayoutRules.Below, idtxtLenTargetWord);
+                    ((RelativeLayout.LayoutParams)(_grdXWord.LayoutParameters)).AddRule(LayoutRules.Below, idTitleText);
 
 
 

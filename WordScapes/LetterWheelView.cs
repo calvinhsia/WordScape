@@ -19,7 +19,7 @@ namespace WordScapes
         List<LtrWheelLetterLayout> _lstSelected = new List<LtrWheelLetterLayout>();
         private MainActivity _mainActivity;
         Point _ptCircleCtr;
-        int _circRadius = 500;
+        int _circRadius = 480;
         private bool fDidLayout;
         private readonly double _pctRadiusLettersInCircle = .7; // the letters (are in the within the circle, forming a smaller circle) are at this fraction of the circle radius
         private readonly List<FoundWord> _lstFoundWordsSoFar = new List<FoundWord>();
