@@ -18,6 +18,7 @@ namespace WordScapes
             this._mainActivity = mainActivity;
             var linearLayout = new LinearLayout(_mainActivity)
             {
+                Id = MainActivity.idWordList,
                 LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent),
                 Orientation = Orientation.Horizontal
             };
@@ -26,8 +27,7 @@ namespace WordScapes
             {
                 Orientation = GridOrientation.Vertical,
                 //                ColumnCount = 15,
-                RowCount = 5,
-                LayoutParameters = new LinearLayout.LayoutParams(2400, LinearLayout.LayoutParams.MatchParent)
+                RowCount = 5
             };
             //            linearLayout.AddView(_grdWordList);
 

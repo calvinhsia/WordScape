@@ -12,10 +12,17 @@ using Android.Views;
 using Android.Widget;
 using Java.Util.Prefs;
 using WordScape;
+//        ConfigurationChanges = Android.Content.PM.ConfigChanges.Orientation | Android.Content.PM.ConfigChanges.ScreenSize | Android.Content.PM.ConfigChanges.KeyboardHidden, // prevent Activity restart,OnCreate called on Rotation
 
 namespace WordScapes
 {
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, ScreenOrientation = Android.Content.PM.ScreenOrientation.Portrait)]
+    [Activity(
+        Label = "@string/app_name",
+        Theme = "@style/AppTheme.NoActionBar",
+                ScreenOrientation = Android.Content.PM.ScreenOrientation.Portrait,
+        //        ConfigurationChanges = Android.Content.PM.ConfigChanges.Orientation | Android.Content.PM.ConfigChanges.ScreenSize | Android.Content.PM.ConfigChanges.KeyboardHidden, // prevent Activity restart,OnCreate called on Rotation
+        MainLauncher = true)]
+    //    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, ScreenOrientation = Android.Content.PM.ScreenOrientation.Portrait)]
     public class MainActivity : AppCompatActivity
     {
         public Point _ptScreenSize = new Point(); // Samsung Galaxy 9Plus : X = 1440, Y = 2792   GetRealSize x=1440, y=2960
@@ -28,6 +35,7 @@ namespace WordScapes
         public const int idGrdXWord = 60;
         public const int idtxtWordSofar = 70;
         public const int idLtrWheelView = 80;
+        public const int idWordList = 80;
         private int idTitleText;
 
         TextView _txtTitle;
@@ -247,6 +255,14 @@ namespace WordScapes
             SetLayoutForOrientation(Android.Content.Res.Orientation.Portrait);
         }
 
+        public override void OnConfigurationChanged(Android.Content.Res.Configuration newConfig)
+        {
+            base.OnConfigurationChanged(newConfig);
+            WindowManager.DefaultDisplay.GetSize(_ptScreenSize);
+            SetLayoutForOrientation(newConfig.Orientation);
+        }
+
+
         public static void DoLookupOnlineDictionary(string text)
         {
             try
@@ -295,6 +311,40 @@ namespace WordScapes
                     ((RelativeLayout.LayoutParams)(_ctrlWordList.LayoutParameters)).AddRule(LayoutRules.Below, idLtrWheelView);
 
 
+                    break;
+                case Android.Content.Res.Orientation.Landscape:
+                    if (WindowManager.DefaultDisplay.Rotation == SurfaceOrientation.Rotation270) // tilted from portrait to right
+                    {
+                        _txtTimer.LayoutParameters = new RelativeLayout.LayoutParams(300, RelativeLayout.LayoutParams.WrapContent);
+                        ((RelativeLayout.LayoutParams)(_txtTimer.LayoutParameters)).AddRule(LayoutRules.AlignParentRight);
+
+
+                        _grdXWord.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
+                        ((RelativeLayout.LayoutParams)(_grdXWord.LayoutParameters)).AddRule(LayoutRules.Below, idTitleText);
+
+
+
+                        _ctrlWordList.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MatchParent, RelativeLayout.LayoutParams.MatchParent);
+                        ((RelativeLayout.LayoutParams)(_ctrlWordList.LayoutParameters)).AddRule(LayoutRules.RightOf, idGrdXWord);
+
+                        _txtWordSoFar.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
+                        ((RelativeLayout.LayoutParams)(_txtWordSoFar.LayoutParameters)).TopMargin = 30;
+                        ((RelativeLayout.LayoutParams)(_txtWordSoFar.LayoutParameters)).AddRule(LayoutRules.RightOf, idWordList);
+                        ((RelativeLayout.LayoutParams)(_txtWordSoFar.LayoutParameters)).AddRule(LayoutRules.CenterHorizontal);
+
+
+                        _gridLayoutLetterWheel.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MatchParent, RelativeLayout.LayoutParams.WrapContent);
+                        ((RelativeLayout.LayoutParams)(_gridLayoutLetterWheel.LayoutParameters)).AddRule(LayoutRules.RightOf, idWordList);
+                        ((RelativeLayout.LayoutParams)(_gridLayoutLetterWheel.LayoutParameters)).AddRule(LayoutRules.Below, idtxtWordSofar);
+
+
+
+
+                    }
+                    else
+                    {
+
+                    }
                     break;
             }
         }
