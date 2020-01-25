@@ -31,12 +31,16 @@ namespace WordScapes
             this.Touch += LetterWheelLayout_Touch;
             //            this.SetBackgroundColor(Color.White);
         }
-        internal void CreateWheelLetters(MainActivity mainActivity)
+        internal void CreateWheelLetters(MainActivity mainActivity, bool IsShuffling)
         {
+            if (!IsShuffling)
+            {
+                _lstFoundWordsSoFar.Clear();
+            }
             this.RemoveAllViews();
+
             fDidLayout = false;
             this._lstLtrWheelLetterLayouts.Clear();
-            _lstFoundWordsSoFar.Clear();
             //            this.LayoutParameters = layoutParametersWheel;
             foreach (var ltr in mainActivity._wordCont.InitialWord.OrderBy(p => mainActivity._Random.NextDouble()))
             {
@@ -217,7 +221,7 @@ namespace WordScapes
 
         internal void Shuffle()
         {
-            CreateWheelLetters(this._mainActivity);
+            CreateWheelLetters(this._mainActivity, IsShuffling: true);
         }
 
         private WordStatus ShowWord(string wrdSoFar)
@@ -269,6 +273,7 @@ namespace WordScapes
         private void RefreshWordList(string wrdSoFar)
         {
             _mainActivity._ctrlWordList.SetWordList(_lstFoundWordsSoFar.OrderBy(p => p.word));
+            _mainActivity._txtWordListLen.Text = _lstFoundWordsSoFar.Count.ToString();
         }
 
         private void UpdateWordSofar()

@@ -25,11 +25,6 @@ namespace WordScapes
         public const string prefShowWordList = "ShowWordList";
 
         public const int idtxtTimer = 10;
-        public const int idtxtLenTargetWord = 20;
-        public const int idtxtLenSubWord = 30;
-        public const int idtxtScore = 35;
-        public const int idBtnPlayAgain = 40;
-        public const int idBtnShuffle = 50;
         public const int idGrdXWord = 60;
         public const int idtxtWordSofar = 70;
         public const int idLtrWheelView = 80;
@@ -48,6 +43,7 @@ namespace WordScapes
         LinearLayout _gridLayoutLetterWheel;
         public CheckBox _chkShowWordList;
         public WordListControl _ctrlWordList;
+        public TextView _txtWordListLen;
 
 
 
@@ -148,7 +144,7 @@ namespace WordScapes
             _gridLayoutLetterWheel = new LinearLayout(this)
             {
                 Id = idLtrWheelView,
-                Orientation= Orientation.Horizontal,
+                Orientation = Orientation.Horizontal,
             };
             layout.AddView(_gridLayoutLetterWheel);
 
@@ -156,25 +152,24 @@ namespace WordScapes
             {
                 Orientation = Orientation.Vertical,
             };
+            _gridLayoutLetterWheel.AddView(linearLayoutCol0, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WrapContent, LinearLayout.LayoutParams.WrapContent));
 
             _btnShuffle = new Button(this)
             {
                 Text = "Shuf",
                 TextSize = 8,
-                LayoutParameters= new LinearLayout.LayoutParams(200, LinearLayout.LayoutParams.WrapContent)
+                LayoutParameters = new LinearLayout.LayoutParams(200, LinearLayout.LayoutParams.WrapContent)
             };
             linearLayoutCol0.AddView(_btnShuffle);
 
             _txtScore = new TextView(this)
             {
-                Id = idtxtScore,
             };
             _txtScore.LayoutParameters = new LinearLayout.LayoutParams(200, LinearLayout.LayoutParams.MatchParent);
             linearLayoutCol0.AddView(_txtScore);
 
             _txtLenTargetWord = new EditText(this)
             {
-                Id = idtxtLenTargetWord,
                 Text = Xamarin.Essentials.Preferences.Get(prefTargWorLen, 7).ToString(),
                 TextSize = 14,
                 LayoutParameters = new LinearLayout.LayoutParams(120, LinearLayout.LayoutParams.WrapContent)
@@ -183,7 +178,6 @@ namespace WordScapes
 
             _txtLenSubword = new EditText(this)
             {
-                Id = idtxtLenSubWord,
                 Text = Xamarin.Essentials.Preferences.Get(prefSubWordLen, 5).ToString(),
                 TextSize = 14,
                 LayoutParameters = new LinearLayout.LayoutParams(120, LinearLayout.LayoutParams.WrapContent)
@@ -203,10 +197,17 @@ namespace WordScapes
             {
                 Xamarin.Essentials.Preferences.Set(prefShowWordList, _chkShowWordList.Checked);
                 _ctrlWordList.Visibility = _chkShowWordList.Checked ? ViewStates.Visible : ViewStates.Invisible;
+                _txtWordListLen.Visibility = _chkShowWordList.Checked ? ViewStates.Visible : ViewStates.Invisible;
             };
             linearLayoutCol0.AddView(_chkShowWordList);
 
-            _gridLayoutLetterWheel.AddView(linearLayoutCol0, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WrapContent, LinearLayout.LayoutParams.WrapContent));
+            _txtWordListLen = new TextView(this)
+            {
+                TextSize = 8,
+                LayoutParameters = new LinearLayout.LayoutParams(100, LinearLayout.LayoutParams.WrapContent),
+            };
+            linearLayoutCol0.AddView(_txtWordListLen);
+
 
 
             _LetterWheelView = new LetterWheelLayout(this)
@@ -220,14 +221,20 @@ namespace WordScapes
                 _LetterWheelView.Shuffle();
             };
 
+            var linearLayoutCol3 = new LinearLayout(this)
+            {
+                Orientation = Orientation.Vertical,
+            };
+            _gridLayoutLetterWheel.AddView(linearLayoutCol3, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WrapContent, LinearLayout.LayoutParams.WrapContent));
+
             _btnNew = new Button(this)
             {
-                Id = idBtnPlayAgain,
                 Text = "New",
-                TextSize = 12
+                TextSize = 8,
+                LayoutParameters = new LinearLayout.LayoutParams(100, LinearLayout.LayoutParams.WrapContent),
             };
             _btnNew.Click += BtnNew_Click;
-            _gridLayoutLetterWheel.AddView(_btnNew, new LinearLayout.LayoutParams(400, LinearLayout.LayoutParams.WrapContent));
+            linearLayoutCol3.AddView(_btnNew, new LinearLayout.LayoutParams(400, LinearLayout.LayoutParams.WrapContent));
 
 
             _ctrlWordList = new WordListControl(this);
@@ -352,7 +359,7 @@ namespace WordScapes
 
             DisplayXWords();
             UpdateScore();
-            _LetterWheelView.CreateWheelLetters(this);
+            _LetterWheelView.CreateWheelLetters(this, IsShuffling: false);
 
             if (_tskTimer != null)
             {
