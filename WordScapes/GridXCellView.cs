@@ -57,7 +57,10 @@ namespace WordScapes
                 {
                     Text = _ltr.ToString();
                     await Task.Delay(TimeSpan.FromSeconds(2.5));
-                    Text = string.Empty;
+                    if (!IsShowing) // after delay user could have got it.
+                    {
+                        Text = string.Empty;
+                    }
                 }
             }
         }
