@@ -52,6 +52,7 @@ namespace WordScapes
         public CheckBox _chkShowWordList;
         public WordListControl _ctrlWordList;
         public TextView _txtWordListLen;
+        public TextView _txtNumHintsUsed;
 
 
 
@@ -66,6 +67,7 @@ namespace WordScapes
         public WordContainer _wordCont;
         public GenGrid _gridgen;
         public int NumWordsFound;
+        public int NumHintsUsed;
         internal int _nCols = 12;
         internal int _nRows = 12;
 
@@ -211,7 +213,7 @@ namespace WordScapes
 
             _txtWordListLen = new TextView(this)
             {
-                TextSize = 8,
+                TextSize = 12,
                 LayoutParameters = new LinearLayout.LayoutParams(100, LinearLayout.LayoutParams.WrapContent),
             };
             linearLayoutCol0.AddView(_txtWordListLen);
@@ -220,7 +222,7 @@ namespace WordScapes
 
             _LetterWheelView = new LetterWheelLayout(this)
             {
-                LayoutParameters = new LinearLayout.LayoutParams(900, LinearLayout.LayoutParams.WrapContent)
+                LayoutParameters = new LinearLayout.LayoutParams(950, LinearLayout.LayoutParams.WrapContent)
             };
             _LetterWheelView.SetGravity(GravityFlags.Center);
             _gridLayoutLetterWheel.AddView(_LetterWheelView);
@@ -244,6 +246,12 @@ namespace WordScapes
             _btnNew.Click += BtnNew_Click;
             linearLayoutCol3.AddView(_btnNew, new LinearLayout.LayoutParams(400, LinearLayout.LayoutParams.WrapContent));
 
+            _txtNumHintsUsed = new TextView(this)
+            {
+                TextSize = 12,
+                LayoutParameters = new LinearLayout.LayoutParams(100, LinearLayout.LayoutParams.WrapContent),
+            };
+            linearLayoutCol3.AddView(_txtNumHintsUsed);
 
             _ctrlWordList = new WordListControl(this);
             {
@@ -354,7 +362,7 @@ namespace WordScapes
             _txtScore.Text = $"{NumWordsFound}/{_gridgen.NumWordsPlaced}";
             if (NumWordsFound == _gridgen.NumWordsPlaced)
             {
-                var str = $"You Won in {_txtTimer.Text}";
+                var str = $"You Won in {_txtTimer.Text} # Hints used = {NumHintsUsed}";
                 Android.Widget.Toast.MakeText(this, str, Android.Widget.ToastLength.Long).Show();
             }
         }
@@ -363,8 +371,8 @@ namespace WordScapes
         {
             _btnNew.Enabled = false;
             _txtWordSoFar.Text = string.Empty;
-            _txtScore.Text = string.Empty;
             NumWordsFound = 0;
+            NumHintsUsed = 0;
             if (_cts != null)
             {
                 _cts.Cancel();
@@ -400,6 +408,8 @@ namespace WordScapes
             {
                 this._txtWordSoFar.Text = err;
             }
+            _txtScore.Text = string.Empty;
+            _txtNumHintsUsed.Text = string.Empty;
             _grdXWord.RemoveAllViews();
             _ctrlWordList.SetWordList(lstWords: null);
             _nCols = _gridgen._MaxX;

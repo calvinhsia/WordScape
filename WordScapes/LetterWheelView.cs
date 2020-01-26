@@ -102,9 +102,10 @@ namespace WordScapes
                         {
                             if (!ltr._IsSelected)
                             {
-                                ltr.Select();
                                 _lstSelected.Add(ltr);
                                 UpdateWordSofar();
+                                ltr.Select(LtrWheelLetterLayout.SelectLetterType.selShort);
+//                                ltr.Select(_lstSelected.Count >= _mainActivity._wordGen._MinSubWordLen ? LtrWheelLetterLayout.SelectLetterType.selLong : LtrWheelLetterLayout.SelectLetterType.selShort);
                             }
                             else
                             { // already in select list. Should we unselect?
@@ -273,7 +274,6 @@ namespace WordScapes
         private void RefreshWordList(string wrdSoFar)
         {
             _mainActivity._ctrlWordList.SetWordList(_lstFoundWordsSoFar.OrderBy(p => p.word));
-            _mainActivity._txtWordListLen.Text = _lstFoundWordsSoFar.Count.ToString();
         }
 
         private void UpdateWordSofar()
@@ -326,21 +326,27 @@ namespace WordScapes
 
             Rect rect = new Rect();
             view.GetHitRect(rect);
-            var isin = rect.Contains((int)x, (int)y);
+            //            rect = new Rect(viewX, viewY, viewX + view.Width, viewY + view.Height);
 
-            var margx = (view.LayoutParameters as RelativeLayout.LayoutParams)?.LeftMargin;
-            var margy = (view.LayoutParameters as RelativeLayout.LayoutParams)?.TopMargin;
-
-            //this._mainActivity._txtWordSoFar.Text = $"view={view.textView.Text} rect={rect}  ({viewX},{viewY}) ({margx}, {margy})  ({view.Width},{view.Height})";
-            //point is inside view bounds
-            // xxz ({x}, {y}) {viewX},{viewY})  rect = {rect.Left},{ rect.Top}) ({rect.Right},{rect.Bottom})
-            if (x > viewX && x < (viewX + view.Width))
-            {
-                if (y > viewY && y < viewY + view.Height)
-                {
-                    return true;
-                }
+            if (_lstSelected.Count == 0)
+            {// for 1st letter, allow a larger rect
+//                rect.Left -= 50; rect.Right += 50; rect.Bottom += 50; rect.Top -= 50;
             }
+            var isin = rect.Contains((int)x, (int)y);
+            //            isin = false;
+            //var margx = (view.LayoutParameters as RelativeLayout.LayoutParams)?.LeftMargin;
+            //var margy = (view.LayoutParameters as RelativeLayout.LayoutParams)?.TopMargin;
+
+            ////this._mainActivity._txtWordSoFar.Text = $"view={view.textView.Text} rect={rect}  ({viewX},{viewY}) ({margx}, {margy})  ({view.Width},{view.Height})";
+            ////point is inside view bounds
+            //// xxz ({x}, {y}) {viewX},{viewY})  rect = {rect.Left},{ rect.Top}) ({rect.Right},{rect.Bottom})
+            //if (x > viewX && x < (viewX + view.Width))
+            //{
+            //    if (y > viewY && y < viewY + view.Height)
+            //    {
+            //        return true;
+            //    }
+            //}
             return isin;
         }
         protected override void OnDraw(Canvas canvas)
@@ -380,6 +386,11 @@ namespace WordScapes
     }
     public class LtrWheelLetterLayout : RelativeLayout
     {
+        public enum SelectLetterType
+        {
+            selShort,
+            selLong
+        }
         public TextView textView;
         public bool _IsSelected = false;
         public LtrWheelLetterLayout(Context context, char letter) : base(context)
@@ -398,12 +409,20 @@ namespace WordScapes
             //this.GetLocationOnScreen(location);
         }
 
-        internal void Select()
+        internal void Select(SelectLetterType selectLetterType)
         {
             if (!_IsSelected)
             {
                 _IsSelected = !_IsSelected;
-                this.SetBackgroundColor(Color.Purple);
+                switch (selectLetterType)
+                {
+                    case SelectLetterType.selLong:
+                        this.SetBackgroundColor(Color.LightGreen);
+                        break;
+                    case SelectLetterType.selShort:
+                        this.SetBackgroundColor(Color.Purple);
+                        break;
+                }
                 this.textView.SetTextColor(Color.White);
             }
         }
@@ -434,7 +453,7 @@ namespace WordScapes
             public LtrWheelLetterAnd(Context context, char letter) : base(context)
             {
                 this.Text = letter.ToString();
-                this.TextSize = 36;
+                this.TextSize = 34;
                 this.TextAlignment = TextAlignment.Center;
                 this.SetTypeface(null, TypefaceStyle.Bold);
                 this.SetTextColor(Color.Black);

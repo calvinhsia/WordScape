@@ -50,9 +50,9 @@ namespace WordScapes
         public void SetWordList(IEnumerable<FoundWord> lstWords)
         {
             _grdWordList.RemoveAllViews();
+            int ndx = 0;
             if (lstWords != null && _mainActivity._chkShowWordList.Checked)
             {
-                int ndx = 0;
                 foreach (var item in lstWords)
                 {
                     LetterWheelLayout.GetColorFromFoundWordType(item.foundWordType, out var forecolr, out var backColr);
@@ -68,13 +68,15 @@ namespace WordScapes
                     };
                     var x = ndx / _grdWordList.RowCount;
                     var y = ndx - x * _grdWordList.RowCount;
-                    tv.LayoutParameters = new GridLayout.LayoutParams(GridLayout.InvokeSpec(y), GridLayout.InvokeSpec(x));
-                    ((GridLayout.LayoutParams)(tv.LayoutParameters)).RightMargin = 2;
+                    var parms = new GridLayout.LayoutParams(GridLayout.InvokeSpec(y), GridLayout.InvokeSpec(x));
+                    tv.LayoutParameters = parms;
+                    parms.RightMargin = 5;
+//                    ((GridLayout.LayoutParams)(tv.LayoutParameters)).RightMargin = 2;
                     _grdWordList.AddView(tv);
                     ndx++;
                 }
             }
-
+            _mainActivity._txtWordListLen.Text = ndx.ToString();
         }
     }
 }

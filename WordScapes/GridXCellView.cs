@@ -55,6 +55,8 @@ namespace WordScapes
             {
                 if (!IsShowing)
                 {
+                    MainActivity._instance.NumHintsUsed++;
+                    MainActivity._instance._txtNumHintsUsed.Text = MainActivity._instance.NumHintsUsed.ToString();
                     Text = _ltr.ToString();
                     await Task.Delay(TimeSpan.FromSeconds(2.5));
                     if (!IsShowing) // after delay user could have got it.
