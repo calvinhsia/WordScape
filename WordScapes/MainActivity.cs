@@ -33,6 +33,7 @@ namespace WordScapes
 
         public const int idtxtTimer = 10;
         public const int idGrdXWord = 60;
+        public const int idBorder = 65;
         public const int idtxtWordSofar = 70;
         public const int idLtrWheelView = 80;
         public const int idWordList = 80;
@@ -70,6 +71,7 @@ namespace WordScapes
         public int NumHintsUsed;
         internal int _nCols = 12;
         internal int _nRows = 12;
+        private TextView _viewBorder;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -136,18 +138,14 @@ namespace WordScapes
             //            _grdXWord.SetBackgroundColor(Color.Red);
             layout.AddView(_grdXWord);
 
-            _txtWordSoFar = new TextView(this)
+            this._viewBorder = new TextView(this)
             {
-                Id = idtxtWordSofar,
-                TextSize = 15
+                Id = idBorder,
             };
-            _txtWordSoFar.Click += (o, e) =>
-              {
-                  DoLookupOnlineDictionary(_txtWordSoFar.Text);
-              };
-
-            layout.AddView(_txtWordSoFar);
-
+            _viewBorder.SetBackgroundColor(Color.Black);
+            var bordLP = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, 10);
+            _viewBorder.LayoutParameters = bordLP;
+            layout.AddView(_viewBorder);
 
             /// the letterwheel is a circle. want some buttons/ui on either side, so use a 3 col grid layout
             /// 
@@ -218,14 +216,39 @@ namespace WordScapes
             };
             linearLayoutCol0.AddView(_txtWordListLen);
 
-
-
+            var lin = new LinearLayout(this)
+            {
+                Orientation= Orientation.Vertical
+            };
+            var lininside = new LinearLayout(this)
+            {
+                Orientation = Orientation.Horizontal
+            };
+            _txtWordSoFar = new TextView(this)
+            {
+                Id = idtxtWordSofar,
+                TextSize = 15,
+                TextAlignment= TextAlignment.Center
+            };
+            _txtWordSoFar.Click += (o, e) =>
+            {
+                DoLookupOnlineDictionary(_txtWordSoFar.Text);
+            };
+//            _txtWordSoFar.SetForegroundGravity(GravityFlags.CenterHorizontal);
+            lininside.AddView(_txtWordSoFar);
+            var p = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MatchParent, LinearLayout.LayoutParams.MatchParent);
+            p.Gravity = GravityFlags.Center;
+            p.LeftMargin = 150;
+            p.TopMargin = 15;
+            lininside.LayoutParameters = p;
+            lin.AddView(lininside);
             _LetterWheelView = new LetterWheelLayout(this)
             {
                 LayoutParameters = new LinearLayout.LayoutParams(950, LinearLayout.LayoutParams.WrapContent)
             };
             _LetterWheelView.SetGravity(GravityFlags.Center);
-            _gridLayoutLetterWheel.AddView(_LetterWheelView);
+            lin.AddView(_LetterWheelView);
+            _gridLayoutLetterWheel.AddView(lin);
             _btnShuffle.Click += (o, e) =>
             {
                 _LetterWheelView.Shuffle();
@@ -302,17 +325,19 @@ namespace WordScapes
 
 
 
-                    _txtWordSoFar.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
-                    ((RelativeLayout.LayoutParams)(_txtWordSoFar.LayoutParameters)).TopMargin = 30;
-                    ((RelativeLayout.LayoutParams)(_txtWordSoFar.LayoutParameters)).AddRule(LayoutRules.Below, idGrdXWord);
-                    ((RelativeLayout.LayoutParams)(_txtWordSoFar.LayoutParameters)).AddRule(LayoutRules.CenterHorizontal);
+                    //_txtWordSoFar.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
+                    //((RelativeLayout.LayoutParams)(_txtWordSoFar.LayoutParameters)).TopMargin = 30;
+                    //((RelativeLayout.LayoutParams)(_txtWordSoFar.LayoutParameters)).AddRule(LayoutRules.Below, idGrdXWord);
+                    //((RelativeLayout.LayoutParams)(_txtWordSoFar.LayoutParameters)).AddRule(LayoutRules.CenterHorizontal);
 
 
 
                     //                    _txtScore.LayoutParameters = new GridLayout.LayoutParams(200, RelativeLayout.LayoutParams.WrapContent);
 
+                    ((RelativeLayout.LayoutParams)(_viewBorder.LayoutParameters)).AddRule(LayoutRules.Below, idGrdXWord);
+
                     _gridLayoutLetterWheel.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MatchParent, RelativeLayout.LayoutParams.WrapContent);
-                    ((RelativeLayout.LayoutParams)(_gridLayoutLetterWheel.LayoutParameters)).AddRule(LayoutRules.Below, idtxtWordSofar);
+                    ((RelativeLayout.LayoutParams)(_gridLayoutLetterWheel.LayoutParameters)).AddRule(LayoutRules.Below, idBorder);
 
 
                     _ctrlWordList.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MatchParent, RelativeLayout.LayoutParams.MatchParent);
