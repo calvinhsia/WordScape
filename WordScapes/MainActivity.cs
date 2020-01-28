@@ -40,7 +40,7 @@ namespace WordScapes
         private int idTitleText;
 
         TextView _txtTitle;
-        Button _btnNew;
+        public Button _btnNew;
         TextView _txtLenTargetWord;
         TextView _txtLenSubword;
         TextView _txtScore;
@@ -169,6 +169,10 @@ namespace WordScapes
                 LayoutParameters = new LinearLayout.LayoutParams(200, LinearLayout.LayoutParams.WrapContent)
             };
             linearLayoutCol0.AddView(_btnShuffle);
+            _btnShuffle.Click += (o, e) =>
+            {
+                _LetterWheelView.Shuffle();
+            };
 
             _txtScore = new TextView(this)
             {
@@ -216,9 +220,9 @@ namespace WordScapes
             };
             linearLayoutCol0.AddView(_txtWordListLen);
 
-            var lin = new LinearLayout(this)
+            var linearLayouCol2 = new LinearLayout(this)
             {
-                Orientation= Orientation.Vertical
+                Orientation = Orientation.Vertical
             };
             var lininside = new LinearLayout(this)
             {
@@ -228,31 +232,27 @@ namespace WordScapes
             {
                 Id = idtxtWordSofar,
                 TextSize = 15,
-                TextAlignment= TextAlignment.Center
+                TextAlignment = TextAlignment.Center
             };
             _txtWordSoFar.Click += (o, e) =>
             {
                 DoLookupOnlineDictionary(_txtWordSoFar.Text);
             };
-//            _txtWordSoFar.SetForegroundGravity(GravityFlags.CenterHorizontal);
+            //            _txtWordSoFar.SetForegroundGravity(GravityFlags.CenterHorizontal);
             lininside.AddView(_txtWordSoFar);
             var p = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MatchParent, LinearLayout.LayoutParams.MatchParent);
             p.Gravity = GravityFlags.Center;
             p.LeftMargin = 150;
             p.TopMargin = 15;
             lininside.LayoutParameters = p;
-            lin.AddView(lininside);
+            linearLayouCol2.AddView(lininside);
             _LetterWheelView = new LetterWheelLayout(this)
             {
-                LayoutParameters = new LinearLayout.LayoutParams(950, LinearLayout.LayoutParams.WrapContent)
+                LayoutParameters = new LinearLayout.LayoutParams((int)(0.59 * _ptScreenSize.X), LinearLayout.LayoutParams.WrapContent)
             };
             _LetterWheelView.SetGravity(GravityFlags.Center);
-            lin.AddView(_LetterWheelView);
-            _gridLayoutLetterWheel.AddView(lin);
-            _btnShuffle.Click += (o, e) =>
-            {
-                _LetterWheelView.Shuffle();
-            };
+            linearLayouCol2.AddView(_LetterWheelView);
+            _gridLayoutLetterWheel.AddView(linearLayouCol2);
 
             var linearLayoutCol3 = new LinearLayout(this)
             {
@@ -367,8 +367,8 @@ namespace WordScapes
 
 
                         _gridLayoutLetterWheel.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MatchParent, RelativeLayout.LayoutParams.WrapContent);
-                        ((RelativeLayout.LayoutParams)(_gridLayoutLetterWheel.LayoutParameters)).AddRule(LayoutRules.RightOf, idWordList);
-                        ((RelativeLayout.LayoutParams)(_gridLayoutLetterWheel.LayoutParameters)).AddRule(LayoutRules.Below, idtxtWordSofar);
+                        //((RelativeLayout.LayoutParams)(_gridLayoutLetterWheel.LayoutParameters)).AddRule(LayoutRules.RightOf, idWordList);
+                        //((RelativeLayout.LayoutParams)(_gridLayoutLetterWheel.LayoutParameters)).AddRule(LayoutRules.Below, idtxtWordSofar);
 
 
 

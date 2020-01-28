@@ -28,8 +28,9 @@ namespace WordScapes
         public LetterWheelLayout(MainActivity mainActivity) : base(mainActivity)
         {
             this._mainActivity = mainActivity;
+            _circRadius = mainActivity._ptScreenSize.X / 3;
             this.Touch += LetterWheelLayout_Touch;
-            //            this.SetBackgroundColor(Color.White);
+//            this.SetBackgroundColor(Color.LightGray);
         }
         internal void CreateWheelLetters(MainActivity mainActivity, bool IsShuffling)
         {
@@ -104,8 +105,6 @@ namespace WordScapes
                             {
                                 _lstSelected.Add(ltr);
                                 UpdateWordSofar();
-                                ltr.Select(LtrWheelLetterLayout.SelectLetterType.selShort);
-//                                ltr.Select(_lstSelected.Count >= _mainActivity._wordGen._MinSubWordLen ? LtrWheelLetterLayout.SelectLetterType.selLong : LtrWheelLetterLayout.SelectLetterType.selShort);
                             }
                             else
                             { // already in select list. Should we unselect?
@@ -120,8 +119,6 @@ namespace WordScapes
                                     }
                                 }
                             }
-
-
                         }
                         break;
                     case MotionEventActions.Up:
@@ -282,6 +279,7 @@ namespace WordScapes
             foreach (var ltr in _lstSelected)
             {
                 txtWordSoFar += ltr.textView.Text;
+                ltr.Select(_lstSelected.Count >= _mainActivity._wordGen._MinSubWordLen ? LtrWheelLetterLayout.SelectLetterType.selLong : LtrWheelLetterLayout.SelectLetterType.selShort);
             }
             _mainActivity._txtWordSoFar.Text = txtWordSoFar;
         }
@@ -298,17 +296,20 @@ namespace WordScapes
 
         private LtrWheelLetterLayout GetLetterFromTouch(TouchEventArgs e)
         {
-            int[] locg = new int[2];
-            this.GetLocationInWindow(locg);
-            var X = (int)e.Event.RawX;// - locg[0];
-            var Y = (int)e.Event.RawY;// - locg[1];
             LtrWheelLetterLayout ltrWheelLetterLayout = null;
-            foreach (var ltr in _lstLtrWheelLetterLayouts)
+            if (_mainActivity._btnNew.Enabled) // if we're not calculating the next board
             {
-                if (IsPointInsideView(X, Y, ltr))
+                int[] locg = new int[2];
+                this.GetLocationInWindow(locg);
+                var X = (int)e.Event.RawX;// - locg[0];
+                var Y = (int)e.Event.RawY;// - locg[1];
+                foreach (var ltr in _lstLtrWheelLetterLayouts)
                 {
-                    ltrWheelLetterLayout = ltr;
-                    break;
+                    if (IsPointInsideView(X, Y, ltr))
+                    {
+                        ltrWheelLetterLayout = ltr;
+                        break;
+                    }
                 }
             }
             return ltrWheelLetterLayout;
@@ -330,7 +331,7 @@ namespace WordScapes
 
             if (_lstSelected.Count == 0)
             {// for 1st letter, allow a larger rect
-//                rect.Left -= 50; rect.Right += 50; rect.Bottom += 50; rect.Top -= 50;
+             //                rect.Left -= 50; rect.Right += 50; rect.Bottom += 50; rect.Top -= 50;
             }
             var isin = rect.Contains((int)x, (int)y);
             //            isin = false;
@@ -398,7 +399,8 @@ namespace WordScapes
             textView = new LtrWheelLetterAnd(context, letter);
             this.AddView(textView);
             //            this.SetBackgroundColor(Color.CornflowerBlue);
-            var parms = new RelativeLayout.LayoutParams(195, 195);
+            var w = (int)(.135 * MainActivity._instance._ptScreenSize.X);
+            var parms = new RelativeLayout.LayoutParams(w,w);
             //parms.AddRule(LayoutRules.CenterHorizontal);
             //parms.AddRule(LayoutRules.CenterVertical);
             //parms.TopMargin = -20;
@@ -414,26 +416,26 @@ namespace WordScapes
             if (!_IsSelected)
             {
                 _IsSelected = !_IsSelected;
-                switch (selectLetterType)
-                {
-                    case SelectLetterType.selLong:
-                        this.SetBackgroundColor(Color.LightGreen);
-                        break;
-                    case SelectLetterType.selShort:
-                        this.SetBackgroundColor(Color.Purple);
-                        break;
-                }
-                this.textView.SetTextColor(Color.White);
             }
+            switch (selectLetterType)
+            {
+                case SelectLetterType.selLong:
+                    this.SetBackgroundColor(Color.LightGreen);
+                    break;
+                case SelectLetterType.selShort:
+                    this.SetBackgroundColor(Color.LightPink);
+                    break;
+            }
+            this.textView.SetTextColor(Color.White);
         }
         internal void UnSelect()
         {
             if (_IsSelected)
             {
                 _IsSelected = !_IsSelected;
-                this.SetBackgroundColor(Color.White);
-                this.textView.SetTextColor(Color.Black);
             }
+            this.SetBackgroundColor(Color.White);
+            this.textView.SetTextColor(Color.Black);
         }
 
         //        public class myshape : RoutingEffect
