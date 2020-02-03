@@ -258,7 +258,9 @@ namespace WordScapes
             {
                 Orientation = Orientation.Vertical,
             };
-            _gridLayoutLetterWheel.AddView(linearLayoutCol3, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WrapContent, LinearLayout.LayoutParams.WrapContent));
+            var layoutpCol3 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WrapContent, LinearLayout.LayoutParams.WrapContent);
+            layoutpCol3.LeftMargin = 100;
+            _gridLayoutLetterWheel.AddView(linearLayoutCol3, layoutpCol3);
 
             _btnNew = new Button(this)
             {
@@ -267,7 +269,7 @@ namespace WordScapes
                 LayoutParameters = new LinearLayout.LayoutParams(100, LinearLayout.LayoutParams.WrapContent),
             };
             _btnNew.Click += BtnNew_Click;
-            linearLayoutCol3.AddView(_btnNew, new LinearLayout.LayoutParams(400, LinearLayout.LayoutParams.WrapContent));
+            linearLayoutCol3.AddView(_btnNew, new LinearLayout.LayoutParams(200, LinearLayout.LayoutParams.WrapContent));
 
             _txtNumHintsUsed = new TextView(this)
             {
@@ -384,7 +386,7 @@ namespace WordScapes
 
         public void UpdateScore()
         {
-            _txtScore.Text = $"{NumWordsFound}/{_gridgen.NumWordsPlaced}";
+            _txtScore.Text = $"{NumWordsFound}/{_gridgen.NumWordsPlaced} {_wordCont.subwords.Count}";
             if (NumWordsFound == _gridgen.NumWordsPlaced)
             {
                 var str = $"You Won in {_txtTimer.Text} # Hints used = {NumHintsUsed}";
@@ -467,6 +469,7 @@ namespace WordScapes
                     await Task.Delay(1000);
                 }
             });
+
             _txtTimer.Text = string.Empty;
             _nSecondsElapsed = 0;
             _timerEnabled = true;
