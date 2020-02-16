@@ -291,8 +291,8 @@ namespace WordScapes
         public override void OnConfigurationChanged(Android.Content.Res.Configuration newConfig)
         {
             base.OnConfigurationChanged(newConfig);
-            WindowManager.DefaultDisplay.GetSize(_ptScreenSize);
-            SetLayoutForOrientation(newConfig.Orientation);
+            //WindowManager.DefaultDisplay.GetSize(_ptScreenSize);
+            //SetLayoutForOrientation(newConfig.Orientation);
         }
 
 
@@ -389,6 +389,7 @@ namespace WordScapes
             _txtScore.Text = $"{NumWordsFound}/{_gridgen.NumWordsPlaced} {_wordCont.subwords.Count}";
             if (NumWordsFound == _gridgen.NumWordsPlaced)
             {
+                _timerEnabled = false;
                 var str = $"You Won in {_txtTimer.Text} # Hints used = {NumHintsUsed}";
                 Android.Widget.Toast.MakeText(this, str, Android.Widget.ToastLength.Long).Show();
             }
