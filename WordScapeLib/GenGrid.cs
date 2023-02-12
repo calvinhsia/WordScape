@@ -147,6 +147,13 @@ namespace WordScape
                         {
                             continue;
                         }
+                    } else
+//                    if (subword.EndsWith("D")) // "remover", "removed": allow only one
+                    {
+                        if (_dictPlacedWords.ContainsKey(subword.Substring(0, subword.Length - 2) + "R"))
+                        {
+                            continue;
+                        }
                     }
                     if (subword.EndsWith("R")) // "remover", "removed": allow only one
                     {
@@ -155,12 +162,9 @@ namespace WordScape
                             continue;
                         }
                     }
-                    if (subword.EndsWith("D")) // "remover", "removed": allow only one
+                    if (_dictPlacedWords.ContainsKey(subword  + "LY")) // discretely: dont put discrete
                     {
-                        if (_dictPlacedWords.ContainsKey(subword.Substring(0, subword.Length - 2) + "R"))
-                        {
-                            continue;
-                        }
+                        continue;
                     }
                     if (_dictPlacedWords.ContainsKey(subword + "ED")) // disobeyed : don't put disobey
                     {

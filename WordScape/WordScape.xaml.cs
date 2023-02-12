@@ -21,14 +21,27 @@ using System.Windows.Threading;
 
 namespace WordScape
 {
+    class WordScapePuzzle
+    {
+        public int LenTargetWord = 7;
+        public int MinSubWordLength = 5;
+        public WordGenerator wordGenerator;
+        public WordContainer wordContainer;
+        public GenGrid genGrid;
+    }
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class WordScapeWindow : Window, INotifyPropertyChanged
     {
-        internal WordGenerator _wordGen;
-        internal WordContainer _WordCont;
-        internal GenGrid _gridgen;
+        public const int MaxX = 18;
+        public const int MaxY = 18;
+        WordScapePuzzle _wordScapePuzzleCurrent = new();
+        Task<WordScapePuzzle> taskGenNextPuzzle;
+
+        internal WordGenerator _wordGen { get { return _wordScapePuzzleCurrent.wordGenerator; } set { _wordScapePuzzleCurrent.wordGenerator = value; } }
+        internal WordContainer _WordCont { get { return _wordScapePuzzleCurrent.wordContainer; } set { _wordScapePuzzleCurrent.wordContainer = value; } }
+        internal GenGrid _gridgen { get { return _wordScapePuzzleCurrent.genGrid; } set { _wordScapePuzzleCurrent.genGrid = value; } }
         static internal WordScapeWindow WordScapeWindowInstance;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -39,8 +52,8 @@ namespace WordScape
         string _strWordSoFar;
         public string StrWordSoFar { get { return _strWordSoFar; } set { _strWordSoFar = value; OnMyPropertyChanged(); } }
 
-        public int LenTargetWord { get; set; } = 7;
-        public int MinSubWordLength { get; set; } = 5;
+        public int LenTargetWord { get { return _wordScapePuzzleCurrent.LenTargetWord; } set { _wordScapePuzzleCurrent.LenTargetWord = value; } }
+        public int MinSubWordLength { get { return _wordScapePuzzleCurrent.MinSubWordLength; } set { _wordScapePuzzleCurrent.MinSubWordLength = value; } }
         private readonly Random _Random;
 
         private int _CountDownTime;
@@ -77,7 +90,7 @@ namespace WordScape
             return $"{hrs}{mins}{secs}";
         }
 
-        private ObservableCollection<UIElement> _LstWrdsSoFar = new ObservableCollection<UIElement>();
+        private ObservableCollection<UIElement> _LstWrdsSoFar = new();
         public ObservableCollection<UIElement> LstWrdsSoFar { get { return _LstWrdsSoFar; } set { _LstWrdsSoFar = value; OnMyPropertyChanged(); } }
 
         private int _NumHintsUsed;
@@ -134,7 +147,43 @@ namespace WordScape
                 },
                 this.Dispatcher
                 );
-            BtnPlayAgain.RaiseEvent(new RoutedEventArgs() { RoutedEvent = Button.ClickEvent, Source = this });
+            taskGenNextPuzzle = CreateNextPuzzleTask(); // don't await it here
+            BtnNew.RaiseEvent(new RoutedEventArgs() { RoutedEvent = Button.ClickEvent, Source = this });
+        }
+        Task<WordScapePuzzle> CreateNextPuzzleTask()
+        {
+            return Task.Run(() =>
+            {
+                var done = false;
+                WordScapePuzzle puzzleNext = null;
+                while (!done)
+                {
+                    puzzleNext = new WordScapePuzzle()
+                    {
+                        LenTargetWord = this.LenTargetWord,
+                        MinSubWordLength = MinSubWordLength
+                    };
+                    try
+                    {
+                        puzzleNext.wordGenerator = new WordGenerator(_Random)
+                        {
+                            _MinSubWordLen = MinSubWordLength
+                        };
+                        puzzleNext.wordContainer = puzzleNext.wordGenerator.GenerateWord(puzzleNext.LenTargetWord);
+                        puzzleNext.genGrid = new GenGrid(MaxX, MaxY, puzzleNext.wordContainer, puzzleNext.wordGenerator._rand);
+                        puzzleNext.genGrid.Generate();
+                        if (puzzleNext.LenTargetWord == this.LenTargetWord && puzzleNext.MinSubWordLength == MinSubWordLength)
+                        {
+                            done = true;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // old version of dict threw nullref sometimes at end of alphabet
+                    }
+                }
+                return puzzleNext;
+            });
         }
 
         void BtnShuffle_Click(object sender, RoutedEventArgs e)
@@ -142,36 +191,33 @@ namespace WordScape
             this.ltrWheel.Shuffle();
         }
 
-        private async void BtnPlayAgain_Click(object sender, RoutedEventArgs e)
+        private async void BtnNew_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 if (this.LenTargetWord >= 12)
                 {
-                    var ow = new Window()
+                    var ow = new Window
                     {
                         Left = this.Left,
                         Top = this.Top,
                         Height = 300,
                         Width = 800,
+                        Content = "Really ??"
                     };
-                    ow.Content = "Really ??";
                     ow.ShowDialog();
                     return;
                 }
-                this.BtnPlayAgain.IsEnabled = false;
+                this.BtnNew.IsEnabled = false;
                 this.wrdsSoFar.RenderTransform = Transform.Identity;
-
-                await Task.Run(() =>
+                TimerIsEnabled = false;
+                var newpuzzle = await taskGenNextPuzzle;
+                while (newpuzzle.LenTargetWord != LenTargetWord || newpuzzle.MinSubWordLength != MinSubWordLength)
                 {
-                    this._wordGen = new WordGenerator(_Random)
-                    {
-                        _MinSubWordLen = MinSubWordLength
-                    };
-                    _WordCont = this._wordGen.GenerateWord(LenTargetWord);
-                    _gridgen = new GenGrid(maxX: 15, maxY: 15, _WordCont, this._wordGen._rand);
-                    _gridgen.Generate();
-                });
+                    newpuzzle = await CreateNextPuzzleTask();
+                }
+                _wordScapePuzzleCurrent = newpuzzle;
+                taskGenNextPuzzle = CreateNextPuzzleTask(); // set up for next puzzle to be instantaneous
 
                 FillGrid(_gridgen);
                 NumWordsTotal = 0; // force prop changed
@@ -188,7 +234,7 @@ namespace WordScape
             {
                 this.Content = ex.ToString();
             }
-            this.BtnPlayAgain.IsEnabled = true;
+            this.BtnNew.IsEnabled = true;
         }
 
         private void FillGrid(GenGrid gridgen)
@@ -229,7 +275,7 @@ namespace WordScape
                 var deltaManipulation = e.DeltaManipulation;
                 var matrix = ((MatrixTransform)element.RenderTransform).Matrix;
                 // find the old center; arguaby this could be cached 
-                Point center = new Point(element.ActualWidth / 2, element.ActualHeight / 2);
+                Point center = new(element.ActualWidth / 2, element.ActualHeight / 2);
                 // transform it to take into account transforms from previous manipulations 
                 center = matrix.Transform(center);
                 //this will be a Zoom. 

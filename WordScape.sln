@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29512.182
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33311.366
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordScape", "WordScape\WordScape.csproj", "{EFDA9468-42EB-42A4-90ED-9666F1ED2C64}"
 EndProject
@@ -10,6 +10,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WordScapeLib", "WordScapeLib\WordScapeLib.csproj", "{1879E036-6832-409B-9183-783D50AE5B5F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordScapes", "WordScapes\WordScapes.csproj", "{6096C8B1-2716-4CB7-885C-D52740E76119}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F3944A61-9DE4-4FE6-A6DF-A63AD7AB7D6D}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
