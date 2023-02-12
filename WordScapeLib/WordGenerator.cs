@@ -22,9 +22,13 @@ namespace WordScape
         public readonly DictionaryLib.DictionaryLib _dictionaryLibSmall;
         public readonly DictionaryLib.DictionaryLib _dictionaryLibLarge;
         public int _MinSubWordLen = 5;
-        public int _numMaxSubWords = 1500;
-        public WordGenerator(Random rand = null)
+        public int _TargetLen;
+        private readonly int _numMaxSubWords;
+        public WordGenerator(Random rand = null, int TargetLen= 10, int minSubWordLength = 3, int MaxSubWords = 1500)
         {
+            _numMaxSubWords = MaxSubWords;
+            _TargetLen = TargetLen;
+            _MinSubWordLen = minSubWordLength;
             if (rand == null)
             {
                 _rand = new Random();
@@ -37,10 +41,10 @@ namespace WordScape
             _dictionaryLibLarge = new DictionaryLib.DictionaryLib(DictionaryLib.DictionaryType.Large, _rand);
         }
 
-        public WordContainer GenerateWord(int Targetlen)
+        public WordContainer GenerateWord()
         {
             var word = string.Empty;
-            while (word.Length != Targetlen)
+            while (word.Length != _TargetLen)
             {
                 word = _dictionaryLibSmall.RandomWord();
             }

@@ -21,10 +21,18 @@ using System.Windows.Threading;
 
 namespace WordScape
 {
+    public class WordScapeOptions
+    {
+        public int LenTargetWord { get; set; } = 7;
+        public int MinSubWordLength { get; set; } = 5;
+        public int MaxX { get; set; } = 15;
+        public int MaxY { get; set; } = 15;
+        public bool IsWordScape { get; set; } = true; // or Ruffle
+    }
     class WordScapePuzzle
     {
-        public int LenTargetWord = 7;
-        public int MinSubWordLength = 5;
+        public int LenTargetWord = 7; // at the time of generation. USer could have changed it, invalidating this one
+        public int MinSubWordLength = 5; // at the time of generation. USer could have changed it, invalidating this one
         public WordGenerator wordGenerator;
         public WordContainer wordContainer;
         public GenGrid genGrid;
@@ -34,10 +42,10 @@ namespace WordScape
     /// </summary>
     public partial class WordScapeWindow : Window, INotifyPropertyChanged
     {
-        public const int MaxX = 18;
-        public const int MaxY = 18;
         WordScapePuzzle _wordScapePuzzleCurrent = new();
         Task<WordScapePuzzle> taskGenNextPuzzle;
+
+        WordScapeOptions _WordScapeOptions = new();
 
         internal WordGenerator _wordGen { get { return _wordScapePuzzleCurrent.wordGenerator; } set { _wordScapePuzzleCurrent.wordGenerator = value; } }
         internal WordContainer _WordCont { get { return _wordScapePuzzleCurrent.wordContainer; } set { _wordScapePuzzleCurrent.wordContainer = value; } }
@@ -115,6 +123,8 @@ namespace WordScape
             this.Left = Properties.Settings.Default.WindowPos.X;
             this.LenTargetWord = Properties.Settings.Default.WordLen;
             this.MinSubWordLength = Properties.Settings.Default.SubWordLen;
+            this._WordScapeOptions.MaxX = Properties.Settings.Default.MaxX;
+            this._WordScapeOptions.MaxY = Properties.Settings.Default.MaxY;
             WordScapeWindowInstance = this;
             _Random = new Random(
 #if DEBUG
@@ -128,6 +138,8 @@ namespace WordScape
                 Properties.Settings.Default.WindowSize = new System.Drawing.Size((int)this.Width, (int)this.Height);
                 Properties.Settings.Default.WordLen = this.LenTargetWord;
                 Properties.Settings.Default.SubWordLen = this.MinSubWordLength;
+                Properties.Settings.Default.MaxX = _WordScapeOptions.MaxX;
+                Properties.Settings.Default.MaxY = _WordScapeOptions.MaxY;
                 Properties.Settings.Default.Save();
             };
             this.Loaded += MainWindow_Loaded;
@@ -165,12 +177,9 @@ namespace WordScape
                     };
                     try
                     {
-                        puzzleNext.wordGenerator = new WordGenerator(_Random)
-                        {
-                            _MinSubWordLen = MinSubWordLength
-                        };
-                        puzzleNext.wordContainer = puzzleNext.wordGenerator.GenerateWord(puzzleNext.LenTargetWord);
-                        puzzleNext.genGrid = new GenGrid(MaxX, MaxY, puzzleNext.wordContainer, puzzleNext.wordGenerator._rand);
+                        puzzleNext.wordGenerator = new WordGenerator(_Random, TargetLen: LenTargetWord, minSubWordLength: MinSubWordLength);
+                        puzzleNext.wordContainer = puzzleNext.wordGenerator.GenerateWord();
+                        puzzleNext.genGrid = new GenGrid(_WordScapeOptions.MaxX, _WordScapeOptions.MaxY, puzzleNext.wordContainer, puzzleNext.wordGenerator._rand);
                         puzzleNext.genGrid.Generate();
                         if (puzzleNext.LenTargetWord == this.LenTargetWord && puzzleNext.MinSubWordLength == MinSubWordLength)
                         {
@@ -235,6 +244,10 @@ namespace WordScape
                 this.Content = ex.ToString();
             }
             this.BtnNew.IsEnabled = true;
+        }
+        void BtnOptions_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
         private void FillGrid(GenGrid gridgen)

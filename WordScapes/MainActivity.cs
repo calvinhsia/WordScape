@@ -412,13 +412,13 @@ namespace WordScapes
             Xamarin.Essentials.Preferences.Set(prefSubWordLen, minSubWordLen);
 
             _wordGen._MinSubWordLen = minSubWordLen;
-
+            _wordGen._TargetLen = LenTargetWord;
             var err = string.Empty;
             await Task.Run(() =>
             {
                 try
                 {
-                    _wordCont = _wordGen.GenerateWord(LenTargetWord);
+                    _wordCont = _wordGen.GenerateWord();
                     _gridgen = new GenGrid(maxX: 12, maxY: 12, _wordCont, this._Random);
                     _gridgen.Generate();
                     //                    var xx = _gridgen.ShowGrid();

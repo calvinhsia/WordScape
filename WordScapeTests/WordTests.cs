@@ -13,13 +13,13 @@ namespace WordScapeTests
         [TestMethod]
         public void TestGridResizeSmaller()
         {
-            var wordGen = new WordGenerator(new Random(1))
+            var wordGen = new WordGenerator(new Random(1), minSubWordLength:5, TargetLen:8)
             {
                 _MinSubWordLen = 5
             };
             for (int i = 0; i < 100; i++)
             {
-                var wcont = wordGen.GenerateWord(Targetlen: 8);
+                var wcont = wordGen.GenerateWord();
                 LogMessage($"NumLookups = {wcont.cntLookups} #SubWords = {wcont.subwords.Count} {wcont.InitialWord}");
                 foreach (var sword in wcont.subwords)
                 {
@@ -36,13 +36,10 @@ namespace WordScapeTests
         [TestMethod]
         public void TestGenGrid()
         {
-            var wordGen = new WordGenerator(new Random(1))
-            {
-                _MinSubWordLen = 3
-            };
+            var wordGen = new WordGenerator(new Random(1), minSubWordLength: 3, TargetLen: 7);
             for (int i = 0; i < 100; i++)
             {
-                var wcont = wordGen.GenerateWord(Targetlen: 7);
+                var wcont = wordGen.GenerateWord();
                 LogMessage($"NumLookups = {wcont.cntLookups} #SubWords = {wcont.subwords.Count} {wcont.InitialWord}");
                 foreach (var sword in wcont.subwords)
                 {
@@ -58,11 +55,11 @@ namespace WordScapeTests
         public void TestGetWord()
         {
             LogMessage("Starting");
-            var wordGen = new WordGenerator(new Random(1));
+            var wordGen = new WordGenerator(new Random(1), TargetLen:7);
 
             for (int i = 0; i < 100; i++)
             {
-                var wcont = wordGen.GenerateWord(Targetlen: 7);
+                var wcont = wordGen.GenerateWord();
                 LogMessage($"NumLookups = {wcont.cntLookups} #SubWords = {wcont.subwords.Count} {wcont.InitialWord}");
                 foreach (var subword in wcont.subwords)
                 {

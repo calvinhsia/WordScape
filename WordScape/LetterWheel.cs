@@ -18,8 +18,8 @@ namespace WordScape
         private WordContainer _wordCont;
         private GenGrid gridgen;
 
-        private readonly List<LetterWheelLetter> _lstLetters = new List<LetterWheelLetter>();
-        private readonly Polyline polyLine = new Polyline()
+        private readonly List<LetterWheelLetter> _lstLetters = new();
+        private readonly Polyline polyLine = new()
         {
             Stroke = Brushes.Red,
             StrokeThickness = 10,
@@ -27,8 +27,8 @@ namespace WordScape
         };
         private bool _mouseIsDown = false;
         private bool _curlinefloating = false;
-        private readonly List<LetterWheelLetter> _lstLtrsSelected = new List<LetterWheelLetter>();
-        private readonly List<FoundWord> _lstFoundWordsSoFar = new List<FoundWord>();
+        private readonly List<LetterWheelLetter> _lstLtrsSelected = new();
+        private readonly List<FoundWord> _lstFoundWordsSoFar = new();
         private Point _ptCirclePos;
         private Point _ptCircleCtr;
         private readonly double _pctRadiusLettersInCircle = .7; // the letters (are in the within the circle, forming a smaller circle) are at this fraction of the circle radius
