@@ -221,10 +221,6 @@ namespace WordScape
                 this.wrdsSoFar.RenderTransform = Transform.Identity;
                 TimerIsEnabled = false;
                 var newpuzzle = await taskGenNextPuzzle;
-                while (newpuzzle.LenTargetWord != LenTargetWord || newpuzzle.MinSubWordLength != MinSubWordLength)
-                {
-                    newpuzzle = await CreateNextPuzzleTask();
-                }
                 _wordScapePuzzleCurrent = newpuzzle;
                 taskGenNextPuzzle = CreateNextPuzzleTask(); // set up for next puzzle to be instantaneous
 
