@@ -30,7 +30,7 @@ namespace WordScapes
             this._mainActivity = mainActivity;
             _circRadius = mainActivity._ptScreenSize.X / 3;
             this.Touch += LetterWheelLayout_Touch;
-//            this.SetBackgroundColor(Color.LightGray);
+            //            this.SetBackgroundColor(Color.LightGray);
         }
         internal void CreateWheelLetters(MainActivity mainActivity, bool IsShuffling)
         {
@@ -43,7 +43,7 @@ namespace WordScapes
             fDidLayout = false;
             this._lstLtrWheelLetterLayouts.Clear();
             //            this.LayoutParameters = layoutParametersWheel;
-            foreach (var ltr in mainActivity._wordCont.InitialWord.OrderBy(p => mainActivity._Random.NextDouble()))
+            foreach (var ltr in mainActivity._wordCont.InitialWord.OrderBy(p => mainActivity._WordScapeOptions._Random.NextDouble()))
             {
                 var wheelLetter = new LtrWheelLetterLayout(mainActivity, ltr);
 
@@ -89,7 +89,6 @@ namespace WordScapes
         {
             try
             {
-
                 switch (e.Event.Action)
                 {
                     case MotionEventActions.Down:
@@ -118,6 +117,17 @@ namespace WordScapes
                                         UpdateWordSofar();
                                     }
                                 }
+                            }
+                        }
+                        else
+                        { // ltr is null... are we out of the letter wheel view? if so, we'll unselect all
+                            int[] locg = new int[2];
+                            this.GetLocationOnScreen(locg);
+                            var y = locg[1];
+                            if (e.Event.RawY < y || e.Event.RawY > y + this.Height) // only deselect if Y out of bounds
+                            {
+                                ClearSelection();
+                                UpdateWordSofar();
                             }
                         }
                         break;
@@ -225,7 +235,7 @@ namespace WordScapes
         private WordStatus ShowWord(string wrdSoFar)
         {
             var wrdStatus = WordStatus.IsNotInGrid;
-            if (_mainActivity._gridgen._dictPlacedWords.TryGetValue(wrdSoFar, out var ltrPlaced))
+            if (_mainActivity._gridGen._dictPlacedWords.TryGetValue(wrdSoFar, out var ltrPlaced))
             {
                 wrdStatus = WordStatus.IsAlreadyInGrid;
                 int incx = 0, incy = 0, x = ltrPlaced.nX, y = ltrPlaced.nY;
@@ -240,7 +250,7 @@ namespace WordScapes
 
                 for (int i = 0; i < wrdSoFar.Length; i++)
                 {
-                    var ltrTile = this._mainActivity._grdXWord.GetChildAt(y * _mainActivity._gridgen._MaxX + x) as GridXCellView;
+                    var ltrTile = this._mainActivity._grdXWord.GetChildAt(y * _mainActivity._gridGen._MaxX + x) as GridXCellView;
                     if (!ltrTile.IsShowing)
                     {
                         wrdStatus = WordStatus.IsShownInGridForFirstTime;
@@ -318,9 +328,9 @@ namespace WordScapes
         private bool IsPointInsideView(float x, float y, LtrWheelLetterLayout view)
         {
             var location = new int[2];
-            view.GetLocationOnScreen(location);
-            int viewX = location[0];
-            int viewY = location[1];
+            //view.GetLocationOnScreen(location);
+            //int viewX = location[0];
+            //int viewY = location[1];
             this.GetLocationOnScreen(location);
             x -= location[0];
             y -= location[1];
@@ -400,7 +410,7 @@ namespace WordScapes
             this.AddView(textView);
             //            this.SetBackgroundColor(Color.CornflowerBlue);
             var w = (int)(.135 * MainActivity._instance._ptScreenSize.X);
-            var parms = new RelativeLayout.LayoutParams(w,w);
+            var parms = new RelativeLayout.LayoutParams(w, w);
             //parms.AddRule(LayoutRules.CenterHorizontal);
             //parms.AddRule(LayoutRules.CenterVertical);
             //parms.TopMargin = -20;

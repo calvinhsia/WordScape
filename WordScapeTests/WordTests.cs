@@ -13,10 +13,12 @@ namespace WordScapeTests
         [TestMethod]
         public void TestGridResizeSmaller()
         {
-            var wordGen = new WordGenerator(new Random(1), minSubWordLength:5, TargetLen:8)
+            var opts = new WordGenerationParms()
             {
-                _MinSubWordLen = 5
+                LenTargetWord = 8,
+                MinSubWordLength = 5
             };
+            var wordGen = new WordGenerator(opts);
             for (int i = 0; i < 100; i++)
             {
                 var wcont = wordGen.GenerateWord();
@@ -25,7 +27,7 @@ namespace WordScapeTests
                 {
 //                    LogMessage($"   {sword}");
                 }
-                var genGrid = new GenGrid(12, 12, wcont, wordGen._rand);
+                var genGrid = new GenGrid(12, 12, wcont, opts._Random);
                 genGrid.PlaceWords();
                 LogMessage($"  ({genGrid._MaxX},{genGrid._MaxY})  ({genGrid._tmpminX},{genGrid._tmpminY}) ({genGrid._tmpmaxX},{genGrid._tmpmaxY}) {genGrid.ShowGrid()}");
 
@@ -36,7 +38,13 @@ namespace WordScapeTests
         [TestMethod]
         public void TestGenGrid()
         {
-            var wordGen = new WordGenerator(new Random(1), minSubWordLength: 3, TargetLen: 7);
+            var opts = new WordGenerationParms()
+            {
+                LenTargetWord = 7,
+                MinSubWordLength = 3
+            };
+
+            var wordGen = new WordGenerator(opts);
             for (int i = 0; i < 100; i++)
             {
                 var wcont = wordGen.GenerateWord();
@@ -45,7 +53,7 @@ namespace WordScapeTests
                 {
                     LogMessage($"   {sword}");
                 }
-                var genGrid = new GenGrid(12, 12, wcont, wordGen._rand);
+                var genGrid = new GenGrid(12, 12, wcont, opts._Random);
                 LogMessage($"{genGrid.ShowGrid()}");
                 LogMessage($"Grid Ltrs= {genGrid.nLtrsPlaced} Wrds= {genGrid.NumWordsPlaced}");
             }
@@ -55,7 +63,12 @@ namespace WordScapeTests
         public void TestGetWord()
         {
             LogMessage("Starting");
-            var wordGen = new WordGenerator(new Random(1), TargetLen:7);
+            var opts = new WordGenerationParms()
+            {
+                LenTargetWord = 7,
+                MinSubWordLength = 3
+            };
+            var wordGen = new WordGenerator(opts);
 
             for (int i = 0; i < 100; i++)
             {

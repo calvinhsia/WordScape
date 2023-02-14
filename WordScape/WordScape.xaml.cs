@@ -21,21 +21,9 @@ using System.Windows.Threading;
 
 namespace WordScape
 {
-    public class WordScapeOptions
+    public class WordScapeOptions : WordGenerationParms
     {
-        public int LenTargetWord { get; set; } = 7;
-        public int MinSubWordLength { get; set; } = 5;
-        public int MaxX { get; set; } = 15;
-        public int MaxY { get; set; } = 15;
         public bool IsWordScape { get; set; } = true; // or Ruffle
-    }
-    class WordScapePuzzle
-    {
-        public int LenTargetWord = 7; // at the time of generation. USer could have changed it, invalidating this one
-        public int MinSubWordLength = 5; // at the time of generation. USer could have changed it, invalidating this one
-        public WordGenerator wordGenerator;
-        public WordContainer wordContainer;
-        public GenGrid genGrid;
     }
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -45,11 +33,11 @@ namespace WordScape
         WordScapePuzzle _wordScapePuzzleCurrent = new();
         Task<WordScapePuzzle> taskGenNextPuzzle;
 
-        WordScapeOptions _WordScapeOptions = new();
+        readonly WordScapeOptions _WordScapeOptions = new();
 
         internal WordGenerator _wordGen { get { return _wordScapePuzzleCurrent.wordGenerator; } set { _wordScapePuzzleCurrent.wordGenerator = value; } }
         internal WordContainer _WordCont { get { return _wordScapePuzzleCurrent.wordContainer; } set { _wordScapePuzzleCurrent.wordContainer = value; } }
-        internal GenGrid _gridgen { get { return _wordScapePuzzleCurrent.genGrid; } set { _wordScapePuzzleCurrent.genGrid = value; } }
+        internal GenGrid _gridGen { get { return _wordScapePuzzleCurrent.genGrid; } set { _wordScapePuzzleCurrent.genGrid = value; } }
         static internal WordScapeWindow WordScapeWindowInstance;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -60,9 +48,8 @@ namespace WordScape
         string _strWordSoFar;
         public string StrWordSoFar { get { return _strWordSoFar; } set { _strWordSoFar = value; OnMyPropertyChanged(); } }
 
-        public int LenTargetWord { get { return _wordScapePuzzleCurrent.LenTargetWord; } set { _wordScapePuzzleCurrent.LenTargetWord = value; } }
-        public int MinSubWordLength { get { return _wordScapePuzzleCurrent.MinSubWordLength; } set { _wordScapePuzzleCurrent.MinSubWordLength = value; } }
-        private readonly Random _Random;
+        public int LenTargetWord { get { return _WordScapeOptions.LenTargetWord; } set { _WordScapeOptions.LenTargetWord = value; } }
+        public int MinSubWordLength { get { return _WordScapeOptions.MinSubWordLength; } set { _WordScapeOptions.MinSubWordLength = value; } }
 
         private int _CountDownTime;
         public bool TimerIsEnabled = false;
@@ -110,7 +97,7 @@ namespace WordScape
 
         public int NumWordsFound { get { return _NumWordsFound; } internal set { _NumWordsFound = value; OnMyPropertyChanged(); } }
 
-        public int NumWordsTotal { get { return _gridgen == null ? 0 : _gridgen.NumWordsPlaced; } internal set { OnMyPropertyChanged(); } }
+        public int NumWordsTotal { get { return _gridGen == null ? 0 : _gridGen.NumWordsPlaced; } internal set { OnMyPropertyChanged(); } }
 
 
         public WordScapeWindow()
@@ -126,7 +113,7 @@ namespace WordScape
             this._WordScapeOptions.MaxX = Properties.Settings.Default.MaxX;
             this._WordScapeOptions.MaxY = Properties.Settings.Default.MaxY;
             WordScapeWindowInstance = this;
-            _Random = new Random(
+            _WordScapeOptions._Random = new Random(
 #if DEBUG
                     //1
 #endif
@@ -159,40 +146,8 @@ namespace WordScape
                 },
                 this.Dispatcher
                 );
-            taskGenNextPuzzle = CreateNextPuzzleTask(); // don't await it here
+            taskGenNextPuzzle = WordScapePuzzle.CreateNextPuzzleTask(_WordScapeOptions); // don't await it here
             BtnNew.RaiseEvent(new RoutedEventArgs() { RoutedEvent = Button.ClickEvent, Source = this });
-        }
-        Task<WordScapePuzzle> CreateNextPuzzleTask()
-        {
-            return Task.Run(() =>
-            {
-                var done = false;
-                WordScapePuzzle puzzleNext = null;
-                while (!done)
-                {
-                    puzzleNext = new WordScapePuzzle()
-                    {
-                        LenTargetWord = this.LenTargetWord,
-                        MinSubWordLength = MinSubWordLength
-                    };
-                    try
-                    {
-                        puzzleNext.wordGenerator = new WordGenerator(_Random, TargetLen: LenTargetWord, minSubWordLength: MinSubWordLength);
-                        puzzleNext.wordContainer = puzzleNext.wordGenerator.GenerateWord();
-                        puzzleNext.genGrid = new GenGrid(_WordScapeOptions.MaxX, _WordScapeOptions.MaxY, puzzleNext.wordContainer, puzzleNext.wordGenerator._rand);
-                        puzzleNext.genGrid.Generate();
-                        if (puzzleNext.LenTargetWord == this.LenTargetWord && puzzleNext.MinSubWordLength == MinSubWordLength)
-                        {
-                            done = true;
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        // old version of dict threw nullref sometimes at end of alphabet
-                    }
-                }
-                return puzzleNext;
-            });
         }
 
         void BtnShuffle_Click(object sender, RoutedEventArgs e)
@@ -220,11 +175,29 @@ namespace WordScape
                 this.BtnNew.IsEnabled = false;
                 this.wrdsSoFar.RenderTransform = Transform.Identity;
                 TimerIsEnabled = false;
-                var newpuzzle = await taskGenNextPuzzle;
+                var done = false;
+                WordScapePuzzle newpuzzle = null;
+                while (!done)
+                {
+                    try
+                    {
+                        newpuzzle = await taskGenNextPuzzle;
+                        if (newpuzzle.LenTargetWord == _WordScapeOptions.LenTargetWord && newpuzzle.MinSubWordLength == _WordScapeOptions.MinSubWordLength)
+                        {
+                            done = true;
+                        }
+                        taskGenNextPuzzle = WordScapePuzzle.CreateNextPuzzleTask(_WordScapeOptions); // set up for next puzzle to be instantaneous
+                    }
+                    catch (Exception ex)
+                    {
+                        // old dict threw sometimes
+                        StrWordSoFar = ex.ToString();
+                        done = true;
+                    }
+                }
                 _wordScapePuzzleCurrent = newpuzzle;
-                taskGenNextPuzzle = CreateNextPuzzleTask(); // set up for next puzzle to be instantaneous
 
-                FillGrid(_gridgen);
+                FillGrid(_gridGen);
                 NumWordsTotal = 0; // force prop changed
                 NumWordsFound = 0;
                 StrWordSoFar = string.Empty;
@@ -232,7 +205,7 @@ namespace WordScape
                 CountDownTime = 0;
                 //this.ltrWheel = new LetterWheel();
                 //Grid.SetRow(this.ltrWheel, 3);
-                this.ltrWheel.LetterWheelInit(this, _WordCont, _gridgen);
+                this.ltrWheel.LetterWheelInit(this, _WordCont, _gridGen);
                 TimerIsEnabled = true;
             }
             catch (Exception ex)
@@ -241,9 +214,28 @@ namespace WordScape
             }
             this.BtnNew.IsEnabled = true;
         }
-        void BtnOptions_Click(object sender, RoutedEventArgs e)
+        async void BtnOptions_Click(object sender, RoutedEventArgs e)
         {
-
+            var optionsPage = new Options(_WordScapeOptions);
+            var w = new Window()
+            {
+                Content = optionsPage,
+                Owner = this
+            };
+            w.ShowDialog();
+            if (optionsPage.SaveWasClicked)
+            {
+                try
+                {
+                    await taskGenNextPuzzle; // ensure old one finished
+                    taskGenNextPuzzle = WordScapePuzzle.CreateNextPuzzleTask(_WordScapeOptions);
+                    BtnNew.RaiseEvent(new RoutedEventArgs() { RoutedEvent = Button.ClickEvent, Source = this });
+                }
+                catch (Exception ex)
+                {
+                    this.StrWordSoFar = ex.ToString();
+                }
+            }
         }
 
         private void FillGrid(GenGrid gridgen)

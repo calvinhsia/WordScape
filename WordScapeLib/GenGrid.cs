@@ -174,6 +174,10 @@ namespace WordScape
                     {
                         continue;
                     }
+                    if (_dictPlacedWords.ContainsKey(subword + "ING")) // disobeying : don't put disobey
+                    {
+                        continue;
+                    }
                     ShuffleLettersPlaced();
                     foreach (var ltrPlaced in _ltrsPlaced)
                     {

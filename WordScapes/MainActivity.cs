@@ -16,21 +16,9 @@ using WordScape;
 
 namespace WordScapes
 {
-    public class WordScapeOptions
+    public class WordScapeOptions : WordGenerationParms
     {
-        public int LenTargetWord { get; set; } = 7;
-        public int MinSubWordLength { get; set; } = 5;
-        public int MaxX { get; set; } = 12;
-        public int MaxY { get; set; } = 12;
         public bool IsWordScape { get; set; } = true; // or Ruffle
-    }
-    class WordScapePuzzle
-    {
-        public int LenTargetWord = 7; // at the time of generation. USer could have changed it, invalidating this one
-        public int MinSubWordLength = 5; // at the time of generation. USer could have changed it, invalidating this one
-        public WordGenerator wordGenerator;
-        public WordContainer wordContainer;
-        public GenGrid genGrid;
     }
 
 
@@ -43,19 +31,17 @@ namespace WordScapes
     //    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, ScreenOrientation = Android.Content.PM.ScreenOrientation.Portrait)]
     public class MainActivity : AppCompatActivity
     {
-        public Point _ptScreenSize = new Point(); // Samsung Galaxy 9Plus : X = 1440, Y = 2792   GetRealSize x=1440, y=2960
-        WordScapePuzzle _wordScapePuzzleCurrent = new WordScapePuzzle();
+        public Point _ptScreenSize = new(); // Samsung Galaxy 9Plus : X = 1440, Y = 2792   GetRealSize x=1440, y=2960
+        WordScapePuzzle _wordScapePuzzleCurrent = new();
         Task<WordScapePuzzle> taskGenNextPuzzle;
-        WordScapeOptions _WordScapeOptions = new WordScapeOptions();
+        public readonly WordScapeOptions _WordScapeOptions = new();
 
         internal WordGenerator _wordGen { get { return _wordScapePuzzleCurrent.wordGenerator; } set { _wordScapePuzzleCurrent.wordGenerator = value; } }
         internal WordContainer _wordCont { get { return _wordScapePuzzleCurrent.wordContainer; } set { _wordScapePuzzleCurrent.wordContainer = value; } }
-        internal GenGrid _gridgen { get { return _wordScapePuzzleCurrent.genGrid; } set { _wordScapePuzzleCurrent.genGrid = value; } }
+        internal GenGrid _gridGen { get { return _wordScapePuzzleCurrent.genGrid; } set { _wordScapePuzzleCurrent.genGrid = value; } }
 
-        public int LenTargetWord { get; private set; }
-        public int MinSubWordLength { get; private set; }
-
-        public Random _Random;
+        public int LenTargetWord { get { return _WordScapeOptions.LenTargetWord; } set { _WordScapeOptions.LenTargetWord = value; } }
+        public int MinSubWordLength { get { return _WordScapeOptions.MinSubWordLength; } set { _WordScapeOptions.MinSubWordLength = value; } }
 
         public const string prefTargWorLen = "TargWordLen";
         public const string prefSubWordLen = "SubWordLen";
@@ -95,20 +81,27 @@ namespace WordScapes
         public static MainActivity _instance;
         public int NumWordsFound;
         public int NumHintsUsed;
-        internal int _nCols = 12;
-        internal int _nRows = 12;
+        /// <summary>
+        /// initially, the max size of desired grid. Once grid filled in and recentered, 
+        /// these are recalculated to be potentially smaller
+        /// </summary>
+        internal int _nCols;
+        internal int _nRows;
         private TextView _viewBorder;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+//            Xamarin.Essentials.Preferences.Clear();
             MainActivity._instance = this;
-            _Random = new Random(
+            _WordScapeOptions._Random = new Random(
 #if DEBUG
                     //                    1
 #endif
                     );
+            _WordScapeOptions.MaxX = 12;
+            _WordScapeOptions.MaxY = 12;
             try
             {
                 LenTargetWord = Xamarin.Essentials.Preferences.Get(prefTargWorLen, 7);
@@ -127,7 +120,7 @@ namespace WordScapes
 
                 return;
             }
-            taskGenNextPuzzle = CreateNextPuzzleTask();
+            taskGenNextPuzzle = WordScapePuzzle.CreateNextPuzzleTask(_WordScapeOptions);
             BtnNew_Click(_btnNew, null);
             //Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
             //SetSupportActionBar(toolbar);
@@ -135,54 +128,54 @@ namespace WordScapes
             //FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
             //fab.Click += FabOnClick;
         }
-        Task<WordScapePuzzle> CreateNextPuzzleTask()
-        {
-            return Task.Run(() =>
-            {
-                var done = false;
-                WordScapePuzzle puzzleNext = null;
-                var nTries = 0;
-                while (!done)
-                {
-                    int.TryParse(_txtLenTargetWord.Text, out var LenTargetWordNew);
-                    int.TryParse(_txtLenSubword.Text, out var minSubWordLenNew);
-                    if (LenTargetWordNew != LenTargetWord || minSubWordLenNew != MinSubWordLength)
-                    {
-                        LenTargetWord = LenTargetWordNew;
-                        MinSubWordLength = minSubWordLenNew;
-                        Xamarin.Essentials.Preferences.Set(prefTargWorLen, LenTargetWord);
-                        Xamarin.Essentials.Preferences.Set(prefSubWordLen, MinSubWordLength);
-                    }
+        //Task<WordScapePuzzle> CreateNextPuzzleTask()
+        //{
+        //    return Task.Run(() =>
+        //    {
+        //        var done = false;
+        //        WordScapePuzzle puzzleNext = null;
+        //        var nTries = 0;
+        //        while (!done)
+        //        {
+        //            int.TryParse(_txtLenTargetWord.Text, out var LenTargetWordNew);
+        //            int.TryParse(_txtLenSubword.Text, out var minSubWordLenNew);
+        //            if (LenTargetWordNew != LenTargetWord || minSubWordLenNew != MinSubWordLength)
+        //            {
+        //                LenTargetWord = LenTargetWordNew;
+        //                MinSubWordLength = minSubWordLenNew;
+        //                Xamarin.Essentials.Preferences.Set(prefTargWorLen, LenTargetWord);
+        //                Xamarin.Essentials.Preferences.Set(prefSubWordLen, MinSubWordLength);
+        //            }
 
-                    puzzleNext = new WordScapePuzzle()
-                    {
-                        LenTargetWord = this.LenTargetWord,
-                        MinSubWordLength = MinSubWordLength
-                    };
-                    try
-                    {
-                        puzzleNext.wordGenerator = new WordGenerator(_Random, TargetLen: LenTargetWord, minSubWordLength: MinSubWordLength);
-                        puzzleNext.wordContainer = puzzleNext.wordGenerator.GenerateWord();
-                        puzzleNext.genGrid = new GenGrid(_WordScapeOptions.MaxX, _WordScapeOptions.MaxY, puzzleNext.wordContainer, puzzleNext.wordGenerator._rand);
-                        puzzleNext.genGrid.Generate();
-                        if (puzzleNext.LenTargetWord == this.LenTargetWord && puzzleNext.MinSubWordLength == MinSubWordLength)
-                        {
-                            done = true;
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        // old version of dict threw nullref sometimes at end of alphabet
-                    }
-                    nTries++;
-                    if (nTries == 3)
-                    {
-                        throw new Exception($"Tried {nTries} times");
-                    }
-                }
-                return puzzleNext;
-            });
-        }
+        //            puzzleNext = new WordScapePuzzle()
+        //            {
+        //                LenTargetWord = this.LenTargetWord,
+        //                MinSubWordLength = MinSubWordLength
+        //            };
+        //            try
+        //            {
+        //                puzzleNext.wordGenerator = new WordGenerator( _Random, TargetLen: LenTargetWord, minSubWordLength: MinSubWordLength);
+        //                puzzleNext.wordContainer = puzzleNext.wordGenerator.GenerateWord();
+        //                puzzleNext.genGrid = new GenGrid(_WordScapeOptions.MaxX, _WordScapeOptions.MaxY, puzzleNext.wordContainer, puzzleNext.wordGenerator._rand);
+        //                puzzleNext.genGrid.Generate();
+        //                if (puzzleNext.LenTargetWord == this.LenTargetWord && puzzleNext.MinSubWordLength == MinSubWordLength)
+        //                {
+        //                    done = true;
+        //                }
+        //            }
+        //            catch (Exception)
+        //            {
+        //                // old version of dict threw nullref sometimes at end of alphabet
+        //            }
+        //            nTries++;
+        //            if (nTries == 3)
+        //            {
+        //                throw new Exception($"Tried {nTries} times");
+        //            }
+        //        }
+        //        return puzzleNext;
+        //    });
+        //}
 
 
         void CreateLayout()
@@ -465,8 +458,8 @@ namespace WordScapes
 
         public void UpdateScore()
         {
-            _txtScore.Text = $"{NumWordsFound}/{_gridgen.NumWordsPlaced} {_wordCont.subwords.Count}";
-            if (NumWordsFound == _gridgen.NumWordsPlaced)
+            _txtScore.Text = $"{NumWordsFound}/{_gridGen.NumWordsPlaced} {_wordCont.subwords.Count}";
+            if (NumWordsFound == _gridGen.NumWordsPlaced)
             {
                 _timerEnabled = false;
                 var str = $"You Won in {_txtTimer.Text} # Hints used = {NumHintsUsed}";
@@ -486,16 +479,36 @@ namespace WordScapes
                 _timerEnabled = false;
             }
 
-            try
+            var done = false;
+            WordScapePuzzle newpuzzle = null;
+            while (!done)
             {
-                var newpuzzle = await taskGenNextPuzzle;
-                _wordScapePuzzleCurrent = newpuzzle;
-                taskGenNextPuzzle = CreateNextPuzzleTask(); // set up for next puzzle to be instantaneous
+                try
+                {
+                    newpuzzle = await taskGenNextPuzzle;
+                    int.TryParse(_txtLenTargetWord.Text, out var LenTargetWordNew);
+                    int.TryParse(_txtLenSubword.Text, out var minSubWordLenNew);
+                    if (LenTargetWordNew != LenTargetWord || minSubWordLenNew != MinSubWordLength)
+                    {
+                        LenTargetWord = LenTargetWordNew;
+                        MinSubWordLength = minSubWordLenNew;
+                        Xamarin.Essentials.Preferences.Set(prefTargWorLen, LenTargetWord);
+                        Xamarin.Essentials.Preferences.Set(prefSubWordLen, MinSubWordLength);
+                    }
+                    else
+                    {
+                        done = true;
+                    }
+                    taskGenNextPuzzle = WordScapePuzzle.CreateNextPuzzleTask(_WordScapeOptions); // set up for next puzzle to be instantaneous
+                }
+                catch (Exception ex)
+                {
+                    // old dict threw sometimes
+                    _txtWordSoFar.Text = ex.ToString();
+                    done = true;
+                }
             }
-            catch (Exception ex)
-            {
-                _txtWordSoFar.Text = ex.ToString();
-            }
+            _wordScapePuzzleCurrent = newpuzzle;
 
             //await Task.Run(() =>
             //{
@@ -523,8 +536,8 @@ namespace WordScapes
             _txtNumHintsUsed.Text = string.Empty;
             _grdXWord.RemoveAllViews();
             _ctrlWordList.SetWordList(lstWords: null);
-            _nCols = _gridgen._MaxX;
-            _nRows = _gridgen._MaxY;
+            _nCols = _gridGen._MaxX; // these will be shtrunk
+            _nRows = _gridGen._MaxY;
             _grdXWord.ColumnCount = _nCols;
             _grdXWord.RowCount = _nRows;
 
@@ -568,7 +581,7 @@ namespace WordScapes
             {
                 for (int x = 0; x < _nCols; x++)
                 {
-                    var ltrTile = new GridXCellView(this, _gridgen, x, y);
+                    var ltrTile = new GridXCellView(this, _gridGen, x, y);
                     _grdXWord.AddView(ltrTile);
 
                     //var x = new GridXCellView(this)
