@@ -120,11 +120,12 @@ namespace WordScapes
                             }
                         }
                         else
-                        { // ltr is null... are we out of the letter wheel view? if so, we'll unselect all
+                        { // ltr is null... are we out of the letter wheel view (with a tolerance)? if so, we'll unselect all
                             int[] locg = new int[2];
                             this.GetLocationOnScreen(locg);
                             var y = locg[1];
-                            if (e.Event.RawY < y || e.Event.RawY > y + this.Height) // only deselect if Y out of bounds
+                            var tolerance = 40;
+                            if (e.Event.RawY < y - tolerance || e.Event.RawY > y + this.Height + tolerance) // only deselect if Y out of bounds
                             {
                                 ClearSelection();
                                 UpdateWordSofar();

@@ -318,7 +318,7 @@ namespace WordScapes
             linearLayouCol2.AddView(lininside);
             _LetterWheelView = new LetterWheelLayout(this)
             {
-                LayoutParameters = new LinearLayout.LayoutParams((int)(0.59 * _ptScreenSize.X), LinearLayout.LayoutParams.WrapContent)
+                LayoutParameters = new LinearLayout.LayoutParams((int)(0.61 * _ptScreenSize.X), LinearLayout.LayoutParams.WrapContent)
             };
             _LetterWheelView.SetGravity(GravityFlags.Center);
             linearLayouCol2.AddView(_LetterWheelView);
