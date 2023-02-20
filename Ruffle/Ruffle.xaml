@@ -5,22 +5,23 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ruffle"
         mc:Ignorable="d"
-        Title="Ruffle" Height="900" Width="1500" Background="DarkSlateBlue">
+        KeyDown="Window_KeyDown"
+        Title="Ruffle" Height="1000" Width="1500" Background="DarkSlateGray">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="3*"/>
+            <RowDefinition Height="2*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Canvas x:Name="cvs"/>
+        <Canvas Margin="20,20" x:Name="cvs"/>
         <DockPanel Grid.Row="1">
             <StackPanel Orientation="Vertical">
-                <StackPanel Orientation="Horizontal" x:Name="spLettersEntered"/>
-                <StackPanel Orientation="Horizontal" x:Name="spLettersAvailable"/>
+                <StackPanel Orientation="Horizontal" x:Name="spLettersEntered" HorizontalAlignment="Center"/>
+                <StackPanel Margin="0,20" Orientation="Horizontal" x:Name="spLettersAvailable" HorizontalAlignment="Center"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button Margin="100" Content="_Submit" FontSize="30"/>
-                    <Button Margin="100" Content="_Clear" FontSize="30"/>
-                    <Button Margin="100" Content="_Ruffle" FontSize="30"/>
-                    <Button Margin="100" Content="_End" FontSize="30"/>
+                    <Button Margin="0,20,5,20" Content="_Submit" FontSize="30" Click="Button_Click"/>
+                    <Button Margin="0,20,5,20" Content="_Clear" FontSize="30" Click="Button_Click"/>
+                    <Button Margin="0,20,5,20" Content="_Ruffle" FontSize="30" Click="Button_Click"/>
+                    <Button Margin="0,20,5,20" Content="_End" FontSize="30" Click="Button_Click"/>
                 </StackPanel>
 
             </StackPanel>
