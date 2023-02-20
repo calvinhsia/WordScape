@@ -6,29 +6,50 @@
         xmlns:local="clr-namespace:Ruffle"
         mc:Ignorable="d"
         KeyDown="Window_KeyDown"
-        Title="Ruffle" Height="1000" Width="1500" Background="DarkSlateGray">
+        Title="Ruffle" Height="800" Width="1100" Background="DarkSlateGray">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="8*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="5*"/>
             <RowDefinition Height="2*"/>
-            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Canvas Margin="20,20" x:Name="cvs"/>
         <DockPanel Grid.Row="1">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Height="20">
+                <TextBlock Margin="0,0,0,0" Text="{Binding TextErrorMessage}" FontSize="14" Foreground="Red" ToolTip="Some words are removed to reduce duplication: e.g. singular if plural is included, present tense it past tense included, '-ly','-ing'"/>
+            </StackPanel>
+        </DockPanel>
+        <DockPanel Grid.Row="2">
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal" x:Name="spLettersEntered" HorizontalAlignment="Center"/>
-                <StackPanel Margin="0,20" Orientation="Horizontal" x:Name="spLettersAvailable" HorizontalAlignment="Center"/>
+                <StackPanel Margin="0,15" Orientation="Horizontal" x:Name="spLettersAvailable" HorizontalAlignment="Center"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button Margin="0,20,5,20" Content="_Submit" FontSize="30" Click="Button_Click"/>
-                    <Button Margin="0,20,5,20" Content="_Clear" FontSize="30" Click="Button_Click"/>
-                    <Button Margin="0,20,5,20" Content="_Ruffle" FontSize="30" Click="Button_Click"/>
-                    <Button Margin="0,20,5,20" Content="_End" FontSize="30" Click="Button_Click"/>
+                    <!--<Button Margin="0,20,5,20" Content="_Submit" FontSize="30" Click="Button_Click"/>-->
+                    <!--<Button Margin="0,20,5,20" Content="_Clear" FontSize="30" Click="Button_Click"/>-->
+                    <Button Margin="0,0,5,0" Content="_Ruffle" FontSize="25" Click="Button_Click" Focusable="False"/>
+                    <Button Margin="0,0,5,0" Content="_End" FontSize="25" Click="Button_Click" Focusable="False"/>
                 </StackPanel>
-
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Height="28">
+                    <Label Margin="0,0,0,0" Content="Score" Foreground="White" FontSize="15"/>
+                    <TextBlock Margin="0,5,0,0" Text="{Binding TextScore}" FontSize="15" Background="White"/>
+                </StackPanel>
             </StackPanel>
-
-
-
         </DockPanel>
+        <Grid Grid.Row="3">
+            <DockPanel>
+                <ListBox 
+                    x:Name="wrdsSoFar" 
+                    ItemsSource="{Binding LstWrdsSoFar}" 
+                    ScrollViewer.VerticalScrollBarVisibility="Disabled" >
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel IsItemsHost="True" Orientation="Vertical"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                </ListBox>
+            </DockPanel>
+        </Grid>
 
     </Grid>
 </Window>

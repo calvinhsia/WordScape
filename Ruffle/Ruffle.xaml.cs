@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.RightsManagement;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,9 +23,12 @@ namespace Ruffle
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindowRuffle : Window
+    public partial class MainWindowRuffle : Window, INotifyPropertyChanged
     {
-        //        private readonly DictionaryLib.DictionaryLib dictionaryLib;
+        public event PropertyChangedEventHandler? PropertyChanged;
+        public void RaisePropChanged([CallerMemberName] string propertyName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        public string TextScore { get; set; }
+        public string TextErrorMessage { get; set; }
         public readonly Random random = new(
 #if DEBUG
             1
@@ -33,9 +39,12 @@ namespace Ruffle
 
         public int LenTargetWord { get; set; } = 7;
         public int MinSubWordLength { get; set; } = 3;
+        private ObservableCollection<UIElement> _LstWrdsSoFar = new();
+        public ObservableCollection<UIElement> LstWrdsSoFar { get { return _LstWrdsSoFar; } set { _LstWrdsSoFar = value; RaisePropChanged(); } }
         public MainWindowRuffle()
         {
             InitializeComponent();
+            DataContext = this;
             Loaded += MainWindowRuffle_Loaded;
         }
         private async void MainWindowRuffle_Loaded(object sender, RoutedEventArgs e)
@@ -57,11 +66,57 @@ namespace Ruffle
                 switch (btnText)
                 {
                     case "_End":
-                        RufflePuzzleCurrent = await RufflePuzzle.CreateRufflePuzzleAsync(LenTargetWord, MinSubWordLength, this);
+                        if (RufflePuzzleCurrent.NumSolvedWords != RufflePuzzleCurrent.NumWordsTotal)
+                        {
+                            foreach (var kvpWordlength in RufflePuzzleCurrent.dictWordListsByLength) // each column of words
+                            {
+                                if (RufflePuzzleCurrent.dictWordListsByLength.TryGetValue(kvpWordlength.Key, out var lstAllWords))
+                                {
+                                    if (RufflePuzzleCurrent.dictWordsInAnswers.TryGetValue(kvpWordlength.Key, out var lstWordsfound))
+                                    {
+                                    }
+                                    foreach (var word in lstAllWords)
+                                    {
+                                        if (lstWordsfound == null || !lstWordsfound.Contains(word))
+                                        {
+                                            if (RufflePuzzleCurrent.dictTiles.TryGetValue(kvpWordlength.Key, out var lstlstTiles))
+                                            {
+                                                foreach (var lstTile in lstlstTiles)  // find an empty spot
+                                                {
+                                                    if (lstTile[0].ruffleTileState.HasFlag(RuffleTileState.Hidden))
+                                                    {
+                                                        var ndx = 0;
+                                                        foreach (var ltr in word)
+                                                        {
+                                                            lstTile[ndx++].ChangeState(RuffleTileState.ShownAsAnswer | RuffleTileState.Revealed, ltr);
+                                                        }
+                                                        RufflePuzzleCurrent.NumSolvedWords++;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            RufflePuzzleCurrent = await RufflePuzzle.CreateRufflePuzzleAsync(LenTargetWord, MinSubWordLength, this);
+                        }
+                        break;
+                    case "_Ruffle":
+                        {
+                            ResetEnteredLetters();
+                            var newlist = spLettersAvailable.Children.Cast<RuffleTile>().OrderBy(p => random.NextDouble()).ToList();
+                            spLettersAvailable.Children.Clear();
+                            newlist.ForEach(t => spLettersAvailable.Children.Add(t));
+                        }
                         break;
                     case "_Submit":
                         break;
                 }
+                Focus();
             }
             catch (Exception)
             {
@@ -72,7 +127,7 @@ namespace Ruffle
         {
             try
             {
-                if (e.Key == Key.Enter)
+                if (e.Key == Key.Enter || e.Key == Key.Back || e.Key == Key.Escape) // or backspace or escape
                 {
                     e.Handled = true;
                     var wordUserInput = "";
@@ -87,30 +142,82 @@ namespace Ruffle
                             break;
                         }
                     }
-                    if (wordUserInput.Length >= MinSubWordLength && RufflePuzzleCurrent?.dictWordListsByLength != null)
+                    var doReset = false;
+                    if (e.Key == Key.Enter)
                     {
-                        if (RufflePuzzleCurrent.dictWordListsByLength.TryGetValue(wordUserInput.Length, out var list) && list.Contains(wordUserInput))
+                        var wasAdded = false;
+                        if (wordUserInput.Length >= MinSubWordLength && RufflePuzzleCurrent?.dictWordListsByLength != null)
                         {
-                            if (!RufflePuzzleCurrent.dictWordsInAnswers.TryGetValue(wordUserInput.Length, out var lstWordsInAnswers))
+                            if (RufflePuzzleCurrent.dictWordListsByLength.TryGetValue(wordUserInput.Length, out var list) && list.Contains(wordUserInput))
                             {
-                                lstWordsInAnswers = new SortedSet<string>();
-                                RufflePuzzleCurrent.dictWordsInAnswers[wordUserInput.Length] = lstWordsInAnswers;
+                                if (!RufflePuzzleCurrent.dictWordsInAnswers.TryGetValue(wordUserInput.Length, out var lstWordsInAnswers))
+                                {
+                                    lstWordsInAnswers = new SortedSet<string>();
+                                    RufflePuzzleCurrent.dictWordsInAnswers[wordUserInput.Length] = lstWordsInAnswers;
+                                }
+                                if (!lstWordsInAnswers.Contains(wordUserInput))
+                                {
+                                    lstWordsInAnswers.Add(wordUserInput);
+                                    RufflePuzzleCurrent.RefreshWordsInAnswers(wordUserInput.Length);
+                                    RufflePuzzleCurrent.NumSolvedWords++;
+                                    TextScore = $"{RufflePuzzleCurrent.NumSolvedWords}/{RufflePuzzleCurrent.NumWordsTotal}";
+                                    RaisePropChanged(nameof(TextScore));
+                                    if (RufflePuzzleCurrent.NumSolvedWords == RufflePuzzleCurrent.NumWordsTotal)
+                                    {
+
+                                    }
+                                }
+                                if (!string.IsNullOrEmpty(TextErrorMessage))
+                                {
+                                    TextErrorMessage = string.Empty;
+                                    RaisePropChanged(nameof(TextErrorMessage));
+                                }
+                                wasAdded = true;
                             }
-                            if (!lstWordsInAnswers.Contains(wordUserInput))
+                            else
                             {
-                                lstWordsInAnswers.Add(wordUserInput);
-                                RufflePuzzleCurrent.RefreshWordsInAnswers(wordUserInput.Length);
+                                TextErrorMessage = $"{wordUserInput} not found";
+                                RaisePropChanged(nameof(TextErrorMessage));
+                            }
+                            var alreadyadded = LstWrdsSoFar.Cast<TextBlock>().Where(t => t.Text == wordUserInput).Any();
+                            if (!alreadyadded)
+                            {
+                                LstWrdsSoFar.Add(new TextBlock() { Text = wordUserInput, Foreground = (wasAdded ? Brushes.Black : Brushes.LightPink) });
+                                LstWrdsSoFar = new ObservableCollection<UIElement>(LstWrdsSoFar.Cast<TextBlock>().OrderBy(t => t.Text));
+                            }
+                            //var lstWrdsTriedSofar = new SortedSet<string>(LstWrdsSoFar.Cast<TextBlock>().Select(t => t.Text));
+                            //lstWrdsTriedSofar.Add(wordUserInput);
+                            //LstWrdsSoFar.Clear();
+                            //foreach(var wrd in lstWrdsTriedSofar)
+                            //{
+                            //    LstWrdsSoFar.Add(new TextBlock() { Text = wordUserInput, Foreground = (wasAdded ? Brushes.Black : Brushes.LightBlue) });
+                            //}
+                        }
+                        doReset = true;
+                    }
+                    else if (e.Key == Key.Escape)
+                    {
+                        doReset = true;
+                    }
+                    else
+                    { // backspace
+                        if (wordUserInput.Length > 0)
+                        {
+                            var tile = spLettersEntered.Children.Cast<RuffleTile>().ToList()[wordUserInput.Length - 1];
+                            tile.ChangeState(RuffleTileState.Hidden);
+                            foreach (var tileAvaileble in spLettersAvailable.Children.Cast<RuffleTile>())
+                            {
+                                if (tileAvaileble.ruffleTileState.HasFlag(RuffleTileState.Hidden) && tileAvaileble._letter == wordUserInput[^1])
+                                {
+                                    tileAvaileble.ChangeState(RuffleTileState.Revealed);
+                                    break;
+                                }
                             }
                         }
                     }
-                    // now reset
-                    foreach (var tile in spLettersEntered.Children.Cast<RuffleTile>())
+                    if (doReset)
                     {
-                        tile.ChangeState(RuffleTileState.UnRevealed);
-                    }
-                    foreach (var tile in spLettersAvailable.Children.Cast<RuffleTile>())
-                    {
-                        tile.ChangeState(RuffleTileState.Revealed);
+                        ResetEnteredLetters();
                     }
                 }
                 else if (e.Key >= Key.A && e.Key <= Key.Z)
@@ -118,12 +225,12 @@ namespace Ruffle
                     var key = e.Key.ToString();
                     foreach (var tile in spLettersAvailable.Children.Cast<RuffleTile>())
                     {
-                        if (tile._letter == key[0] && !tile.ruffleTileState.HasFlag(RuffleTileState.UnRevealed))
+                        if (tile._letter == key[0] && !tile.ruffleTileState.HasFlag(RuffleTileState.Hidden))
                         {
-                            tile.ChangeState(RuffleTileState.UnRevealed, ltr: null);
+                            tile.ChangeState(RuffleTileState.Hidden, ltr: null);
                             foreach (var tileEntered in spLettersEntered.Children.Cast<RuffleTile>())
                             {
-                                if (tileEntered.ruffleTileState.HasFlag(RuffleTileState.UnRevealed))
+                                if (tileEntered.ruffleTileState.HasFlag(RuffleTileState.Hidden))
                                 {
                                     tileEntered.ChangeState(RuffleTileState.Revealed, tile._letter);
                                     break;
@@ -139,15 +246,29 @@ namespace Ruffle
             {
             }
         }
+
+        private void ResetEnteredLetters()
+        {
+            foreach (var tile in spLettersEntered.Children.Cast<RuffleTile>())
+            {
+                tile.ChangeState(RuffleTileState.Hidden);
+            }
+            foreach (var tile in spLettersAvailable.Children.Cast<RuffleTile>())
+            {
+                tile.ChangeState(RuffleTileState.Revealed);
+            }
+        }
     }
     public class RufflePuzzle
     {
         WordScapePuzzle? _WordScapePuzzle; // user wordscape lib for word gen
-        int maxWordListLength = 34; // max # of e.g. 4 letter words
+        int maxWordListLength = 14; // max # of e.g. 4 letter words
         private MainWindowRuffle mainWindowRuffle;
         int LtrWidthSmall = 25;
         int LtrHeighSmall = 25;
         int LtrWidthLarge = 20;
+        public int NumSolvedWords = 0;
+        public int NumWordsTotal = 0;
 
         internal Dictionary<int, List<string>> dictWordListsByLength = new(); // WordLen => list<words>
         internal Dictionary<int, List<List<RuffleTile>>> dictTiles = new(); // WordLen=>List<Tile>
@@ -173,6 +294,7 @@ namespace Ruffle
             await Task.Yield();
             if (_WordScapePuzzle == null) throw new NullReferenceException();
             this.mainWindowRuffle = mainWindowRuffle;
+            mainWindowRuffle.LstWrdsSoFar.Clear();
             dictWordListsByLength = _WordScapePuzzle.wordContainer.subwords.GroupBy(w => w.Length).ToDictionary(kvp => kvp.Key, kvp => kvp.ToList());
             FillRuffleGrid();
             var ltrs = _WordScapePuzzle.wordContainer.InitialWord;
@@ -182,7 +304,7 @@ namespace Ruffle
             {
                 var tile = new RuffleTile(mainWindowRuffle, ltr, ruffleTileState: RuffleTileState.Large);
                 mainWindowRuffle.spLettersAvailable.Children.Add(tile);
-                tile = new RuffleTile(mainWindowRuffle, ltr, ruffleTileState: RuffleTileState.Large | RuffleTileState.UnRevealed);
+                tile = new RuffleTile(mainWindowRuffle, ltr, ruffleTileState: RuffleTileState.Large | RuffleTileState.Hidden);
                 mainWindowRuffle.spLettersEntered.Children.Add(tile);
             }
         }
@@ -241,7 +363,7 @@ namespace Ruffle
                             var lstRuffleTile = new List<RuffleTile>();
                             for (var i = 0; i < wordlength; i++) // for each letter in word
                             {
-                                var tile = new RuffleTile(mainWindowRuffle, word[i], rowNdx, RuffleTileState.UnRevealed);
+                                var tile = new RuffleTile(mainWindowRuffle, word[i], rowNdx, RuffleTileState.Hidden);
                                 lstRuffleTile.Add(tile);
                                 var x = column * (wordlength) * LtrWidthSmall + i * LtrWidthSmall;
                                 var y = rowNdx * LtrHeighSmall;
@@ -252,6 +374,7 @@ namespace Ruffle
                             }
                             rowNdx++;
                             dictTiles[wordlength].Add(lstRuffleTile);
+                            NumWordsTotal++;
                         }
                     }
                     column++;
@@ -283,11 +406,12 @@ namespace Ruffle
     [Flags]
     public enum RuffleTileState
     {
-        UnRevealed = 0x1,
+        Hidden = 0x1,
         Revealed = 0x2, // if revealed, show the letter content, else hide it
-        Small = 0x4,
-        Empty = 0x8,
-        Large = 0x10,
+        ShownAsAnswer = 0x4, // revealed as word that user didn't get
+        Small = 0x8,
+        Empty = 0x10,
+        Large = 0x20,
     }
     public class RuffleTile : DockPanel
     {
@@ -305,7 +429,7 @@ namespace Ruffle
                 Width *= 2;
                 Height *= 2;
             }
-            if (!ruffleTileState.HasFlag(RuffleTileState.Empty) && !ruffleTileState.HasFlag(RuffleTileState.UnRevealed))
+            if (!ruffleTileState.HasFlag(RuffleTileState.Empty) && !ruffleTileState.HasFlag(RuffleTileState.Hidden))
             {
                 _letter = letter;
             }
@@ -330,13 +454,17 @@ namespace Ruffle
             {
                 _letter = ltr.Value;
             }
-            if (ruffleTileState.HasFlag(RuffleTileState.UnRevealed))
+            if (ruffleTileState.HasFlag(RuffleTileState.Hidden))
             {
                 _TxtBlk.Text = string.Empty;
             }
             if (ruffleTileState.HasFlag(RuffleTileState.Revealed))
             {
                 _TxtBlk.Text = _letter.ToString();
+            }
+            if (ruffleTileState.HasFlag(RuffleTileState.ShownAsAnswer))
+            {
+                Background = Brushes.LightBlue;
             }
         }
         public override string ToString() => $"{(_letter == '\0' ? " " : _letter)} {ruffleTileState.ToString()}";
