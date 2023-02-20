@@ -134,47 +134,7 @@ namespace WordScape
                 }
                 else
                 {// not 1st word: find random common letter and see if it can be placed. don't do singular if plural already placed
-                    if (!subword.EndsWith("S"))
-                    {
-                        if (_dictPlacedWords.ContainsKey(subword + "S"))
-                        {
-                            continue;
-                        }
-                    }
-                    if (!subword.EndsWith("D")) // past tense: if "removed", don't add "remove"
-                    {
-                        if (_dictPlacedWords.ContainsKey(subword + "D"))
-                        {
-                            continue;
-                        }
-                    } else
-//                    if (subword.EndsWith("D")) // "remover", "removed": allow only one
-                    {
-                        if (_dictPlacedWords.ContainsKey(subword.Substring(0, subword.Length - 2) + "R"))
-                        {
-                            continue;
-                        }
-                    }
-                    if (subword.EndsWith("R")) // "remover", "removed": allow only one
-                    {
-                        if (_dictPlacedWords.ContainsKey(subword.Substring(0, subword.Length - 2) + "D"))
-                        {
-                            continue;
-                        }
-                    }
-                    if (_dictPlacedWords.ContainsKey(subword  + "LY")) // discretely: dont put discrete
-                    {
-                        continue;
-                    }
-                    if (_dictPlacedWords.ContainsKey(subword + "ED")) // disobeyed : don't put disobey
-                    {
-                        continue;
-                    }
-                    if (_dictPlacedWords.ContainsKey(subword + "ER")) // disobeyer : don't put disobey
-                    {
-                        continue;
-                    }
-                    if (_dictPlacedWords.ContainsKey(subword + "ING")) // disobeying : don't put disobey
+                    if (WordGenerator.IgnorePluralGerundPastTenseWords(subword, _dictPlacedWords))
                     {
                         continue;
                     }
@@ -193,7 +153,6 @@ namespace WordScape
                 }
             }
         }
-
         private void PlaceOneWord(string subword, int x, int y, int incX, int incY)
         {
             var isFirstLetter = true;

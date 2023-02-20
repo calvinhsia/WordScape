@@ -127,5 +127,53 @@ namespace WordScape
             wc.InitialWord = wc.InitialWord.ToUpper();
             return wc;
         }
+        public static bool IgnorePluralGerundPastTenseWords<T>(string subword, Dictionary<string, T> _dictWords)
+        {
+            if (!subword.EndsWith("S"))
+            {
+                if (_dictWords.ContainsKey(subword + "S"))
+                {
+                    return true;
+                }
+            }
+            if (!subword.EndsWith("D")) // past tense: if "removed", don't add "remove"
+            {
+                if (_dictWords.ContainsKey(subword + "D"))
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                if (_dictWords.ContainsKey(subword.Substring(0, subword.Length - 2) + "R"))
+                {
+                    return true;
+                }
+            }
+            if (subword.EndsWith("R")) // "remover", "removed": allow only one
+            {
+                if (_dictWords.ContainsKey(subword.Substring(0, subword.Length - 2) + "D"))
+                {
+                    return true;
+                }
+            }
+            if (_dictWords.ContainsKey(subword + "LY")) // discretely: dont put discrete
+            {
+                return true;
+            }
+            if (_dictWords.ContainsKey(subword + "ED")) // disobeyed : don't put disobey
+            {
+                return true;
+            }
+            if (_dictWords.ContainsKey(subword + "ER")) // disobeyer : don't put disobey
+            {
+                return true;
+            }
+            if (_dictWords.ContainsKey(subword + "ING")) // disobeying : don't put disobey
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }

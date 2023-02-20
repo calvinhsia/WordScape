@@ -87,7 +87,7 @@ namespace Ruffle
                             break;
                         }
                     }
-                    if (wordSofar.Length >= MinSubWordLength)
+                    if (wordSofar.Length >= MinSubWordLength && RufflePuzzleCurrent?.dictWordListsByLength != null)
                     {
                         if (RufflePuzzleCurrent.dictWordListsByLength.TryGetValue(wordSofar.Length, out var list) && list.Contains(wordSofar))
                         {
@@ -145,7 +145,13 @@ namespace Ruffle
             }
         }
     }
+    public class RuffleWord// one of these for each word
+    {
+        public List<RuffleTile> Tiles = new(); // one of these for each letter in Word
+        public string Word = string.Empty;
+        public override string ToString() => $"{Word}";
 
+    }
     public class RufflePuzzle
     {
         WordScapePuzzle? _WordScapePuzzle;
@@ -155,12 +161,13 @@ namespace Ruffle
         int LtrHeighSmall = 25;
         int LtrWidthLarge = 20;
 
-        internal Dictionary<int, List<string>>? dictWordListsByLength; // WordLen => list<words>
+        internal Dictionary<int, List<string>> dictWordListsByLength = new(); // WordLen => list<words>
         internal Dictionary<int, List<List<RuffleTile>>> dictTiles = new(); // WordLen=>List<Tile>
-                                                                            //        internal RuffleTile[,] ruffleTiles; // 2d array of 
+        internal Dictionary<int, List<string>> dictWordsInAnswers = new(); // wordlen=>List<words>
+
         public static async Task<RufflePuzzle> CreateRufflePuzzleAsync(int lenTargetWord, int minSubWordLength, MainWindowRuffle mainWindowRuffle)
         {
-            var puz = new RufflePuzzle
+            var puz = new RufflePuzzle(mainWindowRuffle)
             {
                 _WordScapePuzzle = await WordScapePuzzle.CreateNextPuzzleTask(new WordGenerationParms()
                 {
@@ -192,20 +199,39 @@ namespace Ruffle
             }
         }
 
-        private RufflePuzzle()
+        private RufflePuzzle(MainWindowRuffle mainWindowRuffle)
         {
-
+            this.mainWindowRuffle = mainWindowRuffle;
         }
         public void FillRuffleGrid()
         {
-            if (dictWordListsByLength != null)
-            {
-                foreach (var kvp in dictWordListsByLength)
+            { // we want to remove a singular if the plural is already placed. Bias toward keeping longer word
+                var dictWords = new Dictionary<string, object?>();
+                foreach (var kvp in dictWordListsByLength.OrderByDescending(kvp => kvp.Key)) // for each word list longest set to shortest
                 {
-                    while (kvp.Value.Count >= maxWordListLength)
+                    var lstIgnoredWords = new List<string>();
+                    foreach (var word in kvp.Value) // each word of fixed length
                     {
-                        kvp.Value.RemoveAt(mainWindowRuffle.random.Next(kvp.Value.Count));
+                        if (!WordGenerator.IgnorePluralGerundPastTenseWords(word, dictWords))
+                        {
+                            dictWords[word] = null; // doesn't matter
+                        }
+                        else
+                        {
+                            lstIgnoredWords.Add(word);
+                        }
                     }
+                    foreach (var word in lstIgnoredWords)
+                    {
+                        dictWordListsByLength[kvp.Key].Remove(word);
+                    }
+                }
+            }
+            foreach (var kvp in dictWordListsByLength) // now shorten any long lists
+            {
+                while (kvp.Value.Count >= maxWordListLength)
+                {
+                    kvp.Value.RemoveAt(mainWindowRuffle.random.Next(kvp.Value.Count));
                 }
             }
             //var lstWords = new List<List<string>>(); 
