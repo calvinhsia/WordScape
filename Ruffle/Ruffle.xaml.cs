@@ -75,36 +75,31 @@ namespace Ruffle
                 if (e.Key == Key.Enter)
                 {
                     e.Handled = true;
-                    var wordSofar = "";
+                    var wordUserInput = "";
                     foreach (var tile in spLettersEntered.Children.Cast<RuffleTile>())
                     {
                         if (tile.ruffleTileState.HasFlag(RuffleTileState.Revealed))
                         {
-                            wordSofar += tile._letter;
+                            wordUserInput += tile._letter;
                         }
                         else
                         {
                             break;
                         }
                     }
-                    if (wordSofar.Length >= MinSubWordLength && RufflePuzzleCurrent?.dictWordListsByLength != null)
+                    if (wordUserInput.Length >= MinSubWordLength && RufflePuzzleCurrent?.dictWordListsByLength != null)
                     {
-                        if (RufflePuzzleCurrent.dictWordListsByLength.TryGetValue(wordSofar.Length, out var list) && list.Contains(wordSofar))
+                        if (RufflePuzzleCurrent.dictWordListsByLength.TryGetValue(wordUserInput.Length, out var list) && list.Contains(wordUserInput))
                         {
-                            if (RufflePuzzleCurrent.dictTiles.TryGetValue(wordSofar.Length, out var lstlst))
+                            if (!RufflePuzzleCurrent.dictWordsInAnswers.TryGetValue(wordUserInput.Length, out var lstWordsInAnswers))
                             {
-                                foreach (var lstTiles in lstlst) // for each set of tiles for each word
-                                {
-                                    if (lstTiles[0].ruffleTileState.HasFlag(RuffleTileState.UnRevealed)) // found a row that has 1st entry unused?
-                                    {
-                                        var ltrndx = 0;
-                                        foreach (var tile in lstTiles) // then set the word to the word user typed
-                                        {
-                                            tile.ChangeState(RuffleTileState.Revealed, ltr: wordSofar[ltrndx++]);
-                                        }
-                                        break;
-                                    }
-                                }
+                                lstWordsInAnswers = new SortedSet<string>();
+                                RufflePuzzleCurrent.dictWordsInAnswers[wordUserInput.Length] = lstWordsInAnswers;
+                            }
+                            if (!lstWordsInAnswers.Contains(wordUserInput))
+                            {
+                                lstWordsInAnswers.Add(wordUserInput);
+                                RufflePuzzleCurrent.RefreshWordsInAnswers(wordUserInput.Length);
                             }
                         }
                     }
@@ -145,16 +140,9 @@ namespace Ruffle
             }
         }
     }
-    public class RuffleWord// one of these for each word
-    {
-        public List<RuffleTile> Tiles = new(); // one of these for each letter in Word
-        public string Word = string.Empty;
-        public override string ToString() => $"{Word}";
-
-    }
     public class RufflePuzzle
     {
-        WordScapePuzzle? _WordScapePuzzle;
+        WordScapePuzzle? _WordScapePuzzle; // user wordscape lib for word gen
         int maxWordListLength = 34; // max # of e.g. 4 letter words
         private MainWindowRuffle mainWindowRuffle;
         int LtrWidthSmall = 25;
@@ -163,7 +151,7 @@ namespace Ruffle
 
         internal Dictionary<int, List<string>> dictWordListsByLength = new(); // WordLen => list<words>
         internal Dictionary<int, List<List<RuffleTile>>> dictTiles = new(); // WordLen=>List<Tile>
-        internal Dictionary<int, List<string>> dictWordsInAnswers = new(); // wordlen=>List<words>
+        internal Dictionary<int, SortedSet<string>> dictWordsInAnswers = new(); // Wordlen=>List<words>
 
         public static async Task<RufflePuzzle> CreateRufflePuzzleAsync(int lenTargetWord, int minSubWordLength, MainWindowRuffle mainWindowRuffle)
         {
@@ -234,8 +222,7 @@ namespace Ruffle
                     kvp.Value.RemoveAt(mainWindowRuffle.random.Next(kvp.Value.Count));
                 }
             }
-            //var lstWords = new List<List<string>>(); 
-            if (_WordScapePuzzle == null || dictWordListsByLength == null)
+            if (_WordScapePuzzle == null)
             {
                 throw new NullReferenceException();
             }
@@ -268,6 +255,25 @@ namespace Ruffle
                         }
                     }
                     column++;
+                }
+            }
+        }
+
+        internal void RefreshWordsInAnswers(int length)
+        {
+            if (dictTiles.TryGetValue(length, out var lstlstTiles))
+            {
+                if (dictWordsInAnswers.TryGetValue(length, out var lstlstWords))
+                {
+                    var row = 0;
+                    foreach (var word in lstlstWords)
+                    {
+                        for (var ndxltr = 0; ndxltr < word.Length; ndxltr++)
+                        {
+                            lstlstTiles[row][ndxltr].ChangeState(RuffleTileState.Revealed, ltr: word[ndxltr]);
+                        }
+                        row++;
+                    }
                 }
             }
         }
@@ -332,7 +338,6 @@ namespace Ruffle
             {
                 _TxtBlk.Text = _letter.ToString();
             }
-
         }
         public override string ToString() => $"{(_letter == '\0' ? " " : _letter)} {ruffleTileState.ToString()}";
     }
