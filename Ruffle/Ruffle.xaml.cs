@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using WordScape;
 
+// xcopy /dy C:\Users\calvinh\source\repos\WordScape\Ruffle\bin\Release\net6.0-windows C:\Users\calvinh\OneDrive\Public\Ruffle
 namespace Ruffle
 {
     public partial class MainWindowRuffle : Window, INotifyPropertyChanged
@@ -19,7 +20,7 @@ namespace Ruffle
         public event PropertyChangedEventHandler? PropertyChanged;
         public void RaisePropChanged([CallerMemberName] string propertyName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         public string TextScore { get; set; } = string.Empty;
-        public string TextErrorMessage { get; set; }= string.Empty ;
+        public string TextErrorMessage { get; set; } = string.Empty;
         public readonly Random random = new(
 #if DEBUG
             1
@@ -61,12 +62,14 @@ namespace Ruffle
                         {
                             foreach (var kvpWordlength in RufflePuzzleCurrent.dictWordListsByLength) // each column of words
                             {
-                                if (RufflePuzzleCurrent.dictWordListsByLength.TryGetValue(kvpWordlength.Key, out var lstAllWords))
+                                if (RufflePuzzleCurrent.dictWordListsByLength.TryGetValue(kvpWordlength.Key, out var lstAllWordsInColumn))
                                 {
-                                    var lstWordsfound = RufflePuzzleCurrent.dictWordsInAnswers[kvpWordlength.Key];
-                                    foreach (var word in lstAllWords)
+                                    if (RufflePuzzleCurrent.dictWordsInAnswers.TryGetValue(kvpWordlength.Key, out var lstWordsfound))
                                     {
-                                        if (!lstWordsfound.Contains(word))
+                                    }
+                                    foreach (var word in lstAllWordsInColumn)
+                                    {
+                                        if (lstWordsfound == null || !lstWordsfound.Contains(word))
                                         {
                                             if (RufflePuzzleCurrent.dictTiles.TryGetValue(kvpWordlength.Key, out var lstlstTiles))
                                             {
@@ -133,6 +136,7 @@ namespace Ruffle
                     if (e.Key == Key.Enter)
                     {
                         var wasAdded = false;
+                        var wasRemoved = false;
                         if (wordUserInput.Length >= MinSubWordLength && RufflePuzzleCurrent?.dictWordListsByLength != null)
                         {
                             if (RufflePuzzleCurrent.dictWordListsByLength.TryGetValue(wordUserInput.Length, out var list) && list.Contains(wordUserInput))
@@ -163,13 +167,22 @@ namespace Ruffle
                             }
                             else
                             {
-                                TextErrorMessage = $"{wordUserInput} not found";
-                                RaisePropChanged(nameof(TextErrorMessage));
+                                if (RufflePuzzleCurrent.setWordsRemoved.Contains(wordUserInput))
+                                {
+                                    TextErrorMessage = $"{wordUserInput} was removed from available words";
+                                    RaisePropChanged(nameof(TextErrorMessage));
+                                    wasRemoved = true;
+                                }
+                                else
+                                {
+                                    TextErrorMessage = $"{wordUserInput} not found";
+                                    RaisePropChanged(nameof(TextErrorMessage));
+                                }
                             }
                             var alreadyadded = LstWrdsSoFar.Cast<TextBlock>().Where(t => t.Text == wordUserInput).Any();
                             if (!alreadyadded)
                             {
-                                var bkcolr = wasAdded ? Colors.DarkCyan : Colors.LightPink;
+                                var bkcolr = wasAdded ? Colors.DarkCyan : (wasRemoved ? Colors.LightBlue : Colors.LightPink);
                                 var forecolor = wasAdded ? Brushes.White : Brushes.Black;
                                 var tb = new TextBlock() { Text = wordUserInput, Background = (new SolidColorBrush(bkcolr)), Foreground = forecolor };
                                 LstWrdsSoFar.Add(tb);
@@ -259,7 +272,7 @@ namespace Ruffle
     public class RufflePuzzle
     {
         WordScapePuzzle? _WordScapePuzzle; // user wordscape lib for word gen
-        readonly int maxWordListLength = 28; // max # of e.g. 4 letter words
+        readonly int maxWordListLength = 16; // max # of e.g. 4 letter words
         private MainWindowRuffle mainWindowRuffle;
         readonly int LtrWidthSmall = 25;
         readonly int LtrHeighSmall = 25;
@@ -269,6 +282,7 @@ namespace Ruffle
         internal Dictionary<int, List<string>> dictWordListsByLength = new(); // WordLen => list<words>
         internal Dictionary<int, List<List<RuffleTile>>> dictTiles = new(); // WordLen=>List<Tile>
         internal Dictionary<int, SortedSet<string>> dictWordsInAnswers = new(); // Wordlen=>List<words>
+        internal SortedSet<string> setWordsRemoved = new();
 
         public static async Task<RufflePuzzle> CreateRufflePuzzleAsync(int lenTargetWord, int minSubWordLength, MainWindowRuffle mainWindowRuffle)
         {
@@ -311,6 +325,7 @@ namespace Ruffle
         }
         public void FillRuffleGrid()
         {
+            setWordsRemoved.Clear();
             { // we want to remove a singular if the plural is already placed. Bias toward keeping longer word
                 var dictWords = new Dictionary<string, object?>();
                 foreach (var kvp in dictWordListsByLength.OrderByDescending(kvp => kvp.Key)) // for each word list longest set to shortest
@@ -330,6 +345,7 @@ namespace Ruffle
                     foreach (var word in lstIgnoredWords)
                     {
                         dictWordListsByLength[kvp.Key].Remove(word);
+                        setWordsRemoved.Add(word);
                     }
                 }
             }
@@ -337,7 +353,9 @@ namespace Ruffle
             {
                 while (kvp.Value.Count >= maxWordListLength)
                 {
-                    kvp.Value.RemoveAt(mainWindowRuffle.random.Next(kvp.Value.Count));
+                    var ndxwordToRemove = mainWindowRuffle.random.Next(kvp.Value.Count);
+                    setWordsRemoved.Add(kvp.Value[ndxwordToRemove]);
+                    kvp.Value.RemoveAt(ndxwordToRemove);
                 }
             }
             if (_WordScapePuzzle == null)
