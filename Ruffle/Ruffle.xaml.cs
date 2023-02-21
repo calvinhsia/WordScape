@@ -4,31 +4,22 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Security.RightsManagement;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Windows.Media.Animation;
 using WordScape;
 
 namespace Ruffle
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindowRuffle : Window, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
         public void RaisePropChanged([CallerMemberName] string propertyName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        public string TextScore { get; set; }
-        public string TextErrorMessage { get; set; }
+        public string TextScore { get; set; } = string.Empty;
+        public string TextErrorMessage { get; set; }= string.Empty ;
         public readonly Random random = new(
 #if DEBUG
             1
@@ -66,18 +57,16 @@ namespace Ruffle
                 switch (btnText)
                 {
                     case "_End":
-                        if (RufflePuzzleCurrent.NumSolvedWords != RufflePuzzleCurrent.NumWordsTotal)
+                        if (RufflePuzzleCurrent != null && RufflePuzzleCurrent.NumSolvedWords != RufflePuzzleCurrent.NumWordsTotal)
                         {
                             foreach (var kvpWordlength in RufflePuzzleCurrent.dictWordListsByLength) // each column of words
                             {
                                 if (RufflePuzzleCurrent.dictWordListsByLength.TryGetValue(kvpWordlength.Key, out var lstAllWords))
                                 {
-                                    if (RufflePuzzleCurrent.dictWordsInAnswers.TryGetValue(kvpWordlength.Key, out var lstWordsfound))
-                                    {
-                                    }
+                                    var lstWordsfound = RufflePuzzleCurrent.dictWordsInAnswers[kvpWordlength.Key];
                                     foreach (var word in lstAllWords)
                                     {
-                                        if (lstWordsfound == null || !lstWordsfound.Contains(word))
+                                        if (!lstWordsfound.Contains(word))
                                         {
                                             if (RufflePuzzleCurrent.dictTiles.TryGetValue(kvpWordlength.Key, out var lstlstTiles))
                                             {
@@ -112,8 +101,6 @@ namespace Ruffle
                             spLettersAvailable.Children.Clear();
                             newlist.ForEach(t => spLettersAvailable.Children.Add(t));
                         }
-                        break;
-                    case "_Submit":
                         break;
                 }
                 Focus();
@@ -182,16 +169,26 @@ namespace Ruffle
                             var alreadyadded = LstWrdsSoFar.Cast<TextBlock>().Where(t => t.Text == wordUserInput).Any();
                             if (!alreadyadded)
                             {
-                                LstWrdsSoFar.Add(new TextBlock() { Text = wordUserInput, Foreground = (wasAdded ? Brushes.Black : Brushes.LightPink) });
+                                var bkcolr = wasAdded ? Colors.DarkCyan : Colors.LightPink;
+                                var forecolor = wasAdded ? Brushes.White : Brushes.Black;
+                                var tb = new TextBlock() { Text = wordUserInput, Background = (new SolidColorBrush(bkcolr)), Foreground = forecolor };
+                                LstWrdsSoFar.Add(tb);
                                 LstWrdsSoFar = new ObservableCollection<UIElement>(LstWrdsSoFar.Cast<TextBlock>().OrderBy(t => t.Text));
+
+                                var animDura = TimeSpan.FromSeconds(.2);
+                                var anim = new ColorAnimation(fromValue: Colors.Transparent, toValue: bkcolr, animDura)
+                                {
+                                    //                                    FillBehavior = FillBehavior.HoldEnd,
+                                    RepeatBehavior = new RepeatBehavior(10)
+                                };
+                                tb.Background = new SolidColorBrush(Colors.Transparent);
+                                tb.Background.BeginAnimation(SolidColorBrush.ColorProperty, anim);
                             }
-                            //var lstWrdsTriedSofar = new SortedSet<string>(LstWrdsSoFar.Cast<TextBlock>().Select(t => t.Text));
-                            //lstWrdsTriedSofar.Add(wordUserInput);
-                            //LstWrdsSoFar.Clear();
-                            //foreach(var wrd in lstWrdsTriedSofar)
-                            //{
-                            //    LstWrdsSoFar.Add(new TextBlock() { Text = wordUserInput, Foreground = (wasAdded ? Brushes.Black : Brushes.LightBlue) });
-                            //}
+                            else
+                            {
+                                TextErrorMessage = $"{wordUserInput} already tried";
+                                RaisePropChanged(nameof(TextErrorMessage));
+                            }
                         }
                         doReset = true;
                     }
@@ -262,11 +259,10 @@ namespace Ruffle
     public class RufflePuzzle
     {
         WordScapePuzzle? _WordScapePuzzle; // user wordscape lib for word gen
-        int maxWordListLength = 14; // max # of e.g. 4 letter words
+        readonly int maxWordListLength = 28; // max # of e.g. 4 letter words
         private MainWindowRuffle mainWindowRuffle;
-        int LtrWidthSmall = 25;
-        int LtrHeighSmall = 25;
-        int LtrWidthLarge = 20;
+        readonly int LtrWidthSmall = 25;
+        readonly int LtrHeighSmall = 25;
         public int NumSolvedWords = 0;
         public int NumWordsTotal = 0;
 
@@ -302,9 +298,9 @@ namespace Ruffle
             mainWindowRuffle.spLettersEntered.Children.Clear();
             foreach (var ltr in ltrs.OrderBy(p => mainWindowRuffle.random.NextDouble())) // shuffle
             {
-                var tile = new RuffleTile(mainWindowRuffle, ltr, ruffleTileState: RuffleTileState.Large);
+                var tile = new RuffleTile(ltr, ruffleTileState: RuffleTileState.Large);
                 mainWindowRuffle.spLettersAvailable.Children.Add(tile);
-                tile = new RuffleTile(mainWindowRuffle, ltr, ruffleTileState: RuffleTileState.Large | RuffleTileState.Hidden);
+                tile = new RuffleTile(ltr, ruffleTileState: RuffleTileState.Large | RuffleTileState.Hidden);
                 mainWindowRuffle.spLettersEntered.Children.Add(tile);
             }
         }
@@ -363,7 +359,7 @@ namespace Ruffle
                             var lstRuffleTile = new List<RuffleTile>();
                             for (var i = 0; i < wordlength; i++) // for each letter in word
                             {
-                                var tile = new RuffleTile(mainWindowRuffle, word[i], rowNdx, RuffleTileState.Hidden);
+                                var tile = new RuffleTile(word[i], RuffleTileState.Hidden);
                                 lstRuffleTile.Add(tile);
                                 var x = column * (wordlength) * LtrWidthSmall + i * LtrWidthSmall;
                                 var y = rowNdx * LtrHeighSmall;
@@ -418,7 +414,7 @@ namespace Ruffle
         internal char _letter;
         internal RuffleTileState ruffleTileState;
         internal TextBlock _TxtBlk;
-        public RuffleTile(MainWindowRuffle mainWindowRuffle, char letter, int Rowndx = -1, RuffleTileState ruffleTileState = RuffleTileState.Small)
+        public RuffleTile(char letter, RuffleTileState ruffleTileState = RuffleTileState.Small)
         {
             Margin = new Thickness(1, 1, 1, 1);
             Width = 20;
@@ -448,7 +444,6 @@ namespace Ruffle
 
         internal void ChangeState(RuffleTileState newState, char? ltr = null)
         {
-            var oldState = ruffleTileState;
             this.ruffleTileState = newState;
             if (ltr != null)
             {
@@ -467,6 +462,6 @@ namespace Ruffle
                 Background = Brushes.LightBlue;
             }
         }
-        public override string ToString() => $"{(_letter == '\0' ? " " : _letter)} {ruffleTileState.ToString()}";
+        public override string ToString() => $"{(_letter == '\0' ? " " : _letter)} {ruffleTileState}";
     }
 }

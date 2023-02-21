@@ -28,7 +28,7 @@
                     <!--<Button Margin="0,20,5,20" Content="_Submit" FontSize="30" Click="Button_Click"/>-->
                     <!--<Button Margin="0,20,5,20" Content="_Clear" FontSize="30" Click="Button_Click"/>-->
                     <Button Margin="0,0,5,0" Content="_Ruffle" FontSize="25" Click="Button_Click" Focusable="False"/>
-                    <Button Margin="0,0,5,0" Content="_End" FontSize="25" Click="Button_Click" Focusable="False"/>
+                    <Button Margin="60,0,5,0" Content="_End" FontSize="25" Click="Button_Click" Focusable="False"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Height="28">
                     <Label Margin="0,0,0,0" Content="Score" Foreground="White" FontSize="15"/>
