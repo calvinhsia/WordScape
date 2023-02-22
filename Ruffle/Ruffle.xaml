@@ -17,7 +17,7 @@
         <Canvas Margin="20,20" x:Name="cvs"/>
         <DockPanel Grid.Row="1">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Height="20">
-                <TextBlock Margin="0,0,0,0" Text="{Binding TextErrorMessage}" FontSize="14" Foreground="Red" ToolTip="Some words are removed to reduce duplication: e.g. singular if plural is included, present tense it past tense included, '-ly','-ing'"/>
+                <TextBlock Margin="0,0,0,0" Text="{Binding TextErrorMessage}" FontSize="14" Foreground="Red" ToolTip="{Binding PluralTip}"/>
             </StackPanel>
         </DockPanel>
         <DockPanel Grid.Row="2">
@@ -27,13 +27,45 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <!--<Button Margin="0,20,5,20" Content="_Submit" FontSize="30" Click="Button_Click"/>-->
                     <!--<Button Margin="0,20,5,20" Content="_Clear" FontSize="30" Click="Button_Click"/>-->
-                    <Button Margin="0,0,5,0" Content="_Ruffle" FontSize="25" Click="Button_Click" Focusable="False"/>
-                    <Button Margin="60,0,5,0" Content="_End" FontSize="25" Click="Button_Click" Focusable="False"/>
+                    <Button Margin="0,0,5,0" Content="_Ruffle" FontSize="25" Click="Button_Click" Focusable="False" ToolTip="Re-sort the letters"/>
+                    <Button Margin="60,0,5,0" Content="_New" FontSize="25" Click="Button_Click" Focusable="False" ToolTip="If current puzzle is not complete, will show answers. Hit again to get new puzzle"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Height="28">
-                    <Label Margin="0,0,0,0" Content="Score" Foreground="White" FontSize="15"/>
-                    <TextBlock Margin="0,5,0,0" Text="{Binding TextScore}" FontSize="15" Background="White"/>
-                </StackPanel>
+                <Grid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Height="28">
+                        <Label Margin="0,0,0,0" Content="Score" Foreground="White" FontSize="15"/>
+                        <TextBlock Margin="0,5,0,0" Text="{Binding TextScore}" FontSize="15" Background="White"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Label Content="Max Length" FontSize="12"/>
+                        <!--<TextBox Text="{Binding LenTargetWord}" ToolTip="For the next puzzle, length of the longest word" Width="30" Height="20" FontSize="12"/>-->
+                        <ComboBox Width="40" Text="{Binding LenTargetWord}" ToolTip="For the next puzzle, length of the longest word">
+                            <ComboBoxItem>5</ComboBoxItem>
+                            <ComboBoxItem>6</ComboBoxItem>
+                            <ComboBoxItem>7</ComboBoxItem>
+                            <ComboBoxItem>8</ComboBoxItem>
+                            <ComboBoxItem>9</ComboBoxItem>
+                            <ComboBoxItem>10</ComboBoxItem>
+                            <ComboBoxItem>11</ComboBoxItem>
+                        </ComboBox>
+                        <Label Content="Min Length" FontSize="12"/>
+                        <!--<TextBox Text="{Binding MinSubWordLength}" ToolTip="For the next puzzle, length of the shortest word" Width="30" Height="20" FontSize="12"/>-->
+                        <ComboBox Width="35" Text="{Binding MinSubWordLength}" ToolTip="For the next puzzle, length of the shortest word">
+                            <ComboBoxItem>3</ComboBoxItem>
+                            <ComboBoxItem>4</ComboBoxItem>
+                            <ComboBoxItem>5</ComboBoxItem>
+                        </ComboBox>
+                   
+                        <Label Content="MaxColumnLength" FontSize="12"/>
+                        <!--<TextBox Text="{Binding MaxColumnLength}" Width="30" FontSize="12"/>-->
+                        <ComboBox Width="40" Text="{Binding MaxColumnLength}" ToolTip="Max # of e.g. 3 letter words, 4 letter words... in each column. Excess words are removed">
+                            <ComboBoxItem>5</ComboBoxItem>
+                            <ComboBoxItem>10</ComboBoxItem>
+                            <ComboBoxItem>15</ComboBoxItem>
+                            <ComboBoxItem>20</ComboBoxItem>
+                        </ComboBox>
+                        <CheckBox Margin="10,8,0,0" Content="AllowPlurals" IsChecked="{Binding AllowPlurals}" FontSize="12" ToolTip="{Binding PluralTip}"/>
+                    </StackPanel>
+                </Grid>
             </StackPanel>
         </DockPanel>
         <Grid Grid.Row="3">

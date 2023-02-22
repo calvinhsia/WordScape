@@ -19,8 +19,14 @@ namespace Ruffle
     {
         public event PropertyChangedEventHandler? PropertyChanged;
         public void RaisePropChanged([CallerMemberName] string propertyName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        public string PluralTip { get; } = "Some words are removed to reduce duplication: e.g. singular if plural is included, present tense it past tense included, '-ly','-ing'";
         public string TextScore { get; set; } = string.Empty;
         public string TextErrorMessage { get; set; } = string.Empty;
+        public bool AllowPlurals { get; set; } = false;
+        public int LenTargetWord { get; set; } = 7;
+        public int MinSubWordLength { get; set; } = 3;
+        public int MaxColumnLength { get; set; } = 15;
+
         public readonly Random random = new(
 #if DEBUG
             1
@@ -29,14 +35,25 @@ namespace Ruffle
         RufflePuzzle? RufflePuzzleCurrent;
 
 
-        public int LenTargetWord { get; set; } = 7;
-        public int MinSubWordLength { get; set; } = 3;
         private ObservableCollection<UIElement> _LstWrdsSoFar = new();
         public ObservableCollection<UIElement> LstWrdsSoFar { get { return _LstWrdsSoFar; } set { _LstWrdsSoFar = value; RaisePropChanged(); } }
         public MainWindowRuffle()
         {
             InitializeComponent();
             DataContext = this;
+            AllowPlurals = Properties.Settings.Default.AllowPlurals;
+            LenTargetWord = Properties.Settings.Default.LenTargetWord;
+            MinSubWordLength = Properties.Settings.Default.MinSubwordLength;
+            MaxColumnLength = Properties.Settings.Default.MaxColumnLength;
+            Closed += (_, _)
+                =>
+            {
+                Properties.Settings.Default.AllowPlurals = AllowPlurals;
+                Properties.Settings.Default.LenTargetWord = LenTargetWord;
+                Properties.Settings.Default.MinSubwordLength = MinSubWordLength;
+                Properties.Settings.Default.MaxColumnLength = MaxColumnLength;
+                Properties.Settings.Default.Save();
+            };
             Loaded += MainWindowRuffle_Loaded;
         }
         private async void MainWindowRuffle_Loaded(object sender, RoutedEventArgs e)
@@ -57,7 +74,7 @@ namespace Ruffle
                 var btnText = (sender as Button)?.Content as string;
                 switch (btnText)
                 {
-                    case "_End":
+                    case "_New":
                         if (RufflePuzzleCurrent != null && RufflePuzzleCurrent.NumSolvedWords != RufflePuzzleCurrent.NumWordsTotal)
                         {
                             foreach (var kvpWordlength in RufflePuzzleCurrent.dictWordListsByLength) // each column of words
@@ -95,6 +112,14 @@ namespace Ruffle
                         else
                         {
                             RufflePuzzleCurrent = await RufflePuzzle.CreateRufflePuzzleAsync(LenTargetWord, MinSubWordLength, this);
+                            if (RufflePuzzleCurrent._WordScapePuzzle?.LenTargetWord != LenTargetWord
+                                || RufflePuzzleCurrent._WordScapePuzzle?.MinSubWordLength != MinSubWordLength
+                                || RufflePuzzleCurrent.AllowPlurals != AllowPlurals
+                                || RufflePuzzleCurrent.MaxColumnLength != MaxColumnLength
+                                ) // if anything changed in the UI since the puzzle was created, we need to discard/recreate
+                            {
+                                RufflePuzzleCurrent = await RufflePuzzle.CreateRufflePuzzleAsync(LenTargetWord, MinSubWordLength, this);
+                            }
                         }
                         break;
                     case "_Ruffle":
@@ -135,10 +160,12 @@ namespace Ruffle
                     var doReset = false;
                     if (e.Key == Key.Enter)
                     {
-                        var wasAdded = false;
-                        var wasRemoved = false;
                         if (wordUserInput.Length >= MinSubWordLength && RufflePuzzleCurrent?.dictWordListsByLength != null)
                         {
+                            var wasAdded = false;
+                            var wasRemoved = false;
+                            var IsInSmallDictionary = RufflePuzzleCurrent._WordScapePuzzle?.wordGenerator._dictionaryLibSmall.IsWord(wordUserInput);
+                            var IsInBigDictionary = RufflePuzzleCurrent._WordScapePuzzle?.wordGenerator._dictionaryLibLarge.IsWord(wordUserInput);
                             if (RufflePuzzleCurrent.dictWordListsByLength.TryGetValue(wordUserInput.Length, out var list) && list.Contains(wordUserInput))
                             {
                                 if (!RufflePuzzleCurrent.dictWordsInAnswers.TryGetValue(wordUserInput.Length, out var lstWordsInAnswers))
@@ -175,16 +202,41 @@ namespace Ruffle
                                 }
                                 else
                                 {
-                                    TextErrorMessage = $"{wordUserInput} not found";
+                                    TextErrorMessage = $"{wordUserInput} not found in current set. IsInBigDictionary = {IsInBigDictionary} IsInSmall = {IsInSmallDictionary}";
                                     RaisePropChanged(nameof(TextErrorMessage));
                                 }
                             }
                             var alreadyadded = LstWrdsSoFar.Cast<TextBlock>().Where(t => t.Text == wordUserInput).Any();
                             if (!alreadyadded)
                             {
-                                var bkcolr = wasAdded ? Colors.DarkCyan : (wasRemoved ? Colors.LightBlue : Colors.LightPink);
-                                var forecolor = wasAdded ? Brushes.White : Brushes.Black;
-                                var tb = new TextBlock() { Text = wordUserInput, Background = (new SolidColorBrush(bkcolr)), Foreground = forecolor };
+                                var bkcolr = Colors.Transparent;
+                                var forecolorBrush = Brushes.White;
+                                if (wasAdded)
+                                {
+                                    bkcolr = Colors.DarkCyan;
+                                }
+                                else
+                                {
+                                    if (wasRemoved)
+                                    {
+                                        bkcolr = Colors.LightBlue;
+                                    }
+                                    else
+                                    {
+                                        if (IsInBigDictionary != null && IsInBigDictionary.Value == true)
+                                        {
+                                            bkcolr = Colors.Pink;
+
+                                        }
+                                        else
+                                        {
+                                            bkcolr = Colors.LightPink;
+                                        }
+                                    }
+                                }
+                                //var bkcolr = wasAdded ? Colors.DarkCyan : (wasRemoved ? Colors.LightBlue : Colors.LightPink);
+                                //var forecolor = wasAdded ? Brushes.White : Brushes.Black;
+                                var tb = new TextBlock() { Text = wordUserInput, Background = (new SolidColorBrush(bkcolr)), Foreground = forecolorBrush };
                                 LstWrdsSoFar.Add(tb);
                                 LstWrdsSoFar = new ObservableCollection<UIElement>(LstWrdsSoFar.Cast<TextBlock>().OrderBy(t => t.Text));
 
@@ -271,8 +323,9 @@ namespace Ruffle
     }
     public class RufflePuzzle
     {
-        WordScapePuzzle? _WordScapePuzzle; // user wordscape lib for word gen
-        readonly int maxWordListLength = 16; // max # of e.g. 4 letter words
+        internal WordScapePuzzle? _WordScapePuzzle; // user wordscape lib for word gen
+        internal readonly int MaxColumnLength = 16; // max # of e.g. 4 letter words
+        internal bool AllowPlurals;
         private MainWindowRuffle mainWindowRuffle;
         readonly int LtrWidthSmall = 25;
         readonly int LtrHeighSmall = 25;
@@ -321,11 +374,14 @@ namespace Ruffle
 
         private RufflePuzzle(MainWindowRuffle mainWindowRuffle)
         {
+            MaxColumnLength = mainWindowRuffle.MaxColumnLength;
+            AllowPlurals = mainWindowRuffle.AllowPlurals;
             this.mainWindowRuffle = mainWindowRuffle;
         }
         public void FillRuffleGrid()
         {
             setWordsRemoved.Clear();
+            if (!AllowPlurals)
             { // we want to remove a singular if the plural is already placed. Bias toward keeping longer word
                 var dictWords = new Dictionary<string, object?>();
                 foreach (var kvp in dictWordListsByLength.OrderByDescending(kvp => kvp.Key)) // for each word list longest set to shortest
@@ -351,7 +407,7 @@ namespace Ruffle
             }
             foreach (var kvp in dictWordListsByLength) // now shorten any long lists
             {
-                while (kvp.Value.Count >= maxWordListLength)
+                while (kvp.Value.Count > MaxColumnLength)
                 {
                     var ndxwordToRemove = mainWindowRuffle.random.Next(kvp.Value.Count);
                     setWordsRemoved.Add(kvp.Value[ndxwordToRemove]);
