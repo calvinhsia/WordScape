@@ -41,7 +41,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DictionaryLib, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DictionaryLib_Calvin_Hsia.1.0.3\lib\net46\DictionaryLib.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Wordament\DictionaryLib\bin\Release\net46\DictionaryLib.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\MSTest.TestFramework.1.3.2\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.dll</HintPath>

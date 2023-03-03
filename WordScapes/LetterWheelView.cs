@@ -152,7 +152,7 @@ namespace WordScapes
                                         foundWordType = FoundWordType.SubWordNotInGrid;
                                         if (!_mainActivity._wordCont.subwords.Contains(wrdSoFar))
                                         {
-                                            if (this._mainActivity._wordGen._dictionaryLibLarge.IsWord(wrdSoFar.ToLower()))
+                                            if (this._mainActivity._wordGen.IsWordInLargeDictionary(wrdSoFar.ToLower()))
                                             {
                                                 foundWordType = FoundWordType.SubWordInLargeDictionary;
                                             }

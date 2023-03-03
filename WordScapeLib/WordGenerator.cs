@@ -77,7 +77,11 @@ namespace WordScape
             _dictionaryLibSmall = new DictionaryLib.DictionaryLib(DictionaryLib.DictionaryType.Small, _wordGenerationParms._Random);
             _dictionaryLibLarge = new DictionaryLib.DictionaryLib(DictionaryLib.DictionaryType.Large, _wordGenerationParms._Random);
         }
-
+        // avoid havin
+        public bool IsWordInLargeDictionary(string word) // forwarder so xamarin doesn't need ref to dict
+        {
+            return _dictionaryLibLarge.IsWord(word);
+        }
         public WordContainer GenerateWord()
         {
             var word = string.Empty;

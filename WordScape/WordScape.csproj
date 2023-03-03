@@ -40,9 +40,6 @@
     <StartupObject>WordScape.App</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DictionaryLib, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DictionaryLib_Calvin_Hsia.1.0.3\lib\net46\DictionaryLib.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />

@@ -5,7 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DictionaryLib_Calvin_Hsia" Version="1.0.3" />
+    <Reference Include="DictionaryLib">
+      <HintPath>..\..\Wordament\DictionaryLib\bin\Release\netstandard2.0\DictionaryLib.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

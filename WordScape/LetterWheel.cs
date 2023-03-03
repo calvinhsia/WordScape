@@ -245,7 +245,7 @@ namespace WordScape
                             foundWordType = FoundWordType.SubWordNotInGrid;
                             if (!_wordCont.subwords.Contains(wrdSoFar))
                             {
-                                if (this.wordScapeWindow._wordGen._dictionaryLibLarge.IsWord(wrdSoFar.ToLower()))
+                                if (this.wordScapeWindow._wordGen.IsWordInLargeDictionary(wrdSoFar.ToLower()))
                                 {
                                     foundWordType = FoundWordType.SubWordInLargeDictionary;
                                 }
