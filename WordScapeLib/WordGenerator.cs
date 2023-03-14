@@ -30,22 +30,22 @@ namespace WordScape
             return Task.Run(() =>
             {
                 WordScapePuzzle puzzleNext = null;
-                    puzzleNext = new WordScapePuzzle()
-                    {
-                        LenTargetWord = wordGenerationParms.LenTargetWord,
-                        MinSubWordLength = wordGenerationParms.MinSubWordLength
-                    };
-                    try
-                    {
-                        puzzleNext.wordGenerator = new WordGenerator(wordGenerationParms);
-                        puzzleNext.wordContainer = puzzleNext.wordGenerator.GenerateWord();
-                        puzzleNext.genGrid = new GenGrid(wordGenerationParms.MaxX, wordGenerationParms.MaxY, puzzleNext.wordContainer, wordGenerationParms._Random);
-                        puzzleNext.genGrid.Generate();
-                    }
-                    catch (Exception)
-                    {
-                        // old version of dict threw nullref sometimes at end of alphabet
-                    }
+                puzzleNext = new WordScapePuzzle()
+                {
+                    LenTargetWord = wordGenerationParms.LenTargetWord,
+                    MinSubWordLength = wordGenerationParms.MinSubWordLength
+                };
+                try
+                {
+                    puzzleNext.wordGenerator = new WordGenerator(wordGenerationParms);
+                    puzzleNext.wordContainer = puzzleNext.wordGenerator.GenerateWord();
+                    puzzleNext.genGrid = new GenGrid(wordGenerationParms.MaxX, wordGenerationParms.MaxY, puzzleNext.wordContainer, wordGenerationParms._Random);
+                    puzzleNext.genGrid.Generate();
+                }
+                catch (Exception)
+                {
+                    // old version of dict threw nullref sometimes at end of alphabet
+                }
                 Debug.WriteLine($"");
                 return puzzleNext;
             });
@@ -67,10 +67,10 @@ namespace WordScape
     {
         public readonly DictionaryLib.DictionaryLib _dictionaryLibSmall;
         public readonly DictionaryLib.DictionaryLib _dictionaryLibLarge;
-        public int _MinSubWordLen =>_wordGenerationParms.MinSubWordLength;
-        public int _TargetLen=>_wordGenerationParms.LenTargetWord;
+        public int _MinSubWordLen => _wordGenerationParms.MinSubWordLength;
+        public int _TargetLen => _wordGenerationParms.LenTargetWord;
         private readonly WordGenerationParms _wordGenerationParms;
-        private int _numMaxSubWords=>_wordGenerationParms.MaxSubWords;
+        private int _numMaxSubWords => _wordGenerationParms.MaxSubWords;
         public WordGenerator(WordGenerationParms wordGenerationParms)
         {
             _wordGenerationParms = wordGenerationParms;
@@ -89,48 +89,15 @@ namespace WordScape
             {
                 word = _dictionaryLibSmall.RandomWord();
             }
-            return GenSubWords(word);
-        }
-
-        private WordContainer GenSubWords(string word)
-        {
             var wc = new WordContainer()
             {
-                InitialWord = word
+                InitialWord = word.ToUpper()
             };
-            DictionaryLib.DictionaryLib.PermuteString(word, LeftToRight: true, (str) =>
-            {
-                //if (!wc.subwords.Contains(str))
-                //{
-                //    wc.subwords.Add(str);
-                //}
-                //return true;
-                for (int i = _MinSubWordLen; i < str.Length + 1; i++)
-                {
-                    var testWord = str.Substring(0, i);
-                    var partial = _dictionaryLibSmall.SeekWord(testWord, out var compResult);
-                    wc.cntLookups++;
-                    if (!string.IsNullOrEmpty(partial) && compResult == 0)
-                    {
-                        if (!wc.subwords.Contains(testWord))
-                        {
-                            wc.subwords.Add(testWord);
-                        }
-                    }
-                    else
-                    {
-                        if (!partial.StartsWith(testWord))
-                        {
-                            break;
-                        }
-                    }
-                }
-                return wc.subwords.Count != _numMaxSubWords; // continue
-            });
-            wc.subwords = wc.subwords.OrderByDescending(w => w.Length).Select(p => p.ToUpper()).ToList();
-            wc.InitialWord = wc.InitialWord.ToUpper();
+            var subwrds = _dictionaryLibSmall.GenerateSubWords(word, out wc.cntLookups, MinLength: _MinSubWordLen, MaxSubWords: _numMaxSubWords);
+            wc.subwords = subwrds.OrderByDescending(w => w.Length).Select(p => p.ToUpper()).ToList();
             return wc;
         }
+
         public static bool IgnorePluralGerundPastTenseWords<T>(string subword, Dictionary<string, T> _dictWords)
         {
             if (!subword.EndsWith("S"))

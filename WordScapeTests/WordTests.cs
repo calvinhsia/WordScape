@@ -67,6 +67,8 @@ namespace WordScapeTests
         {
             LogMessage($"test {nameof(TestGotDictionary)}");
             var asm = typeof(DictionaryLib.DictionaryLib).Assembly;
+
+            LogMessage($"{asm}");
             //            var asm = System.Reflection.Assembly.GetExecutingAssembly();
             var names = asm.GetManifestResourceNames(); // "Dictionary.Properties.Resources.resources"
 
@@ -77,12 +79,12 @@ namespace WordScapeTests
 
             /// Note: getting resource throws filenotfound exception for DictionaryLib.resources event though it's embedded: it gets caught and swallowed
             var dict1 = (byte[])resman.GetObject("dict1"); //large
-            LogMessage($"test {nameof(TestGotDictionary)} Large = {dict1.Length}");
+            LogMessage($"Large = {dict1.Length}");
 
             var dict2 = (byte[])resman.GetObject("dict2");
             var dictSmall = new DictionaryLib.DictionaryLib(DictionaryType.Small);
             var dictLarge = new DictionaryLib.DictionaryLib(DictionaryType.Large);
-            LogMessage($"test {nameof(TestGotDictionary)} done");
+            LogMessage($"done");
 
         }
         [TestMethod]
