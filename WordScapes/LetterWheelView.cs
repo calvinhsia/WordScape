@@ -124,7 +124,7 @@ namespace WordScapes
                             int[] locg = new int[2];
                             this.GetLocationOnScreen(locg);
                             var y = locg[1];
-                            var tolerance = 40;
+                            var tolerance = 60;
                             if (e.Event.RawY < y - tolerance || e.Event.RawY > y + this.Height + tolerance) // only deselect if Y out of bounds
                             {
                                 ClearSelection();

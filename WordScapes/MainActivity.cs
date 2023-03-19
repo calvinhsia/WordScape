@@ -128,56 +128,6 @@ namespace WordScapes
             //FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
             //fab.Click += FabOnClick;
         }
-        //Task<WordScapePuzzle> CreateNextPuzzleTask()
-        //{
-        //    return Task.Run(() =>
-        //    {
-        //        var done = false;
-        //        WordScapePuzzle puzzleNext = null;
-        //        var nTries = 0;
-        //        while (!done)
-        //        {
-        //            int.TryParse(_txtLenTargetWord.Text, out var LenTargetWordNew);
-        //            int.TryParse(_txtLenSubword.Text, out var minSubWordLenNew);
-        //            if (LenTargetWordNew != LenTargetWord || minSubWordLenNew != MinSubWordLength)
-        //            {
-        //                LenTargetWord = LenTargetWordNew;
-        //                MinSubWordLength = minSubWordLenNew;
-        //                Xamarin.Essentials.Preferences.Set(prefTargWorLen, LenTargetWord);
-        //                Xamarin.Essentials.Preferences.Set(prefSubWordLen, MinSubWordLength);
-        //            }
-
-        //            puzzleNext = new WordScapePuzzle()
-        //            {
-        //                LenTargetWord = this.LenTargetWord,
-        //                MinSubWordLength = MinSubWordLength
-        //            };
-        //            try
-        //            {
-        //                puzzleNext.wordGenerator = new WordGenerator( _Random, TargetLen: LenTargetWord, minSubWordLength: MinSubWordLength);
-        //                puzzleNext.wordContainer = puzzleNext.wordGenerator.GenerateWord();
-        //                puzzleNext.genGrid = new GenGrid(_WordScapeOptions.MaxX, _WordScapeOptions.MaxY, puzzleNext.wordContainer, puzzleNext.wordGenerator._rand);
-        //                puzzleNext.genGrid.Generate();
-        //                if (puzzleNext.LenTargetWord == this.LenTargetWord && puzzleNext.MinSubWordLength == MinSubWordLength)
-        //                {
-        //                    done = true;
-        //                }
-        //            }
-        //            catch (Exception)
-        //            {
-        //                // old version of dict threw nullref sometimes at end of alphabet
-        //            }
-        //            nTries++;
-        //            if (nTries == 3)
-        //            {
-        //                throw new Exception($"Tried {nTries} times");
-        //            }
-        //        }
-        //        return puzzleNext;
-        //    });
-        //}
-
-
         void CreateLayout()
         {
             //            dp(Density Pixels), here's a formula to convert PXs from DPs:
@@ -318,7 +268,7 @@ namespace WordScapes
             linearLayouCol2.AddView(lininside);
             _LetterWheelView = new LetterWheelLayout(this)
             {
-                LayoutParameters = new LinearLayout.LayoutParams((int)(0.61 * _ptScreenSize.X), LinearLayout.LayoutParams.WrapContent)
+                LayoutParameters = new LinearLayout.LayoutParams((int)(0.66 * _ptScreenSize.X), LinearLayout.LayoutParams.WrapContent)
             };
             _LetterWheelView.SetGravity(GravityFlags.Center);
             linearLayouCol2.AddView(_LetterWheelView);
@@ -388,7 +338,7 @@ namespace WordScapes
                 case Android.Content.Res.Orientation.Portrait:
 
 
-                    _txtTimer.LayoutParameters = new RelativeLayout.LayoutParams(300, RelativeLayout.LayoutParams.WrapContent);
+                    _txtTimer.LayoutParameters = new RelativeLayout.LayoutParams(350, RelativeLayout.LayoutParams.WrapContent);
                     ((RelativeLayout.LayoutParams)(_txtTimer.LayoutParameters)).AddRule(LayoutRules.AlignParentRight);
 
                     //                    _btnNew.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WrapContent, RelativeLayout.LayoutParams.WrapContent);
