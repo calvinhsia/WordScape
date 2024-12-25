@@ -33,7 +33,7 @@ namespace WordScape
         WordScapePuzzle _wordScapePuzzleCurrent = new();
         Task<WordScapePuzzle> taskGenNextPuzzle;
 
-        readonly WordScapeOptions _WordScapeOptions = new();
+        internal readonly WordScapeOptions _WordScapeOptions = new();
 
         internal WordGenerator _wordGen { get { return _wordScapePuzzleCurrent.wordGenerator; } set { _wordScapePuzzleCurrent.wordGenerator = value; } }
         internal WordContainer _WordCont { get { return _wordScapePuzzleCurrent.wordContainer; } set { _wordScapePuzzleCurrent.wordContainer = value; } }

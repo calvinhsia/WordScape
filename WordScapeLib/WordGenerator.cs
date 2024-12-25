@@ -5,6 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
+/*
+ This project directly references:
+    <Reference Include="DictionaryLib">
+      <HintPath>..\..\Wordament\DictionaryLib\bin\Release\netstandard2.0\DictionaryLib.dll</HintPath>
+    </Reference>
+
+so will use up to date Release build
+ */
 namespace WordScape
 {
     public class WordGenerationParms
