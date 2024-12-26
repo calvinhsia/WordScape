@@ -33,7 +33,7 @@ namespace WordScape
     public partial class WordScapeWindow : Window, INotifyPropertyChanged
     {
         WordScapePuzzle _wordScapePuzzleCurrent = new();
-        Task<WordScapePuzzle> taskGenNextPuzzle;
+        internal Task<WordScapePuzzle> taskGenNextPuzzle;
 
         internal readonly WordScapeOptions _WordScapeOptions = new();
 

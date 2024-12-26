@@ -19,8 +19,21 @@ namespace WordScapeTests
                 await Task.Yield();
                 var wordScapeWindow = new WordScape.WordScapeWindow();
                 wordScapeWindow._WordScapeOptions._Random = new Random(1);
+                await Task.Delay(1000); //allow time for window to load, 2nd puzzle to be generated
                 wordScapeWindow.Show();
-                await Task.Delay(15000);
+                var nTimes = 0;
+                while (!wordScapeWindow.TimerIsEnabled)
+                {
+                    await Task.Delay(1000);
+                    LogMessage($"waiting for timer to start");
+                    if (nTimes++ > 10)
+                    {
+                        throw new Exception("Timer never started");
+                    }
+                }
+
+                //await wordScapeWindow.taskGenNextPuzzle;
+                await Task.Delay(5000);
                 wordScapeWindow.Close();
             });
 
