@@ -1,28 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <StartupObject>Ruffle.App</StartupObject>
     <ApplicationIcon>15211_feather_write_icon.ico</ApplicationIcon>
   </PropertyGroup>
-
   <ItemGroup>
     <Content Include="15211_feather_write_icon.ico" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\WordScapeLib\WordScapeLib.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <Reference Include="DictionaryLib">
       <HintPath>..\..\Wordament\DictionaryLib\bin\Release\netstandard2.0\DictionaryLib.dll</HintPath>
     </Reference>
   </ItemGroup>
-
   <ItemGroup>
     <Compile Update="Properties\Settings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -30,16 +25,16 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
   </ItemGroup>
-
   <ItemGroup>
     <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
-<!--  <ItemGroup>
+  <!--  <ItemGroup>
     <ProjectReference Include="..\WordScapeLib\WordScapeLib.csproj" />
   </ItemGroup>
 
 
---></Project>
+-->
+</Project>
