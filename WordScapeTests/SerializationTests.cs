@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-
 namespace WordScapeTests
 {
     [TestClass]
@@ -18,10 +17,11 @@ namespace WordScapeTests
             await RunInSTAExecutionContextAsync(async () =>
             {
                 await Task.Yield();
-                var window = new WordScape.WordScapeWindow();
-                window.Show();
+                var wordScapeWindow = new WordScape.WordScapeWindow();
+                wordScapeWindow._WordScapeOptions._Random = new Random(1);
+                wordScapeWindow.Show();
                 await Task.Delay(15000);
-                window.Close();
+                wordScapeWindow.Close();
             });
 
         }

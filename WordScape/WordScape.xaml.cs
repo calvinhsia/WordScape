@@ -18,6 +18,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+// make main assembly internals visible to test assembly
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("WordScapeTests")]
 
 namespace WordScape
 {
@@ -196,7 +198,10 @@ namespace WordScape
                     }
                 }
                 _wordScapePuzzleCurrent = newpuzzle;
-
+                if (_gridGen == null)
+                {
+                    throw new Exception("Grid is null");
+                }
                 FillGrid(_gridGen);
                 NumWordsTotal = 0; // force prop changed
                 NumWordsFound = 0;
