@@ -2,11 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
+using WordScape;
 namespace WordScapeTests
 {
     [TestClass]
@@ -38,8 +40,36 @@ namespace WordScapeTests
                 await Task.Delay(5000);
                 wordScapeWindow.Close();
             });
-
         }
+        [TestMethod]
+        public async Task TestSerializeWordScape()
+        {
+            LogMessage($"serialization TestSerializeWordScape");
+            await RunInSTAExecutionContextAsync(async () =>
+            {
+                await Task.Yield();
+                var opts = new WordGenerationParms()
+                {
+                    LenTargetWord = 7,
+                    MinSubWordLength = 3
+                };
+
+                var wordGen = new WordGenerator(opts);
+                var serOptions = new JsonSerializerOptions
+                {
+                    //IncludeFields = true,
+                    IgnoreReadOnlyFields = false,
+                };
+                var json = JsonSerializer.Serialize(wordGen, serOptions);
+                LogMessage("json={0}", json);
+                var wordGenDeserialized = JsonSerializer.Deserialize<WordGenerator>(json, serOptions);
+                var wcont = wordGenDeserialized.GenerateWord();
+                LogMessage($"NumLookups = {wcont.cntLookups} #SubWords = {wcont.subwords.Count} {wcont.InitialWord}");
+
+            });
+        }
+
+
         [TestMethod]
         public async Task TestSerializeSimple()
         {
@@ -47,25 +77,68 @@ namespace WordScapeTests
             await RunInSTAExecutionContextAsync(async () =>
             {
                 await Task.Yield();
-                var testSerialization = new TestDataForSerialization() { name = "fred", age = 42 };
+                var person1 = new Person("fred", 42);
+                person1.children = new List<Person>
+                {
+                    new Person("child1", 1),
+                    new Person("child2", 2),
+                };
                 var serOptions = new JsonSerializerOptions
                 {
-                    IncludeFields = true,
-                    IgnoreReadOnlyFields = true,
+                    //IncludeFields = true,
+                    //IgnoreReadOnlyFields = true,
                 };
-                var json = JsonSerializer.Serialize(testSerialization, serOptions);
+                var json = JsonSerializer.Serialize(person1, serOptions);
                 LogMessage("json={0}", json);
-                var testSerialization2 = JsonSerializer.Deserialize<TestDataForSerialization>(json, serOptions);
-                Assert.AreEqual(testSerialization.name, testSerialization2.name);
-                Assert.AreEqual(testSerialization.age, testSerialization2.age);
+                var personDeserialized = JsonSerializer.Deserialize<Person>(json, serOptions);
+                Assert.AreEqual(person1.name, personDeserialized.name);
+                // get the age from reflection
+                var age1 = personDeserialized.GetType().GetField("age", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance).GetValue(person1);
+                var age2 = personDeserialized.GetType().GetField("age", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance).GetValue(personDeserialized);
+                Assert.AreEqual(age1, age2);
             });
         }
 
-        public class TestDataForSerialization
+
+        public class PrivateFieldConverter<T> : JsonConverter<T>
         {
-            //[JsonInclude]
+            public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                throw new NotImplementedException("Deserialization is not implemented in this example.");
+            }
+
+            public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
+            {
+                writer.WriteStartObject();
+
+                foreach (var field in typeof(T).GetFields(BindingFlags.NonPublic | BindingFlags.Instance))
+                {
+                    var fieldValue = field.GetValue(value);
+                    writer.WritePropertyName(field.Name);
+                    JsonSerializer.Serialize(writer, fieldValue, options);
+                }
+
+                writer.WriteEndObject();
+            }
+        }
+        public class Person
+        {
+            public Person() { } // for deserialization
+            public Person(string name, int age)
+            {
+                this.name = name;
+                this.age = age;
+            }
+            [JsonInclude]
             public string name;
-            public int age { get; set; }
+            [JsonInclude]
+            int age;
+            [JsonInclude]
+            internal List<Person> children;
+            [JsonIgnore]
+            public int[] ints = new int[] { 1, 2, 3 };
+
+
         }
     }
 }

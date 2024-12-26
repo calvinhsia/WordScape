@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 
@@ -76,17 +77,21 @@ namespace WordScape
     {
         public readonly DictionaryLib.DictionaryLib _dictionaryLibSmall;
         public readonly DictionaryLib.DictionaryLib _dictionaryLibLarge;
-        public int _MinSubWordLen => _wordGenerationParms.MinSubWordLength;
-        public int _TargetLen => _wordGenerationParms.LenTargetWord;
-        private readonly WordGenerationParms _wordGenerationParms;
-        private int _numMaxSubWords => _wordGenerationParms.MaxSubWords;
+        [JsonIgnore]
+        public int _MinSubWordLen => WordGenerationParms.MinSubWordLength;
+        [JsonIgnore]
+        public int _TargetLen => WordGenerationParms.LenTargetWord;
+
+        [JsonInclude]
+        private readonly WordGenerationParms WordGenerationParms; // InvalidOperationException: Each parameter in the deserialization constructor on type 
+        private int _numMaxSubWords => WordGenerationParms.MaxSubWords;
+        [JsonConstructor]
         public WordGenerator(WordGenerationParms wordGenerationParms)
         {
-            _wordGenerationParms = wordGenerationParms;
-            _dictionaryLibSmall = new DictionaryLib.DictionaryLib(DictionaryLib.DictionaryType.Small, _wordGenerationParms._Random);
-            _dictionaryLibLarge = new DictionaryLib.DictionaryLib(DictionaryLib.DictionaryType.Large, _wordGenerationParms._Random);
+            WordGenerationParms = wordGenerationParms;
+            _dictionaryLibSmall = new DictionaryLib.DictionaryLib(DictionaryLib.DictionaryType.Small, WordGenerationParms._Random);
+            _dictionaryLibLarge = new DictionaryLib.DictionaryLib(DictionaryLib.DictionaryType.Large, WordGenerationParms._Random);
         }
-        // avoid havin
         public bool IsWordInLargeDictionary(string word) // forwarder so xamarin doesn't need ref to dict
         {
             return _dictionaryLibLarge.IsWord(word);
