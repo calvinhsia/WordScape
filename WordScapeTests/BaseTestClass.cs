@@ -66,7 +66,9 @@ namespace WordScapeTests
                 IsBackground = true,
                 Name = $"MySta{description}" // can be called from within the same context (e.g. a prog bar) so distinguish thread names
             };
+#pragma warning disable CA1416 // Validate platform compatibility
             myStaThread.SetApartmentState(ApartmentState.STA);
+#pragma warning restore CA1416 // Validate platform compatibility
             myStaThread.Start();
             await tcsGetExecutionContext.Task; // wait for thread to set up STA sync context
             var tcsCallerAction = new TaskCompletionSource<int>();
