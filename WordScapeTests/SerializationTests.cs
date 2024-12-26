@@ -11,6 +11,8 @@ using System.Windows;
 using WordScape;
 namespace WordScapeTests
 {
+    // https://sergeyteplyakov.github.io/Blog/csharp/2024/03/21/Mythical_MissingMethodException.html
+
     [TestClass]
     public class SerializationTests : BaseTestClass
     {
@@ -37,14 +39,14 @@ namespace WordScapeTests
                 }
 
                 //await wordScapeWindow.taskGenNextPuzzle;
-                await Task.Delay(5000);
+                await Task.Delay(2000);
                 wordScapeWindow.Close();
             });
         }
         [TestMethod]
-        public async Task TestSerializeWordScape()
+        public async Task TestSerializeWordGenerator()
         {
-            LogMessage($"serialization TestSerializeWordScape");
+            LogMessage($"serialization TestSerializeWordGenerator");
             await RunInSTAExecutionContextAsync(async () =>
             {
                 await Task.Yield();
@@ -63,6 +65,8 @@ namespace WordScapeTests
                 var json = JsonSerializer.Serialize(wordGen, serOptions);
                 LogMessage("json={0}", json);
                 var wordGenDeserialized = JsonSerializer.Deserialize<WordGenerator>(json, serOptions);
+                // got a new random from deserialization
+                Assert.AreEqual(wordGen._MinSubWordLen, wordGenDeserialized._MinSubWordLen);
                 var wcont = wordGenDeserialized.GenerateWord();
                 LogMessage($"NumLookups = {wcont.cntLookups} #SubWords = {wcont.subwords.Count} {wcont.InitialWord}");
 
