@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("WordScapeTests")]
@@ -57,12 +58,14 @@ namespace WordScape
         //        public List<string> _lstWordsPlaced = new List<string>();
         public Dictionary<string, LtrPlaced> _dictPlacedWords = new Dictionary<string, LtrPlaced>(); // subword to 1st letter
         public int nLtrsPlaced;
-        public readonly List<LtrPlaced> _ltrsPlaced = new List<LtrPlaced>();
+        [JsonInclude]
+        public List<LtrPlaced> _ltrsPlaced = new List<LtrPlaced>();
 
         internal int _tmpminX;
         internal int _tmpmaxX;
         internal int _tmpminY;
         internal int _tmpmaxY;
+        public GenGrid() { } // for serialization
         public GenGrid(int maxX, int maxY, WordContainer wordCont, Random rand)
         {
             this._random = rand;

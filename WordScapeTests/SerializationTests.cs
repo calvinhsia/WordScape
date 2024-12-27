@@ -69,7 +69,76 @@ namespace WordScapeTests
                 Assert.AreEqual(wordGen._MinSubWordLen, wordGenDeserialized._MinSubWordLen);
                 var wcont = wordGenDeserialized.GenerateWord();
                 LogMessage($"NumLookups = {wcont.cntLookups} #SubWords = {wcont.subwords.Count} {wcont.InitialWord}");
+            });
+        }
 
+        public class TwoDimensionalCharArrayJsonConverter : JsonConverter<char[,]>
+        {
+            public override char[,] Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                using var jsonDoc = JsonDocument.ParseValue(ref reader);
+                var rowLength = jsonDoc.RootElement.GetArrayLength();
+                var columnLength = jsonDoc.RootElement.EnumerateArray().First().GetArrayLength();
+                var result = new char[rowLength, columnLength];
+                var row = 0;
+                foreach (var jsonRow in jsonDoc.RootElement.EnumerateArray())
+                {
+                    var column = 0;
+                    foreach (var jsonValue in jsonRow.EnumerateArray())
+                    {
+                        result[row, column] = jsonValue.GetString()[0];
+                        column++;
+                    }
+                    row++;
+                }
+                return result;
+            }
+            public override void Write(Utf8JsonWriter writer, char[,] value, JsonSerializerOptions options)
+            {
+                writer.WriteStartArray();
+                for (int i = 0; i < value.GetLength(0); i++)
+                {
+                    writer.WriteStartArray();
+                    for (int j = 0; j < value.GetLength(1); j++)
+                    {
+                        writer.WriteStringValue(value[i, j].ToString());
+                    }
+                    writer.WriteEndArray();
+                }
+                writer.WriteEndArray();
+            }
+        }
+        
+        [TestMethod]
+        public async Task TestSerializeGenGrid()
+        {
+            LogMessage($"serialization TestSerializeGenGrid");
+            await RunInSTAExecutionContextAsync(async () =>
+            {
+                await Task.Yield();
+                var opts = new WordGenerationParms()
+                {
+                    LenTargetWord = 7,
+                    MinSubWordLength = 3
+                };
+                var wordGen = new WordGenerator(opts);
+                var wcont = wordGen.GenerateWord();
+                var genGrid = new GenGrid(15, 15, wcont, new Random(1));
+                genGrid.Generate();
+                var serOptions = new JsonSerializerOptions
+                {
+                    IncludeFields = true,
+                    IgnoreReadOnlyFields = false,
+                    //PreferredObjectCreationHandling = JsonObjectCreationHandling.Replace
+                };
+                serOptions.Converters.Add(new TwoDimensionalCharArrayJsonConverter());
+                var json = JsonSerializer.Serialize(genGrid, serOptions);
+                LogMessage("json={0}", json);
+                var genGridDeserialized = JsonSerializer.Deserialize<GenGrid>(json, serOptions);
+                Assert.AreEqual(genGrid._MaxX, genGridDeserialized._MaxX);
+                Assert.AreEqual(genGrid._MaxY, genGridDeserialized._MaxY);
+                Assert.AreEqual(genGrid.nLtrsPlaced, genGridDeserialized.nLtrsPlaced);
+                Assert.AreEqual(genGrid._ltrsPlaced[0].ltr, genGridDeserialized._ltrsPlaced[0].ltr);
             });
         }
 
