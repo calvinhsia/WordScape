@@ -20,6 +20,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using System.Diagnostics;
 // make main assembly internals visible to test assembly
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("WordScapeTests")]
 
@@ -134,6 +135,16 @@ namespace WordScape
                 Properties.Settings.Default.Save();
             };
             this.Loaded += MainWindow_Loaded;
+        }
+        protected override void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+            Trace.WriteLine("Activated");
+        }
+        protected override void OnDeactivated(EventArgs e)
+        {
+            base.OnDeactivated(e);
+            Trace.WriteLine("Deactivated");
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)

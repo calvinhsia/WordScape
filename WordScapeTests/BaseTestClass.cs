@@ -14,13 +14,23 @@ namespace WordScapeTests
         public TestContext TestContext { get; set; }
 
         public List<string> _lstLoggedStrings;
+        private MyTraceListener _listener;
 
         [TestInitialize]
         public void TestInitialize()
         {
+            // create a TraceListener
+            _listener = new MyTraceListener(this);
+            Trace.Listeners.Add(_listener);
             _lstLoggedStrings = new List<string>();
-            LogMessage($"Starting test {TestContext.TestName}");
+            Trace.WriteLine($"Starting test {TestContext.TestName}");
 
+        }
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            _listener.Flush();
+            _listener.Close();
         }
         public void LogMessage(string str, params object[] args)
         {
@@ -101,6 +111,23 @@ namespace WordScapeTests
             Debug.WriteLine($"sta thread finished {description}");
         }
 
+    }
+    public class MyTraceListener : TraceListener
+    {
+        private readonly ILogger _logger;
+
+        public MyTraceListener(ILogger logger)
+        {
+            _logger = logger;
+        }
+        public override void Write(string message)
+        {
+            _logger.LogMessage(message);
+        }
+        public override void WriteLine(string message)
+        {
+            _logger.LogMessage(message);
+        }
     }
 
 }
