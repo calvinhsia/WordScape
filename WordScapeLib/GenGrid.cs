@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -334,4 +335,41 @@ namespace WordScape
             return grid;
         }
     }
+    public class TwoDimensionalCharArrayJsonConverter : JsonConverter<char[,]>
+    {
+        public override char[,] Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            using var jsonDoc = JsonDocument.ParseValue(ref reader);
+            var rowLength = jsonDoc.RootElement.GetArrayLength();
+            var columnLength = jsonDoc.RootElement.EnumerateArray().First().GetArrayLength();
+            var result = new char[rowLength, columnLength];
+            var row = 0;
+            foreach (var jsonRow in jsonDoc.RootElement.EnumerateArray())
+            {
+                var column = 0;
+                foreach (var jsonValue in jsonRow.EnumerateArray())
+                {
+                    result[row, column] = jsonValue.GetString()[0];
+                    column++;
+                }
+                row++;
+            }
+            return result;
+        }
+        public override void Write(Utf8JsonWriter writer, char[,] value, JsonSerializerOptions options)
+        {
+            writer.WriteStartArray();
+            for (int i = 0; i < value.GetLength(0); i++)
+            {
+                writer.WriteStartArray();
+                for (int j = 0; j < value.GetLength(1); j++)
+                {
+                    writer.WriteStringValue(value[i, j].ToString());
+                }
+                writer.WriteEndArray();
+            }
+            writer.WriteEndArray();
+        }
+    }
+
 }

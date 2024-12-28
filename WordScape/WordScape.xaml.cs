@@ -5,6 +5,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -407,6 +409,42 @@ namespace WordScape
         public override string ToString()
         {
             return $"{_ltr}";
+        }
+    }
+    public class ObservableCollectionUiElementConverter : JsonConverter<ObservableCollection<MyTextBlockWithOnlineLookup>>
+    {
+        public override ObservableCollection<MyTextBlockWithOnlineLookup> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            var lst = new ObservableCollection<MyTextBlockWithOnlineLookup>();
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonTokenType.EndArray)
+                {
+                    break;
+                }
+                if (reader.TokenType == JsonTokenType.StartObject)
+                {
+                    reader.Read();
+                    if (reader.TokenType == JsonTokenType.PropertyName && reader.GetString() == "Text")
+                    {
+                        reader.Read();
+                        var txt = reader.GetString();
+                        lst.Add(new MyTextBlockWithOnlineLookup() { Text = txt });
+                    }
+                }
+            }
+            return lst;
+        }
+        public override void Write(Utf8JsonWriter writer, ObservableCollection<MyTextBlockWithOnlineLookup> value, JsonSerializerOptions options)
+        {
+            writer.WriteStartArray();
+            foreach (var item in value)
+            {
+                writer.WriteStartObject();
+                writer.WriteString("Text", item.Text);
+                writer.WriteEndObject();
+            }
+            writer.WriteEndArray();
         }
     }
 
